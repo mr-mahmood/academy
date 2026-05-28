@@ -1,0 +1,537 @@
+/* Container */
+.container {
+    min-height: 100%;
+    padding: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Filter Section */
+.filterSection {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.filterButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-primary, #FFFFFF);
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #102A43);
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.filterButton:hover {
+    border-color: var(--accent-color, #D4A017);
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+.filterButtonActive {
+    border-color: var(--accent-color, #D4A017);
+    background: rgba(var(--accent-color-rgb, 212, 160, 23), 0.05);
+}
+
+.filterButton svg {
+    width: 18px !important;
+    height: 18px !important;
+    color: var(--accent-color, #D4A017);
+}
+
+.chevron {
+    margin-right: auto;
+}
+
+.filterBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: var(--accent-color, #D4A017);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 1rem;
+}
+
+/* Filter Button Skeleton */
+.filterButtonSkeleton {
+    width: 100%;
+    height: 50px;
+    background: var(--bg-primary, #FFFFFF);
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 2rem;
+    overflow: hidden;
+}
+
+/* Filter Dropdown */
+.filterDropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    background: var(--bg-primary, #FFFFFF);
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 2rem;
+    padding: 1rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.filterRow {
+    margin-bottom: 1rem;
+}
+
+.filterRow:last-of-type {
+    margin-bottom: 0;
+}
+
+.filterLabel {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary, #64748B);
+    margin-bottom: 0.4rem;
+}
+
+.filterSelect {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    background: var(--bg-secondary, #F8FAFC);
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 1.2rem;
+    font-size: 0.875rem;
+    color: var(--text-primary, #102A43);
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.filterSelect:hover {
+    border-color: var(--accent-color, #D4A017);
+}
+
+.clearFiltersBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    margin-top: 1rem;
+    background: #ff9c9cda;
+    border: 1px solid hsl(0, 100%, 62%);
+    border-radius: 2rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #c90606;
+    cursor: pointer;
+}
+
+.clearFiltersBtn svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.clearFiltersBtn:hover {
+    background: #FECACA;
+}
+
+/* Courses List */
+.coursesList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+
+
+/* ============================================ */
+/* THEME-AWARE SKELETON STYLES */
+/* ============================================ */
+
+/* Base skeleton pulse animation */
+.skeletonPulse {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            var(--skeleton-start, #F1F5F9) 0%,
+            var(--skeleton-mid, #E2E8F0) 50%,
+            var(--skeleton-start, #F1F5F9) 100%);
+    background-size: 200% 100%;
+    border-radius: 2rem;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Filter Button Skeleton - FIXED */
+.filterButtonSkeleton {
+    width: 100%;
+    height: 50px;
+    background: var(--bg-primary, #FFFFFF);
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 2rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.filterButtonSkeleton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        var(--skeleton-start, #e2e8f0) 0%,
+        var(--skeleton-mid, #f1f5f9) 50%,
+        var(--skeleton-start, #e2e8f0) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+    border-radius: 2rem;
+}
+
+/* Course Card Skeleton */
+.skeletonCard {
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 2rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border-color, #E2E8F0);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: relative;
+}
+
+/* Status Badge Skeleton */
+.skeletonStatusBadge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: 80px;
+    height: 26px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+.skeletonStatusBadge .skeletonPulse {
+    border-radius: 2rem;
+}
+
+/* Main Section Skeleton */
+.skeletonMainSection {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding-left: 6rem;
+}
+
+.skeletonIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 2rem;
+    background: var(--bg-secondary, #F8FAFC);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.skeletonIcon .skeletonPulse {
+    border-radius: 2rem;
+}
+
+.skeletonMainInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeletonTitle {
+    width: 70%;
+    height: 20px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+.skeletonTitle .skeletonPulse {
+    border-radius: 2rem;
+}
+
+.skeletonSubtitle {
+    width: 50%;
+    height: 16px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+.skeletonSubtitle .skeletonPulse {
+    border-radius: 2rem;
+}
+
+/* Schedule Section Skeleton */
+.skeletonScheduleContainer {
+    background: var(--bg-secondary, #F8FAFC);
+    border-radius: 2rem;
+    padding: 0.65rem 0.875rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeletonScheduleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed var(--border-color, #E2E8F0);
+}
+
+.skeletonScheduleRow:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.skeletonScheduleDay {
+    width: 70px;
+    height: 16px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-primary, #FFFFFF);
+}
+
+.skeletonScheduleDay .skeletonPulse {
+    border-radius: 2rem;
+}
+
+.skeletonScheduleTime {
+    width: 100px;
+    height: 16px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-primary, #FFFFFF);
+}
+
+.skeletonScheduleTime .skeletonPulse {
+    border-radius: 2rem;
+}
+
+/* Address Section Skeleton - FIXED with proper centering */
+.skeletonAddressRow {
+    background: var(--bg-secondary, #F8FAFC);
+    border-radius: 2rem;
+    min-height: 42px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.skeletonAddressRow .skeletonPulse {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0.65rem 0.875rem;
+    background: linear-gradient(90deg,
+            var(--skeleton-start, #e2e8f0) 0%,
+            var(--skeleton-mid, #f1f5f9) 50%,
+            var(--skeleton-start, #e2e8f0) 100%);
+    background-size: 200% 100%;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+    box-sizing: border-box;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+/* Bottom Section Skeleton */
+.skeletonBottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color, #E2E8F0);
+}
+
+.skeletonPrice {
+    width: 100px;
+    height: 20px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+.skeletonPrice .skeletonPulse {
+    border-radius: 2rem;
+}
+
+.skeletonGenderBadge {
+    width: 70px;
+    height: 30px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+.skeletonGenderBadge .skeletonPulse {
+    border-radius: 2rem;
+}
+
+/* Error Box */
+.errorBox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #FEE2E2;
+    border-radius: 2rem;
+    color: #DC2626;
+    margin: 1rem 0;
+}
+
+.errorBox svg {
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0;
+}
+
+.errorBox p {
+    flex: 1;
+    font-size: 0.875rem;
+}
+
+.errorBox button {
+    padding: 0.4rem 0.8rem;
+    background: #DC2626;
+    color: white;
+    border: none;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+/* Empty State */
+.emptyState {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 2rem;
+    border: 1px solid var(--border-color, #E2E8F0);
+}
+
+.emptyState svg {
+    width: 64px !important;
+    height: 64px !important;
+    color: var(--text-muted, #94A3B8);
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.emptyState h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary, #102A43);
+    margin-bottom: 0.25rem;
+}
+
+.emptyState p {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #64748B);
+}
+
+.resetBtn {
+    padding: 0.5rem 1rem;
+    background: var(--accent-color, #D4A017);
+    color: white;
+    border: none;
+    border-radius: 2rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.emptyCourses {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 2rem;
+    border: 1px solid var(--border-color, #E2E8F0);
+}
+
+.emptyCourses svg {
+    width: 64px !important;
+    height: 64px !important;
+    color: var(--text-muted, #94A3B8);
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+
+.resetFiltersButton {
+    margin-top: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    background: #DC2626;
+    color: white;
+    border: none;
+    border-radius: 2rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 200ms ease;
+}
+
+.resetFiltersButton svg {
+    width: 16px !important;
+    height: 16px !important;
+    color: white;
+}
+
+.resetFiltersButton:hover {
+    background: #B91C1C;
+    transform: translateY(-1px);
+}

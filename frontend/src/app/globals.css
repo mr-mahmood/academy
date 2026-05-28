@@ -1,0 +1,387 @@
+:root {
+  /* Light mode colors */
+  --bg-primary: #f8fafc;
+  --bg-primary-rgb: 248, 250, 252;
+
+  --bg-secondary: #edf5fd;
+  --bg-secondary-rgb: 237, 245, 253;
+
+  --bg-card: #ffffff;
+  --bg-card-rgb: 255, 255, 255;
+
+  --text-primary: #0f172a;
+  --text-primary-rgb: 15, 23, 42;
+
+  --text-secondary: #475569;
+  --text-secondary-rgb: 71, 85, 105;
+
+  --text-muted: #64748b;
+  --text-muted-rgb: 100, 116, 139;
+
+  --border-color: #e2e8f0;
+  --border-color-rgb: 226, 232, 240;
+
+  --shadow-color: rgba(0, 0, 0, 0.05);
+  --shadow-color-rgb: 0, 0, 0;
+
+  --shadow-heavy: rgba(0, 0, 0, 0.1);
+  --shadow-heavy-rgb: 0, 0, 0;
+
+  --hero-bg-start: #e6b800;
+  --hero-bg-start-rgb: 230, 184, 0;
+
+  --hero-bg-end: #d4a800;
+  --hero-bg-end-rgb: 212, 168, 0;
+
+  --accent-color: #e6b800;
+  --accent-color-rgb: 230, 184, 0;
+
+  --accent-hover: #d4a800;
+  --accent-hover-rgb: 212, 168, 0;
+
+  --accent-text: #0f172a;
+  --accent-text-rgb: 15, 23, 42;
+
+  --error-bg: #fef2f2;
+  --error-bg-rgb: 254, 242, 242;
+
+  --error-border: #fee2e2;
+  --error-border-rgb: 254, 226, 226;
+
+  --error-text: #dc2626;
+  --error-text-rgb: 220, 38, 38;
+
+  --success-bg: #f0fdf4;
+  --success-bg-rgb: 240, 253, 244;
+
+  --success-border: #dcfce7;
+  --success-border-rgb: 220, 252, 231;
+
+  --success-text: #16a34a;
+  --success-text-rgb: 22, 163, 74;
+
+  --warning-bg: #fffbeb;
+  --warning-bg-rgb: 255, 251, 235;
+
+  --warning-border: #fef3c7;
+  --warning-border-rgb: 254, 243, 199;
+
+  --warning-text: #d97706;
+  --warning-text-rgb: 217, 119, 6;
+
+  --input-bg: #ffffff;
+  --input-bg-rgb: 255, 255, 255;
+
+  --input-border: #e2e8f0;
+  --input-border-rgb: 226, 232, 240;
+
+  --input-focus: #e6b800;
+  --input-focus-rgb: 230, 184, 0;
+
+  --input-disabled-bg: #f8fafc;
+  --input-disabled-bg-rgb: 248, 250, 252;
+
+  --input-disabled-text: #94a3b8;
+  --input-disabled-text-rgb: 148, 163, 184;
+
+  --avatar-bg: #fef5e6;
+  --avatar-bg-rgb: 254, 245, 230;
+
+  --avatar-icon: #e6b800;
+  --avatar-icon-rgb: 230, 184, 0;
+
+  --nav-bg: #ffffff;
+  --nav-bg-rgb: 255, 255, 255;
+
+  --nav-border: #e2e8f0;
+  --nav-border-rgb: 226, 232, 240;
+
+  --nav-inactive: #64748b;
+  --nav-inactive-rgb: 100, 116, 139;
+
+  --nav-active: #e6b800;
+  --nav-active-rgb: 230, 184, 0;
+
+  --circle-bg: rgba(230, 184, 0, 0.08);
+  --shield-bg: #fef5e6;
+  --shield-bg-rgb: 254, 245, 230;
+
+  /* Skeleton specific */
+  --skeleton-start: #d3e3f1;
+  --skeleton-mid: #b6c6da;
+}
+
+.dark {
+  /* Dark mode colors */
+  --bg-primary: #0a0a1a;
+  --bg-primary-rgb: 10, 10, 26;
+
+  --bg-secondary: #12122a;
+  --bg-secondary-rgb: 18, 18, 42;
+
+  --bg-card: #151530;
+  --bg-card-rgb: 21, 21, 48;
+
+  --text-primary: #f1f5f9;
+  --text-primary-rgb: 241, 245, 249;
+
+  --text-secondary: #a3b3cc;
+  --text-secondary-rgb: 163, 179, 204;
+
+  --text-muted: #7a8aa8;
+  --text-muted-rgb: 122, 138, 168;
+
+  --border-color: #1e1e38;
+  --border-color-rgb: 30, 30, 56;
+
+  --shadow-color: rgba(18, 18, 48, 0.2);
+  --shadow-color-rgb: 18, 18, 48;
+
+  --shadow-heavy: rgba(18, 18, 48, 0.5);
+  --shadow-heavy-rgb: 18, 18, 48;
+
+  --hero-bg-start: #d4b000;
+  --hero-bg-start-rgb: 212, 176, 0;
+
+  --hero-bg-end: #c4a400;
+  --hero-bg-end-rgb: 196, 164, 0;
+
+  --accent-color: #d4b000;
+  --accent-color-rgb: 212, 176, 0;
+
+  --accent-hover: #e6c400;
+  --accent-hover-rgb: 230, 196, 0;
+
+  --accent-text: #0a0a1a;
+  --accent-text-rgb: 10, 10, 26;
+
+  --error-bg: #2a1a1a;
+  --error-bg-rgb: 42, 26, 26;
+
+  --error-border: #3a2828;
+  --error-border-rgb: 58, 40, 40;
+
+  --error-text: #f87171;
+  --error-text-rgb: 248, 113, 113;
+
+  --success-bg: #0a2a1a;
+  --success-bg-rgb: 10, 42, 26;
+
+  --success-border: #0f3820;
+  --success-border-rgb: 15, 56, 32;
+
+  --success-text: #4ade80;
+  --success-text-rgb: 74, 222, 128;
+
+  --warning-bg: #2a2010;
+  --warning-bg-rgb: 42, 32, 16;
+
+  --warning-border: #3a2a18;
+  --warning-border-rgb: 58, 42, 24;
+
+  --warning-text: #fbbf24;
+  --warning-text-rgb: 251, 191, 36;
+
+  --input-bg: #151530;
+  --input-bg-rgb: 21, 21, 48;
+
+  --input-border: #252542;
+  --input-border-rgb: 37, 37, 66;
+
+  --input-focus: #d4b000;
+  --input-focus-rgb: 212, 176, 0;
+
+  --input-focus-ring: rgba(212, 176, 0, 0.2);
+  --input-focus-ring-rgb: 212, 176, 0;
+
+  --input-disabled-bg: #0a0a1a;
+  --input-disabled-bg-rgb: 10, 10, 26;
+
+  --input-disabled-text: #5a6a88;
+  --input-disabled-text-rgb: 90, 106, 136;
+
+  --avatar-bg: #222242;
+  --avatar-bg-rgb: 34, 34, 66;
+
+  --avatar-icon: #d4b000;
+  --avatar-icon-rgb: 212, 176, 0;
+
+  --nav-bg: #151530;
+  --nav-bg-rgb: 21, 21, 48;
+
+  --nav-border: #1e1e38;
+  --nav-border-rgb: 30, 30, 56;
+
+  --nav-inactive: #a3b3cc;
+  --nav-inactive-rgb: 163, 179, 204;
+
+  --nav-active: #d4b000;
+  --nav-active-rgb: 212, 176, 0;
+
+  --circle-bg: rgba(212, 176, 0, 0.08);
+  --shield-bg: #151530;
+  --shield-bg-rgb: 21, 21, 48;
+
+  --hover-bg: rgba(255, 255, 255, 0.05);
+  --hover-bg-rgb: 255, 255, 255;
+
+  --active-bg: rgba(212, 176, 0, 0.1);
+  --active-bg-rgb: 212, 176, 0;
+
+  --card-border: rgba(255, 255, 255, 0.05);
+  --card-border-rgb: 255, 255, 255;
+
+  /* Skeleton specific for dark mode */
+  --skeleton-start: #1E293B;
+  --skeleton-mid: #334155;
+}
+
+*,
+html,
+body {
+  font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* Animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-up {
+  animation: fadeUp 0.3s ease both;
+}
+
+.slide-in {
+  animation: slide 0.25s ease both;
+}
+
+/* Base Layout */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.app-page {
+  height: 100%;
+  margin: 0;
+  background: var(--bg-primary, #eef2f7);
+}
+
+.app-shell {
+  padding: 24px;
+  display: grid;
+  place-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.app-container {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-secondary, #F5F7FA);
+  border-radius: 28px;
+  box-shadow: 0 4px 12px rgba(var(--shadow-color-rgb), 0.15);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+/* Responsive */
+@media (min-width: 640px) {
+  .app-shell {
+    padding: 32px;
+  }
+
+  .app-container {
+    width: min(430px, calc(100vw - 64px));
+    height: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 0;
+    display: block;
+    height: 100%;
+  }
+
+  .app-container {
+    width: 100vw;
+    width: 100dvw;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* Hero Section Styles (for pages that use it) */
+.hero-section {
+  background: linear-gradient(to bottom right, var(--hero-bg-start), var(--hero-bg-end));
+}
+
+.hero-circle-1,
+.hero-circle-2 {
+  background: var(--circle-bg);
+}
+
+/* Selection color */
+::selection {
+  background: var(--accent-color);
+  color: white;
+}
+
+
+/* Or for better cross-browser support */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* Dark mode shadow adjustments */
+.dark .app-container {
+  box-shadow: 0 4px 12px var(--shadow-heavy);
+}
+
+/* Additional dark mode refinements */
+.dark ::selection {
+  background: var(--accent-color);
+  color: var(--accent-text);
+}

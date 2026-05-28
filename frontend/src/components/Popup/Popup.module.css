@@ -1,0 +1,230 @@
+/* components/Popup.module.css */
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.overlayExit {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+.card {
+    background: var(--bg-card, #ffffff);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    max-width: 90%;
+    width: 380px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+.cardExit {
+    animation: slideDown 0.3s ease forwards;
+}
+
+/* Icon */
+.iconCircle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.icon {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+/* Title & Message */
+.title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary, #0f172a);
+    margin-bottom: 0.5rem;
+}
+
+.message {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #475569);
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+}
+
+/* New multi-line message styles */
+.messageContainer {
+    margin-bottom: 1.25rem;
+}
+
+.messageLine {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #475569);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.messageLine:not(:last-child) {
+    margin-bottom: 0.5rem;
+}
+
+/* Progress Bar */
+.progressContainer {
+    width: 100%;
+    height: 4px;
+    background: var(--border-color, #E2E8F0);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progressBar {
+    height: 100%;
+    border-radius: 4px;
+    width: 100%;
+    animation: shrink linear forwards;
+}
+
+.timer {
+    font-size: 0.75rem;
+    color: var(--text-muted, #94A3B8);
+    margin-bottom: 1rem;
+}
+
+/* Close Button */
+.closeButton {
+    padding: 0.625rem 1.5rem;
+    background: var(--bg-secondary, #F1F5F9);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.closeButton:hover {
+    background: var(--border-color);
+}
+
+/* Type Colors */
+/* Error */
+.errorContainer {
+    border: 2px solid rgba(239, 68, 68, 0.2);
+}
+
+.errorIconBg {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.errorIconBg .icon {
+    color: #EF4444;
+}
+
+.errorProgressBar {
+    background: #EF4444;
+}
+
+/* Warning */
+.warningContainer {
+    border: 2px solid rgba(245, 158, 11, 0.2);
+}
+
+.warningIconBg {
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.warningIconBg .icon {
+    color: #F59E0B;
+}
+
+.warningProgressBar {
+    background: #F59E0B;
+}
+
+/* Info */
+.infoContainer {
+    border: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.infoIconBg {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.infoIconBg .icon {
+    color: #3B82F6;
+}
+
+.infoProgressBar {
+    background: #3B82F6;
+}
+
+/* Success */
+.successContainer {
+    border: 2px solid rgba(34, 197, 94, 0.2);
+}
+
+.successIconBg {
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.successIconBg .icon {
+    color: #22C55E;
+}
+
+.successProgressBar {
+    background: #22C55E;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px) scale(0.95); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+
+@keyframes slideDown {
+    from { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+    to { 
+        opacity: 0; 
+        transform: translateY(-20px) scale(0.95); 
+    }
+}
+
+@keyframes shrink {
+    from { width: 100%; }
+    to { width: 0%; }
+}

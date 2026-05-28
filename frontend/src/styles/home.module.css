@@ -1,0 +1,190 @@
+/* app/home.module.css */
+
+.container {
+    padding: 1rem;
+    min-height: 100%;
+}
+
+/* Welcome Section */
+.welcomeSection {
+    text-align: center;
+    padding: 1.5rem 0.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, rgba(var(--accent-color-rgb), 0.08), rgba(var(--accent-color-rgb), 0.02));
+    border-radius: 1.5rem;
+}
+
+.welcomeTitle {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.welcomeText {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Navigation Cards */
+.navigationCards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.navCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 2rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: all 200ms ease;
+    width: 100%;
+    text-align: right;
+}
+
+.navCard:hover {
+    transform: translateX(-4px);
+    box-shadow: 0 4px 16px var(--shadow-color);
+    border-color: var(--accent-color);
+}
+
+.cardIcon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(var(--accent-color-rgb), 0.12), rgba(var(--accent-color-rgb), 0.04));
+    color: var(--accent-color);
+    border-radius: 1.2rem;
+    flex-shrink: 0;
+}
+
+.cardIcon svg {
+    width: 24px !important;
+    height: 24px !important;
+}
+
+.cardContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.cardContent h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.cardContent p {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.cardArrow {
+    width: 20px !important;
+    height: 20px !important;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: all 200ms ease;
+}
+
+.navCard:hover .cardArrow {
+    transform: translateX(-4px);
+    color: var(--accent-color);
+}
+
+.memberCard .cardIcon {
+    background: linear-gradient(135deg, rgba(var(--accent-color-rgb), 0.2), rgba(var(--accent-color-rgb), 0.08));
+}
+
+/* Quick Links */
+.quickLinks {
+    margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    padding-right: 0.5rem;
+    text-align: center;
+}
+
+.quickLinksGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.quickLink {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem 0.5rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: all 180ms ease;
+    color: var(--text-primary);
+    font-size: 0.72rem;
+    font-weight: 500;
+}
+
+.quickLink>svg{
+    color: var(--accent-color);
+}
+
+.quickLink:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.quickLink svg {
+    width: 22px !important;
+    height: 22px !important;
+}
+
+/* About Section */
+.aboutSection {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 2rem;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.aboutText {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+/* Spinner */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

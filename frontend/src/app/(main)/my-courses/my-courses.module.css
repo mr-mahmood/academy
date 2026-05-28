@@ -1,0 +1,579 @@
+/* app/my-courses/my-courses.module.css */
+
+.container {
+    padding: 1rem;
+    min-height: 100%;
+}
+
+/* Page Header */
+.pageHeader {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 0;
+}
+
+.pageTitle {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.pageSubtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* Enrollments List */
+.enrollmentsList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+/* Spinner */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Error Box */
+.errorBox {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
+    border-radius: 1rem;
+}
+
+.errorIcon {
+    width: 44px;
+    height: 44px;
+    border-radius: 0.75rem;
+    background: rgba(239, 68, 68, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--error-text);
+    flex-shrink: 0;
+}
+
+.errorIcon svg {
+    width: 22px !important;
+    height: 22px !important;
+}
+
+.errorContent {
+    flex: 1;
+}
+
+.errorContent h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--error-text);
+    margin-bottom: 0.15rem;
+}
+
+.errorContent p {
+    font-size: 0.8rem;
+    color: var(--error-text);
+    opacity: 0.85;
+}
+
+.errorBox button {
+    padding: 0.5rem 1rem;
+    background: var(--error-text);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 180ms ease;
+}
+
+.errorBox button:hover {
+    opacity: 0.9;
+}
+
+/* Empty State */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 1.5rem;
+}
+
+.emptyIcon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--accent-color-rgb), 0.08);
+    border-radius: 50%;
+    color: var(--accent-color);
+    margin-bottom: 1.25rem;
+}
+
+.emptyIcon svg {
+    width: 40px !important;
+    height: 40px !important;
+}
+
+.emptyState h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.emptyState p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+}
+
+.browseClassesBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.browseClassesBtn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+/* Add these styles to my-courses.module.css */
+
+/* Filter Section */
+.filterSection {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.filterButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-primary, #FFFFFF);
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #102A43);
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.filterButton:hover {
+    border-color: var(--accent-color, #D4A017);
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+.filterButtonActive {
+    border-color: var(--accent-color, #D4A017);
+    background: rgba(var(--accent-color-rgb, 212, 160, 23), 0.05);
+}
+
+.filterButton svg {
+    width: 18px !important;
+    height: 18px !important;
+    color: var(--accent-color, #D4A017);
+}
+
+.chevron {
+    margin-right: auto;
+}
+
+.filterBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: var(--accent-color, #D4A017);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 1rem;
+}
+
+/* Filter Dropdown */
+.filterDropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    background: var(--bg-primary, #FFFFFF);
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 1.5rem;
+    padding: 1rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+    z-index: 100;
+    animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.filterRow {
+    margin-bottom: 1rem;
+}
+
+.filterRow:last-of-type {
+    margin-bottom: 0;
+}
+
+.filterLabel {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary, #64748B);
+    margin-bottom: 0.4rem;
+}
+
+.filterSelect {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    background: var(--bg-secondary, #F8FAFC);
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-primary, #102A43);
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.filterSelect:hover {
+    border-color: var(--accent-color, #D4A017);
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: var(--accent-color, #D4A017);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 212, 160, 23), 0.1);
+}
+
+.clearFiltersBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    margin-top: 1rem;
+    background: #FEE2E2;
+    border: 1px solid #FECACA;
+    border-radius: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #DC2626;
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.clearFiltersBtn svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.clearFiltersBtn:hover {
+    background: #FECACA;
+}
+
+/* Skeleton Styles for My Courses */
+.skeletonPulse {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            var(--skeleton-start, #F1F5F9) 0%,
+            var(--skeleton-mid, #E2E8F0) 50%,
+            var(--skeleton-start, #F1F5F9) 100%);
+    background-size: 200% 100%;
+    border-radius: 2rem;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Filter Button Skeleton */
+.filterButtonSkeleton {
+    width: 100%;
+    height: 50px;
+    background: var(--bg-primary, #FFFFFF);
+    border: 1px solid var(--border-color, #E2E8F0);
+    border-radius: 2rem;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.filterButtonSkeleton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        var(--skeleton-start, #e2e8f0) 0%,
+        var(--skeleton-mid, #f1f5f9) 50%,
+        var(--skeleton-start, #e2e8f0) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+    border-radius: 2rem;
+}
+
+/* Course Card Skeleton */
+.skeletonCard {
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 2rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border-color, #E2E8F0);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.skeletonStatusBadge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: 80px;
+    height: 26px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+.skeletonMainSection {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding-left: 6rem;
+}
+
+.skeletonIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 2rem;
+    background: var(--bg-secondary, #F8FAFC);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.skeletonMainInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeletonTitle {
+    width: 70%;
+    height: 20px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+.skeletonSubtitle {
+    width: 50%;
+    height: 16px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+.skeletonScheduleContainer {
+    background: var(--bg-secondary, #F8FAFC);
+    border-radius: 2rem;
+    padding: 0.65rem 0.875rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeletonScheduleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.skeletonScheduleDay {
+    width: 70px;
+    height: 16px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-primary, #FFFFFF);
+}
+
+.skeletonScheduleTime {
+    width: 100px;
+    height: 16px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-primary, #FFFFFF);
+}
+
+.skeletonAddressRow {
+    background: var(--bg-secondary, #F8FAFC);
+    border-radius: 2rem;
+    min-height: 42px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.65rem 0.875rem;
+}
+
+.skeletonBottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color, #E2E8F0);
+}
+
+.skeletonPrice {
+    width: 100px;
+    height: 20px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+.skeletonGenderBadge {
+    width: 70px;
+    height: 30px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--bg-secondary, #F8FAFC);
+}
+
+/* Empty Courses State */
+.emptyCourses {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 2rem;
+    border: 1px solid var(--border-color, #E2E8F0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.emptyCourses svg {
+    width: 64px !important;
+    height: 64px !important;
+    color: var(--text-muted, #94A3B8);
+    opacity: 0.5;
+}
+
+.emptyCourses p {
+    color: var(--text-secondary, #64748B);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.resetFiltersButton {
+    margin-top: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    background: #DC2626;
+    color: white;
+    border: none;
+    border-radius: 2rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 200ms ease;
+}
+
+.resetFiltersButton svg {
+    width: 16px !important;
+    height: 16px !important;
+    color: white;
+}
+
+.resetFiltersButton:hover {
+    background: #B91C1C;
+    transform: translateY(-1px);
+}
+
+.skeletonAddressRow {
+    background: var(--bg-secondary, #F8FAFC);
+    border-radius: 2rem;
+    min-height: 42px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.skeletonAddressRow .skeletonPulse {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0.65rem 0.875rem;
+    background: linear-gradient(90deg,
+            var(--skeleton-start, #e2e8f0) 0%,
+            var(--skeleton-mid, #f1f5f9) 50%,
+            var(--skeleton-start, #e2e8f0) 100%);
+    background-size: 200% 100%;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+    box-sizing: border-box;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
