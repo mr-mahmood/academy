@@ -21,7 +21,6 @@ python-dotenv
 psycopg2-binary
 dj_database_url
 django-environ
-sympy
 requests
 Pillow
 gunicorn

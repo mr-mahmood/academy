@@ -1,7 +1,6 @@
 # users/forms.py
 from django import forms
 from django.core.exceptions import ValidationError
-from sympy import true
 from users.models import User
 from users.validators import validate_national_id, validate_phone_number
 

@@ -1,9 +1,11 @@
-// next.config.ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
     reactStrictMode: true,
 
+    // CRITICAL: Creates standalone build with minimal dependencies
+    output: 'standalone',
+    
     // Compress responses
     compress: true,
 
@@ -19,7 +21,6 @@ const nextConfig: NextConfig = {
     },
 
     poweredByHeader: false,
-    
 };
 
 export default nextConfig;

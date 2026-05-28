@@ -483,7 +483,9 @@ $RECYCLE.BIN/
 .vscode/
 .idea/
 
-./media/*
+backend/static/
+backend/media/
+backend/logs/
 
 *.npy
 *.index
