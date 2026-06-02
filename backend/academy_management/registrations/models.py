@@ -1,6 +1,6 @@
 from django.db import models
 from users.models import User
-from courses.models import Course, CourseSchedule
+from academy_management.courses.models import Course, CourseSchedule
 from core.exceptions import APIError, RegistrationError
 from core.cache_service import CacheService
 from django.core.cache import cache

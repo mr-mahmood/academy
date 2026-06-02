@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Enrollment
-from courses.serializers import CourseSerializer
+from academy_management.courses.serializers import CourseSerializer
 from users.serializers import UserProfileSerializer
 
 

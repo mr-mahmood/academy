@@ -1,7 +1,7 @@
 # apps/classes/models.py
 from django.db import models
-from sports.models import Sport
-from academies.models import Academy
+from academy_management.sports.models import Sport
+from academy_management.academies.models import Academy
 from core.exceptions import APIError, ClassError
 from core.cache_service import CacheService
 from django.core.cache import cache

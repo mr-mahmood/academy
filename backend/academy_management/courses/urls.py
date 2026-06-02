@@ -1,5 +1,5 @@
 from django.urls import path
-from courses.views import CourseAPIView, CourseScheduleAPIView
+from .views import CourseAPIView, CourseScheduleAPIView
 
 app_name = 'courses'
 

@@ -1,8 +1,10 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from core.exceptions import APIError, UserAccountError
 from core.cache_service import CacheService
 from django.core.cache import cache
+
 
 
 class UserManager(BaseUserManager['User']):
@@ -63,6 +65,18 @@ class User(AbstractUser):
     class Role(models.TextChoices):
         ADMIN = "ADMIN", "Admin"
         USER = "USER", "User"
+        
+    class AgeCategory(models.TextChoices):
+        # --- VALID RANGES ---
+        U12 = "U12", "U12"
+        U13 = "U13", "U13"
+        U14 = "U14", "U14"
+        U15 = "U15", "U15"
+        U17 = "U17", "U17"
+        U18 = "U18", "U18"
+        YOUTH = "YOUTH", "جوانان"
+        U21 = "U21", "امید"
+        OUT_OF_RANGE = "OOR", "خارج از محدوده" 
     
     # Core fields - ALL REQUIRED
     phone_number = models.CharField(
@@ -94,6 +108,12 @@ class User(AbstractUser):
         null=True, 
         blank=True,
         verbose_name="Birth Date"
+    )
+    
+    age_category  = models.CharField(
+        max_length=20,
+        choices=AgeCategory.choices,
+        default=AgeCategory.OUT_OF_RANGE
     )
     
     role = models.CharField(
@@ -171,7 +191,16 @@ class User(AbstractUser):
             raise APIError(UserAccountError.USER_NOT_EXIST)
         return user
     
+    def update_age_category(self) -> None:
+        """Update and optionally save the age category"""
+        new_category = self.calculate_age_category()
+        if self.age_category != new_category:
+            self.age_category = new_category
+            self.save(update_fields=['age_category'])
+
     def save(self, *args, **kwargs):
+        # Auto-calculate age category before saving
+        self.update_age_category()
         super().save(*args, **kwargs)
         
         # Clear individual cache
@@ -194,3 +223,39 @@ class User(AbstractUser):
         cache.delete(f"user:phone:{phone_number}")
         cache.delete("users:all_list")
         cache.delete("users:active_list")
+         
+    def calculate_age_category(self) -> str:
+        """Calculate age category based on birth date and current date"""
+        if not self.birth_date:
+            return User.AgeCategory.OUT_OF_RANGE
+        
+        # Get current date in Gregorian
+        current_date = timezone.now().date()
+        
+        # Calculate age
+        age = current_date.year - self.birth_date.year
+        
+        # Adjust if birthday hasn't occurred yet this year
+        if current_date.month < self.birth_date.month or \
+        (current_date.month == self.birth_date.month and current_date.day < self.birth_date.day):
+            age -= 1
+        
+        # Determine age category based on age
+        if age < 12:
+            return User.AgeCategory.U12
+        elif age == 12:
+            return User.AgeCategory.U13
+        elif age == 13:
+            return User.AgeCategory.U14
+        elif age == 14:
+            return User.AgeCategory.U15
+        elif 15 <= age <= 16:
+            return User.AgeCategory.U17
+        elif 17 <= age <= 18:
+            return User.AgeCategory.U18
+        elif age == 19:
+            return User.AgeCategory.YOUTH
+        elif age == 20:
+            return User.AgeCategory.U21
+        else:
+            return User.AgeCategory.OUT_OF_RANGE

@@ -24,11 +24,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
     path('api/users/', include('users.urls')),
-    path('api/sports/', include('sports.urls')),
-    path('api/academies/', include('academies.urls')),
-    path('api/courses/', include('courses.urls')),
-    path('api/registrations/', include('registrations.urls')),
-    path('api/payment/', include('payment.urls')),
+    
+    # academy_management
+    path('api/sports/', include('academy_management.sports.urls')),
+    path('api/academies/', include('academy_management.academies.urls')),
+    path('api/courses/', include('academy_management.courses.urls')),
+    path('api/registrations/', include('academy_management.registrations.urls')),
+    path('api/payment/', include('academy_management.payment.urls')),
 ]
 
 if settings.DEBUG:

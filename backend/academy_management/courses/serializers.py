@@ -1,11 +1,9 @@
 # apps/classes/serializers.py
 from rest_framework import serializers
 from .models import Course, CourseSchedule
-from sports.models import Sport
-from academies.models import Academy
 from core.exceptions import APIError, ClassError
-from academies.serializers import AcademySerializer
-from sports.serializers import SportSerializer
+from academy_management.academies.serializers import AcademySerializer
+from academy_management.sports.serializers import SportSerializer
 
 
 class CourseScheduleSerializer(serializers.ModelSerializer):

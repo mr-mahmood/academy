@@ -1,5 +1,5 @@
 from django.urls import path
-from academies.views import AcademyAPIView
+from .views import AcademyAPIView
 
 app_name = 'academies'
 

@@ -1,5 +1,5 @@
 from django.urls import path
-from sports.views import SportAPIView
+from .views import SportAPIView
 
 app_name = 'sports'
 

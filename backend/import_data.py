@@ -3,16 +3,15 @@ Django Shell Script to Import Data with Sequential IDs Starting from 1
 Run with: sudo cat import_data.py | sudo docker exec -i academy_backend python manage.py shell
 """
 
-import sys
 from datetime import datetime
 from django.db import transaction
 from django.db import connection
-from academies.models import Academy
-from sports.models import Sport
+from academy_management.academies.models import Academy
+from academy_management.sports.models import Sport
 from users.models import User
-from courses.models import Course, CourseSchedule
-from payment.models import Payment
-from registrations.models import Enrollment
+from academy_management.courses.models import Course, CourseSchedule
+from academy_management.payment.models import Payment
+from academy_management.registrations.models import Enrollment
 
 print("=" * 60)
 print("⚠️  WARNING: This will DELETE ALL existing data and renumber everything from 1! ⚠️")
