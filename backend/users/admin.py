@@ -57,6 +57,7 @@ class UserAdmin(BaseUserAdmin):
                 "full_name",
                 "gender",
                 "birth_date",
+                "age_category",
                 "state",
                 "city",
                 "address",

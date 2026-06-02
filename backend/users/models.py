@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from datetime import timedelta
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from core.exceptions import APIError, UserAccountError
 from core.cache_service import CacheService
@@ -171,6 +172,10 @@ class User(AbstractUser):
         ordering = ["-created_at"]
         verbose_name = "User"
         verbose_name_plural = "Users"
+        
+        indexes = [
+            models.Index(fields=['age_category'])
+        ]
     
     def __str__(self):
         return f"{self.phone_number}"
@@ -190,17 +195,13 @@ class User(AbstractUser):
         if not user:
             raise APIError(UserAccountError.USER_NOT_EXIST)
         return user
-    
-    def update_age_category(self) -> None:
-        """Update and optionally save the age category"""
-        new_category = self.calculate_age_category()
-        if self.age_category != new_category:
-            self.age_category = new_category
-            self.save(update_fields=['age_category'])
 
     def save(self, *args, **kwargs):
         # Auto-calculate age category before saving
-        self.update_age_category()
+        new_category = self.update_age_category_if_needed()
+        if self.age_category != new_category:
+            self.age_category = new_category
+        
         super().save(*args, **kwargs)
         
         # Clear individual cache
@@ -212,7 +213,7 @@ class User(AbstractUser):
         # Clear list caches
         cache.delete("users:all_list")
         cache.delete("users:active_list")
-    
+        
     def delete(self, *args, **kwargs):
         user_id = self.pk
         phone_number = self.phone_number
@@ -229,18 +230,13 @@ class User(AbstractUser):
         if not self.birth_date:
             return User.AgeCategory.OUT_OF_RANGE
         
-        # Get current date in Gregorian
         current_date = timezone.now().date()
-        
-        # Calculate age
         age = current_date.year - self.birth_date.year
         
-        # Adjust if birthday hasn't occurred yet this year
         if current_date.month < self.birth_date.month or \
-        (current_date.month == self.birth_date.month and current_date.day < self.birth_date.day):
+           (current_date.month == self.birth_date.month and current_date.day < self.birth_date.day):
             age -= 1
         
-        # Determine age category based on age
         if age < 12:
             return User.AgeCategory.U12
         elif age == 12:
@@ -259,3 +255,30 @@ class User(AbstractUser):
             return User.AgeCategory.U21
         else:
             return User.AgeCategory.OUT_OF_RANGE
+    
+    def update_age_category_if_needed(self):
+        """
+        Update age category only if it hasn't been updated in the last 3 months.
+        Uses updated_at field to track last update.
+        """
+        # If no birth date, set to OUT_OF_RANGE
+        if not self.birth_date:
+            if self.age_category != User.AgeCategory.OUT_OF_RANGE:
+                self.age_category = User.AgeCategory.OUT_OF_RANGE
+                self.save(update_fields=['age_category', 'updated_at'])
+            return
+        
+        # Check if age category needs update (3 months since last update)
+        three_months_ago = timezone.now() - timedelta(days=90)
+        
+        # If updated_at is within 3 months, skip update
+        if self.updated_at and self.updated_at > three_months_ago:
+            return
+        
+        # Calculate new category
+        new_category = self.calculate_age_category()
+        
+        # Update only if changed
+        if self.age_category != new_category:
+            self.age_category = new_category
+            self.save(update_fields=['age_category', 'updated_at'])
