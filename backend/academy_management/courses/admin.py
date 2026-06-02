@@ -1,7 +1,7 @@
 # apps/classes/admin.py
 from django.contrib import admin
 from .models import Course, CourseSchedule
-
+from config.admin import admin_site
 
 class CourseScheduleInline(admin.TabularInline):
     """Inline schedule entries"""
@@ -10,7 +10,7 @@ class CourseScheduleInline(admin.TabularInline):
     fields = ['weekday', 'start_time', 'end_time']
 
 
-@admin.register(Course)
+
 class CourseAdmin(admin.ModelAdmin):
     """Simple Course admin"""
     
@@ -37,7 +37,8 @@ class CourseAdmin(admin.ModelAdmin):
     
     actions = ['make_active', 'make_draft', 'make_full']
     
-@admin.register(CourseSchedule)
+
+
 class CourseScheduleAdmin(admin.ModelAdmin):
     """Simple Course Schedule admin"""
     
@@ -46,3 +47,8 @@ class CourseScheduleAdmin(admin.ModelAdmin):
     list_filter = ['weekday', 'course__sport', 'course__academy']
     
     raw_id_fields = ['course']
+    
+    
+# Register explicitly
+admin_site.register(Course, CourseAdmin)
+admin_site.register(CourseSchedule, CourseScheduleAdmin)

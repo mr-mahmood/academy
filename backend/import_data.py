@@ -11,7 +11,7 @@ from academy_management.sports.models import Sport
 from users.models import User
 from academy_management.courses.models import Course, CourseSchedule
 from academy_management.payment.models import Payment
-from academy_management.registrations.models import Enrollment
+from academy_management.enrollment.models import Enrollment
 
 print("=" * 60)
 print("⚠️  WARNING: This will DELETE ALL existing data and renumber everything from 1! ⚠️")

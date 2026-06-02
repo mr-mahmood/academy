@@ -31,7 +31,7 @@ export default function MyCoursesFilter({ onEnrollmentsLoaded, onFilterChange, o
         const fetchEnrollments = async () => {
             try {
                 const result = await apiFetch({
-                    url: 'api/registrations/',
+                    url: 'api/enrollment/',
                     method: 'GET'
                 })
 
@@ -39,8 +39,8 @@ export default function MyCoursesFilter({ onEnrollmentsLoaded, onFilterChange, o
                     let enrollmentsData: Enrollment[] = []
                     if (result.data?.enrollments) {
                         enrollmentsData = result.data.enrollments
-                    } else if (result.data?.registrations) {
-                        enrollmentsData = result.data.registrations
+                    } else if (result.data?.enrollments) {
+                        enrollmentsData = result.data.enrollments
                     }
 
                     setAllEnrollments(enrollmentsData)

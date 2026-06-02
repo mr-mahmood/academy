@@ -1,10 +1,11 @@
+# academy_management/enrollment/admin.py
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 from .models import Enrollment
+from config.admin import admin_site
 
 
-@admin.register(Enrollment)
 class EnrollmentAdmin(admin.ModelAdmin):
     """Simple Enrollment admin"""
     
@@ -60,3 +61,6 @@ class EnrollmentAdmin(admin.ModelAdmin):
         )
         self.message_user(request, f"{updated} enrollment(s) marked as cancelled.")
     mark_cancelled.short_description = "Mark as Cancelled"
+
+# Register explicitly
+admin_site.register(Enrollment, EnrollmentAdmin)

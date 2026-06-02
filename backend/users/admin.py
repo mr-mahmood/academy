@@ -4,9 +4,9 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 from users.models import User
 from users.forms import UserCreationForm, UserChangeForm
+from config.admin import admin_site
 
 
-@admin.register(User)
 class UserAdmin(BaseUserAdmin):
     """Admin panel configuration for User model"""
     
@@ -99,3 +99,8 @@ class UserAdmin(BaseUserAdmin):
         "updated_at",
         "last_login",
     )
+    
+    
+
+# Register explicitly
+admin_site.register(User, UserAdmin)

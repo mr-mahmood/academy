@@ -28,7 +28,7 @@ function SignupContent() {
     const registerForCourse = async (courseId: number): Promise<{ success: boolean; message?: string; code?: number }> => {
         try {
             const result = await apiFetch({
-                url: 'api/registrations/',
+                url: 'api/enrollment/',
                 method: 'POST',
                 body: {
                     course_id: courseId

@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from academy_management.registrations.models import Enrollment
+from academy_management.enrollment.models import Enrollment
 from core.exceptions import APIError, PaymentError
 
 

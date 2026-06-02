@@ -74,7 +74,8 @@ class VerifyOTPApiView(APIView):
         if user_exists:
             # Existing user - login immediately
             user = User.objects.get(phone_number=phone_number)
-            user.update_age_category_if_needed()
+            if user.update_age_category_if_needed():
+                user.save()
             return self._login_existing_user(request, phone_number)
         else:
             # New user - mark phone as verified for signup

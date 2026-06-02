@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "academy_management.sports",
     "academy_management.academies",
     "academy_management.courses",
-    "academy_management.registrations",
+    "academy_management.enrollment",
 ]
 
 MIDDLEWARE = [

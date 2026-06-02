@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Payment
 from django.urls import reverse
 from django.utils.html import format_html
-
+from config.admin import admin_site
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
@@ -34,3 +34,7 @@ class PaymentAdmin(admin.ModelAdmin):
                 return str(obj.enrollment.course)
         return "-"
     course_link.short_description = "Course"
+    
+
+# Register explicitly
+admin_site.register(Payment, PaymentAdmin)

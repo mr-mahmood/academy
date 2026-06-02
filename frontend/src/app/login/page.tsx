@@ -205,7 +205,7 @@ function AuthPageContent() {
 
         try {
             const result = await apiFetch({
-                url: 'api/registrations/',
+                url: 'api/enrollment/',
                 method: 'POST',
                 body: {
                     course_id: pendingRegistration.courseId

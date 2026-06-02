@@ -1,8 +1,8 @@
-# apps/registrations/urls.py
+# apps/enrollment/urls.py
 from django.urls import path
 from .views import EnrollmentAPIView
 
-app_name = 'registrations'
+app_name = 'enrollment'
 
 urlpatterns = [
     path('', EnrollmentAPIView.as_view(), name='enrollment_list_create'),

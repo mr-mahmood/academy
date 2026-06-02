@@ -7,7 +7,7 @@ import { Icon, Icons } from '@/components/icon'
 import { useActiveUser } from '@/contexts/active_user_context'
 import { useApi } from '@/hooks/useApi'
 import type { Course } from '@/types/Course'
-import type { Enrollment } from '@/types/Enrollment'
+import type { Enrollment } from '@/types/enrollment'
 import type { Schedule } from '@/types/Schedule'
 import styles from './courseDetail.module.css'
 import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
@@ -92,9 +92,9 @@ export default function ClassDetailPage() {
         if (!activeUser || !isValidId) return
         const fetchEnrollments = async () => {
             if (!activeUser) return
-            const result = await apiFetch({ url: 'api/registrations/', method: 'GET' })
+            const result = await apiFetch({ url: 'api/enrollment/', method: 'GET' })
             if (result.success) {
-                const data = result.data?.enrollments || result.data?.registrations || result.data || []
+                const data = result.data?.enrollments || result.data?.enrollments || result.data || []
                 setUserEnrollments(Array.isArray(data) ? data : [])
             }
         }
@@ -162,7 +162,7 @@ export default function ClassDetailPage() {
     }
 
     const refreshEnrollments = async () => {
-        const result = await apiFetch({ url: 'api/registrations/', method: 'GET' })
+        const result = await apiFetch({ url: 'api/enrollment/', method: 'GET' })
         if (result.success) {
             const data = result.data?.enrollments || result.data || []
             setUserEnrollments(Array.isArray(data) ? data : [])
@@ -176,7 +176,7 @@ export default function ClassDetailPage() {
         setError('')
 
         try {
-            const result = await apiFetch({ url: 'api/registrations/', method: 'POST', body: { course_id: course.id } })
+            const result = await apiFetch({ url: 'api/enrollment/', method: 'POST', body: { course_id: course.id } })
             if (result.success) {
                 setSuccess('پیش‌ ثبت‌ نام با موفقیت انجام شد')
                 await refreshEnrollments()
@@ -227,7 +227,7 @@ export default function ClassDetailPage() {
         setCancelProcessing(true)
 
         try {
-            const result = await apiFetch({ url: `api/registrations/${enrollment.id}/`, method: 'DELETE' })
+            const result = await apiFetch({ url: `api/enrollment/${enrollment.id}/`, method: 'DELETE' })
 
             if (result.success) {
                 setEnrollment(null)

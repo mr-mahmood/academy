@@ -102,7 +102,7 @@ class ClassError(APIError):
     SCHEDULE_NOT_FOUND = (411, "Schedule not found")
 
 # ============================================================================
-# REGISTRATIONS APP
+# ENROLLMENTS APP
 # ============================================================================
 class RegistrationError(APIError):
     ENROLLMENT_NOT_FOUND = (501, "Enrollment not found")

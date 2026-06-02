@@ -16,7 +16,7 @@ from rest_framework import status
 from .models import Payment, PaymentStatus
 from .services import ZibalPaymentService
 from academy_management.courses.models import Course
-from academy_management.registrations.models import Enrollment
+from academy_management.enrollment.models import Enrollment
 from core.exceptions import APIError, PaymentError, RegistrationError
 
 logger = logging.getLogger(__name__)

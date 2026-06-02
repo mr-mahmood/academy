@@ -7,7 +7,6 @@ from core.cache_service import CacheService
 from django.core.cache import cache
 
 
-
 class UserManager(BaseUserManager['User']):
     
     def create_user(self, phone_number, national_id, full_name, **extra_fields):
@@ -19,7 +18,6 @@ class UserManager(BaseUserManager['User']):
         if not full_name:
             raise ValueError("Full name is required")
         
-        # Regular users
         extra_fields.setdefault("role", User.Role.USER)
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
@@ -55,7 +53,6 @@ class UserManager(BaseUserManager['User']):
 
 class User(AbstractUser):
     id: int
-    # Remove username, email fields only (keep password for admin)
     username = None
     email = None
     
@@ -68,7 +65,6 @@ class User(AbstractUser):
         USER = "USER", "User"
         
     class AgeCategory(models.TextChoices):
-        # --- VALID RANGES ---
         U12 = "U12", "U12"
         U13 = "U13", "U13"
         U14 = "U14", "U14"
@@ -79,7 +75,7 @@ class User(AbstractUser):
         U21 = "U21", "امید"
         OUT_OF_RANGE = "OOR", "خارج از محدوده" 
     
-    # Core fields - ALL REQUIRED
+    # Core fields
     phone_number = models.CharField(
         max_length=11, 
         unique=True, 
@@ -111,7 +107,7 @@ class User(AbstractUser):
         verbose_name="Birth Date"
     )
     
-    age_category  = models.CharField(
+    age_category = models.CharField(
         max_length=20,
         choices=AgeCategory.choices,
         default=AgeCategory.OUT_OF_RANGE
@@ -123,21 +119,10 @@ class User(AbstractUser):
         default=Role.USER
     )
     
-    # Address fields (optional)
-    state = models.CharField(
-        max_length=200, 
-        blank=True,
-        verbose_name="State"
-    )
-    city = models.CharField(
-        max_length=200, 
-        blank=True,
-        verbose_name="City"
-    )
-    address = models.TextField(
-        blank=True,
-        verbose_name="Address"
-    )
+    # Address fields
+    state = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=200, blank=True)
+    address = models.TextField(blank=True)
     
     # Optional fields
     profile_image = models.ImageField(
@@ -145,34 +130,25 @@ class User(AbstractUser):
         null=True,
         blank=True,
         default='profile_pics/default_profile_image.png',
-        verbose_name="Profile Image"
     )
     
     # Timestamps
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Created At"
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Updated At"
-    )
-    
-    # one session only logic
+    # Session logic
     token_version = models.IntegerField(default=1)
     
     USERNAME_FIELD = "phone_number"
     REQUIRED_FIELDS = ["national_id", "full_name"]
     
-    objects = UserManager()  # type: ignore
+    objects = UserManager() #type: ignore
     
     class Meta:
         db_table = "user"
         ordering = ["-created_at"]
         verbose_name = "User"
         verbose_name_plural = "Users"
-        
         indexes = [
             models.Index(fields=['age_category'])
         ]
@@ -195,36 +171,7 @@ class User(AbstractUser):
         if not user:
             raise APIError(UserAccountError.USER_NOT_EXIST)
         return user
-
-    def save(self, *args, **kwargs):
-        # Auto-calculate age category before saving
-        new_category = self.update_age_category_if_needed()
-        if self.age_category != new_category:
-            self.age_category = new_category
-        
-        super().save(*args, **kwargs)
-        
-        # Clear individual cache
-        CacheService.invalidate_model(self.__class__, self.pk)
-        
-        # Clear phone number lookup cache
-        cache.delete(f"user:phone:{self.phone_number}")
-        
-        # Clear list caches
-        cache.delete("users:all_list")
-        cache.delete("users:active_list")
-        
-    def delete(self, *args, **kwargs):
-        user_id = self.pk
-        phone_number = self.phone_number
-        super().delete(*args, **kwargs)
-        
-        # Clear cache
-        CacheService.invalidate_model(self.__class__, user_id)
-        cache.delete(f"user:phone:{phone_number}")
-        cache.delete("users:all_list")
-        cache.delete("users:active_list")
-         
+    
     def calculate_age_category(self) -> str:
         """Calculate age category based on birth date and current date"""
         if not self.birth_date:
@@ -256,29 +203,50 @@ class User(AbstractUser):
         else:
             return User.AgeCategory.OUT_OF_RANGE
     
-    def update_age_category_if_needed(self):
+    def update_age_category_if_needed(self) -> bool:
         """
-        Update age category only if it hasn't been updated in the last 3 months.
-        Uses updated_at field to track last update.
+        Check if age category needs update and update it if needed.
+        Returns True if category was updated, False otherwise.
         """
-        # If no birth date, set to OUT_OF_RANGE
+        # No birth date case
         if not self.birth_date:
             if self.age_category != User.AgeCategory.OUT_OF_RANGE:
                 self.age_category = User.AgeCategory.OUT_OF_RANGE
-                self.save(update_fields=['age_category', 'updated_at'])
-            return
+                return True
+            return False
         
-        # Check if age category needs update (3 months since last update)
+        # Check if 3 months have passed
         three_months_ago = timezone.now() - timedelta(days=90)
-        
-        # If updated_at is within 3 months, skip update
         if self.updated_at and self.updated_at > three_months_ago:
-            return
+            return False
         
-        # Calculate new category
+        # Calculate and check if update needed
         new_category = self.calculate_age_category()
-        
-        # Update only if changed
         if self.age_category != new_category:
             self.age_category = new_category
-            self.save(update_fields=['age_category', 'updated_at'])
+            return True
+        
+        return False
+
+    def save(self, *args, **kwargs):
+        # Update age category if needed
+        self.update_age_category_if_needed()
+        
+        # Save once with all updates
+        super().save(*args, **kwargs)
+        
+        # Clear caches
+        CacheService.invalidate_model(self.__class__, self.pk)
+        cache.delete(f"user:phone:{self.phone_number}")
+        cache.delete("users:all_list")
+        cache.delete("users:active_list")
+    
+    def delete(self, *args, **kwargs):
+        user_id = self.pk
+        phone_number = self.phone_number
+        super().delete(*args, **kwargs)
+        
+        CacheService.invalidate_model(self.__class__, user_id)
+        cache.delete(f"user:phone:{phone_number}")
+        cache.delete("users:all_list")
+        cache.delete("users:active_list")
