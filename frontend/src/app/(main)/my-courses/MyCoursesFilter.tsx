@@ -1,48 +1,34 @@
+// app/my-courses/MyCoursesFilter.tsx
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import { Icon, Icons } from '@/components/icon'
-import { useApi } from '@/hooks/useApi'
-import type { Enrollment } from '@/types/Enrollment'
+import { useRef, useState, useEffect } from 'react'
 import styles from './my-courses.module.css'
+import FilterModal from '@/components/FilterModal/FilterModal'
+import { Icon, Icons } from '@/components/icon'
 import { MyCoursesFilterSkeleton } from './MyCoursesSkeletons'
-
-interface FilterOption {
-    id: number
-    name: string
-}
+import type { Enrollment } from '@/types/enrollment'
+import { useApi } from '@/hooks/useApi'
 
 interface MyCoursesFilterProps {
     onEnrollmentsLoaded?: (enrollments: Enrollment[]) => void
+    onFilterChange?: (filteredData: any[]) => void
+    onFilterCountChange?: (count: number) => void
+    isLoading?: boolean
 }
 
-export default function MyCoursesFilter({ onEnrollmentsLoaded }: MyCoursesFilterProps) {
-    const router = useRouter()
-    const [isFilterOpen, setIsFilterOpen] = useState(false)
+export default function MyCoursesFilter({ onEnrollmentsLoaded, onFilterChange, onFilterCountChange, isLoading = false }: MyCoursesFilterProps) {
     const filterRef = useRef<HTMLDivElement>(null)
-    const { apiFetch } = useApi() 
-    const [selectedSport, setSelectedSport] = useState<string>('')
-    const [selectedAcademy, setSelectedAcademy] = useState<string>('')
-    const [sports, setSports] = useState<FilterOption[]>([])
-    const [academies, setAcademies] = useState<FilterOption[]>([])
-    const [loading, setLoading] = useState(true)
+    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
+    const [activeFilterCount, setActiveFilterCount] = useState(0)
     const [allEnrollments, setAllEnrollments] = useState<Enrollment[]>([])
+    const { apiFetch } = useApi()
+    const [fetched, setFetched] = useState(false)
 
+    // Fetch enrollments when component mounts - ONLY ONCE
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-                setIsFilterOpen(false)
-            }
-        }
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [])
+        if (fetched) return
 
-    // Fetch enrollments (only once)
-    useEffect(() => {
         const fetchEnrollments = async () => {
-            setLoading(true)
             try {
                 const result = await apiFetch({
                     url: 'api/registrations/',
@@ -58,173 +44,98 @@ export default function MyCoursesFilter({ onEnrollmentsLoaded }: MyCoursesFilter
                     }
 
                     setAllEnrollments(enrollmentsData)
+                    setFetched(true)
 
-                    // Pass enrollments to parent component
                     if (onEnrollmentsLoaded) {
                         onEnrollmentsLoaded(enrollmentsData)
                     }
 
-                    // 🔥 IMPORTANT: Dispatch initial enrollments (all enrollments, no filters)
+                    // Dispatch initial courses (all enrollments, no filters)
+                    const initialCourses = enrollmentsData.map(enrollment => ({
+                        ...enrollment.course,
+                        enrollment_status: enrollment.enrollment_status
+                    }))
+                    
                     window.dispatchEvent(new CustomEvent('myCoursesFilteredChanged', {
-                        detail: enrollmentsData
-                    }));
-
-                    // 🔥 Dispatch all enrollments for the list component to track
-                    window.dispatchEvent(new CustomEvent('myCoursesAllEnrollmentsLoaded', {
-                        detail: enrollmentsData
-                    }));
-
-                    // Extract filter options
-                    const uniqueSports = new Map()
-                    const uniqueAcademies = new Map()
-
-                    enrollmentsData.forEach((enrollment: Enrollment) => {
-                        if (enrollment.course?.sport && !uniqueSports.has(enrollment.course.sport.id)) {
-                            uniqueSports.set(enrollment.course.sport.id, {
-                                id: enrollment.course.sport.id,
-                                name: enrollment.course.sport.name
-                            })
-                        }
-                        if (enrollment.course?.academy && !uniqueAcademies.has(enrollment.course.academy.id)) {
-                            uniqueAcademies.set(enrollment.course.academy.id, {
-                                id: enrollment.course.academy.id,
-                                name: enrollment.course.academy.name
-                            })
-                        }
-                    })
-
-                    setSports(Array.from(uniqueSports.values()))
-                    setAcademies(Array.from(uniqueAcademies.values()))
+                        detail: initialCourses
+                    }))
                 }
             } catch (error) {
                 console.error('Error fetching enrollments:', error)
-            } finally {
-                setLoading(false)
+                // Still need to notify that loading is done even on error
+                if (onEnrollmentsLoaded) {
+                    onEnrollmentsLoaded([])
+                }
             }
         }
 
         fetchEnrollments()
-    }, [router, onEnrollmentsLoaded])
+    }, [apiFetch, onEnrollmentsLoaded, fetched])
 
-    // Listen for reset requests from the courses list
+    // Listen for filter count changes
     useEffect(() => {
-        const handleResetRequest = () => {
-            clearFilters()
+        const handleFilterCount = (e: CustomEvent) => {
+            setActiveFilterCount(e.detail)
+            if (onFilterCountChange) {
+                onFilterCountChange(e.detail)
+            }
         }
-
-        window.addEventListener('resetMyCoursesFilters', handleResetRequest)
-        return () => window.removeEventListener('resetMyCoursesFilters', handleResetRequest)
-    }, [allEnrollments])
-
-    const updateFilters = (type: string, value: string) => {
-        let newSport = selectedSport;
-        let newAcademy = selectedAcademy;
-
-        if (type === 'sport') {
-            newSport = value;
-            setSelectedSport(value);
-        }
-        if (type === 'academy') {
-            newAcademy = value;
-            setSelectedAcademy(value);
-        }
-
-        // Apply filters
-        let filteredResult = [...allEnrollments];
-
-        if (newSport) {
-            filteredResult = filteredResult.filter(enrollment =>
-                enrollment.course?.sport?.id === parseInt(newSport)
-            )
-        }
-        if (newAcademy) {
-            filteredResult = filteredResult.filter(enrollment =>
-                enrollment.course?.academy?.id === parseInt(newAcademy)
-            )
-        }
-
-        // Dispatch event with filtered enrollments
-        window.dispatchEvent(new CustomEvent('myCoursesFilteredChanged', {
-            detail: filteredResult
-        }));
-    }
-
-    const clearFilters = () => {
-        setSelectedSport('');
-        setSelectedAcademy('');
-        setIsFilterOpen(false);
-
-        // Dispatch all enrollments (clear filters)
-        window.dispatchEvent(new CustomEvent('myCoursesFilteredChanged', {
-            detail: [...allEnrollments]
-        }));
-    }
-
-    const hasActiveFilters = selectedSport || selectedAcademy
+        
+        window.addEventListener('filterCountChanged', handleFilterCount as EventListener)
+        return () => window.removeEventListener('filterCountChanged', handleFilterCount as EventListener)
+    }, [onFilterCountChange])
 
     // Show skeleton while loading
-    if (loading) {
+    if (isLoading) {
         return <MyCoursesFilterSkeleton />
     }
 
     return (
-        <div className={styles.filterSection} ref={filterRef}>
-            <button
-                className={`${styles.filterButton} ${hasActiveFilters ? styles.filterButtonActive : ''}`}
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-            >
-                <Icon icon={Icons.filter} />
-                <span>فیلترها</span>
-                {hasActiveFilters && (
-                    <span className={styles.filterBadge}>
-                        {[selectedSport, selectedAcademy].filter(Boolean).length}
-                    </span>
-                )}
-                <Icon icon={isFilterOpen ? Icons.chevronUp : Icons.chevronDown} className={styles.chevron} />
-            </button>
-
-            {isFilterOpen && (
-                <div className={styles.filterDropdown}>
-                    <div className={styles.filterRow}>
-                        <label className={styles.filterLabel}>ورزش</label>
-                        <select
-                            value={selectedSport}
-                            onChange={(e) => updateFilters('sport', e.target.value)}
-                            className={styles.filterSelect}
-                        >
-                            <option value="">همه ورزش‌ها</option>
-                            {sports.map(sport => (
-                                <option key={sport.id} value={sport.id}>
-                                    {sport.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className={styles.filterRow}>
-                        <label className={styles.filterLabel}>ورزشگاه</label>
-                        <select
-                            value={selectedAcademy}
-                            onChange={(e) => updateFilters('academy', e.target.value)}
-                            className={styles.filterSelect}
-                        >
-                            <option value="">همه ورزشگاه‌ها</option>
-                            {academies.map(academy => (
-                                <option key={academy.id} value={academy.id}>
-                                    {academy.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {hasActiveFilters && (
-                        <button onClick={clearFilters} className={styles.clearFiltersBtn}>
-                            <Icon icon={Icons.times} />
-                            <span>حذف همه فیلترها</span>
-                        </button>
+        <>
+            {/* Filter Section */}
+            <div className={styles.filterSection}>
+                <button 
+                    onClick={() => setIsFilterModalOpen(true)}
+                    className={`${styles.filterButton} ${activeFilterCount > 0 ? styles.filterButtonActive : ''}`}
+                >
+                    <Icon icon={Icons.filter} />
+                    <span>فیلترها</span>
+                    {activeFilterCount > 0 && (
+                        <span className={styles.filterBadge}>{activeFilterCount}</span>
                     )}
-                </div>
-            )}
-        </div>
+                    <Icon icon={Icons.chevronDown} className={styles.chevron} />
+                </button>
+            </div>
+            
+            <div ref={filterRef}>
+                <FilterModal
+                    isOpen={isFilterModalOpen}
+                    onClose={() => setIsFilterModalOpen(false)}
+                    title="فیلتر دوره‌های من"
+                    data={allEnrollments.map(enrollment => ({
+                        ...enrollment.course,
+                        enrollment_status: enrollment.enrollment_status
+                    }))}
+                    filterFields={[
+                        {
+                            key: 'sport',
+                            label: 'ورزش',
+                            type: 'select',
+                            extractFrom: (item) => item.sport
+                        },
+                        {
+                            key: 'academy',
+                            label: 'ورزشگاه',
+                            type: 'select',
+                            extractFrom: (item) => item.academy
+                        }
+                    ]}
+                    onFilterApply={onFilterChange}
+                    onFilterCountChange={setActiveFilterCount}
+                    filterChangeEvent="myCoursesFilteredChanged"
+                    resetEvent="resetMyCoursesFilters"
+                />
+            </div>
+        </>
     )
 }

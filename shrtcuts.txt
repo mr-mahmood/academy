@@ -2,6 +2,9 @@ docker compose exec backend python manage.py migrate
 docker compose exec backend python manage.py makemigrations
 
 docker save mrmahmood/academy-backend:latest -o academy-backend.tar
+docker save mrmahmood/academy-frontend:latest -o academy-frontend.tar
+
 docker load -i academy-backend.tar
+docker load -i academy-frontend.tar
 
 scp academy-backend.tar reisi@194.150.71.210:~/Academy/ 

@@ -8,7 +8,6 @@ import { Sport } from '@/types/Sport'
 import { Academy } from '@/types/Academy'
 import { Schedule } from '@/types/Schedule'
 
-
 interface CourseCardProps {
     id: number
     sport?: Sport
@@ -57,7 +56,6 @@ export default function CourseCard({
 
     const getStatusDisplay = (statusValue: string) => {
         const statusMap: Record<string, { label: string; className: string; icon: any }> = {
-            // Enrollment statuses
             'WAITING_FOR_PAYMENT': {
                 label: 'پیش ثبت نام',
                 className: 'statusWarning',
@@ -78,7 +76,6 @@ export default function CourseCard({
                 className: 'statusInfo',
                 icon: Icons.verified
             },
-            // Course statuses
             'ACTIVE': {
                 label: 'فعال',
                 className: 'statusSuccess',
@@ -121,15 +118,8 @@ export default function CourseCard({
             className={`${styles.card} ${className}`}
             onClick={handleClick}
         >
-            {/* Status Badge */}
-            {statusInfo && (
-                <div className={`${styles.statusBadge} ${styles[statusInfo.className]}`}>
-                    <Icon icon={statusInfo.icon} className={styles.statusIcon} />
-                    <span>{statusInfo.label}</span>
-                </div>
-            )}
 
-            {/* Sport & Academy */}
+            {/* Sport & Sessions */}
             <div className={styles.mainSection}>
                 <div className={styles.iconContainer}>
                     <Icon icon={Icons.football} />
@@ -138,14 +128,30 @@ export default function CourseCard({
                     <h3 className={styles.title}>
                         {sport?.name || academy.name}
                     </h3>
-                    <p className={styles.subtitle}>
-                        {`ورزشگاه ${academy.name}`}
-                        {showSessions && totalSessions && ` (${totalSessions} جلسه)`}
-                    </p>
+                    {showSessions && totalSessions && (
+                        <span className={styles.sessionsText}>
+                            {totalSessions} جلسه
+                        </span>
+                    )}
                 </div>
+                {statusInfo && (
+                    <div className={`${styles.statusBadge} ${styles[statusInfo.className]}`}>
+                        <Icon icon={statusInfo.icon} className={styles.statusIcon} />
+                        <span>{statusInfo.label}</span>
+                    </div>
+                )}
             </div>
 
-            {/* Schedule - Multiple Times */}
+            {/* Gender Section */}
+            <div className={styles.genderSection}>
+                <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
+                    <Icon icon={Icons.user} className={styles.genderIcon} />
+                    <span className={styles.genderLabel}>مناسب برای</span>
+                </div>
+                <span className={styles.genderValue}>{getGenderDisplay(gender)}</span>
+            </div>
+
+            {/* Schedule */}
             {schedule && schedule.length > 0 && (
                 <div className={styles.scheduleContainer}>
                     {schedule.map((sched, index) => (
@@ -155,9 +161,8 @@ export default function CourseCard({
                                 <span>{getDayName(sched.weekday_name)}</span>
                             </div>
                             <div className={styles.scheduleTime}>
-                                <Icon icon={Icons.clock} className={styles.scheduleIcon} />
                                 <span>
-                                    {sched.start_time?.slice(0, 5)} - {sched.end_time?.slice(0, 5)}
+                                    {sched.end_time?.slice(0, 5)} - {sched.start_time?.slice(0, 5)}
                                 </span>
                             </div>
                         </div>
@@ -166,20 +171,22 @@ export default function CourseCard({
             )}
 
             {/* Address */}
-            {showAddress && academy.address_text && (
-                <div className={styles.addressRow}>
-                    <Icon icon={Icons.location} className={styles.addressIcon} />
-                    <span>{academy.address_text}</span>
+            <div className={styles.addressRow}>
+                <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
+                    <Icon icon={Icons.building} className={styles.addressIcon} />
+                    <span className={styles.addressValue}>ورزشگاه {academy.name}</span>
+                    <span className={styles.addressSeparator} />
                 </div>
-            )}
+                {showAddress && academy.address_text && (
+                    <span className={styles.addressDetail}>{academy.address_text}</span>
+                )}
+            </div>
 
-            {/* Bottom */}
+            {/* Bottom - Price */}
             <div className={styles.bottom}>
-                <div className={styles.price}>
-                    {formatPrice(price)} تومان
-                </div>
-                <div className={styles.genderBadge}>
-                    {getGenderDisplay(gender)}
+                <div className={styles.priceSection}>
+                    <span className={styles.priceLabel}>قیمت دوره</span>
+                    <span className={styles.price}>{formatPrice(price)} تومان</span>
                 </div>
             </div>
         </div>

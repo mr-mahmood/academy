@@ -1,45 +1,53 @@
+// app/my-courses/MyCoursesList.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Icon, Icons } from '@/components/icon'
 import ClassCard from '@/components/CourseCard/CourseCard'
-import type { Enrollment } from '@/types/Enrollment'
+import type { Enrollment } from '@/types/enrollment'
 import styles from './my-courses.module.css'
 import { MyCoursesCardSkeleton } from './MyCoursesSkeletons'
 
-export default function MyCoursesList() {
+interface MyCoursesListProps {
+    enrollments?: Enrollment[]
+    isLoading?: boolean
+}
+
+export default function MyCoursesList({ enrollments = [], isLoading = false }: MyCoursesListProps) {
     const [filteredEnrollments, setFilteredEnrollments] = useState<Enrollment[]>([])
-    const [allEnrollments, setAllEnrollments] = useState<Enrollment[]>([])
-    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         // Listen for filtered enrollments from filter component
         const handleFilteredEnrollments = (event: CustomEvent) => {
-            setFilteredEnrollments(event.detail)
-            setLoading(false)
+            const filteredCourses = event.detail
+            // Match filtered courses back to enrollments
+            const matchedEnrollments = enrollments.filter(enrollment => 
+                filteredCourses.some((course: any) => course.id === enrollment.course.id)
+            )
+            setFilteredEnrollments(matchedEnrollments)
         }
         
-        // Listen for all enrollments to be loaded
-        const handleAllEnrollments = (event: CustomEvent) => {
-            setAllEnrollments(event.detail)
-        }
-        
-        window.addEventListener('myCoursesFilteredChanged', handleFilteredEnrollments as EventListener);
-        window.addEventListener('myCoursesAllEnrollmentsLoaded', handleAllEnrollments as EventListener);
+        window.addEventListener('myCoursesFilteredChanged', handleFilteredEnrollments as EventListener)
         
         return () => {
-            window.removeEventListener('myCoursesFilteredChanged', handleFilteredEnrollments as EventListener);
-            window.removeEventListener('myCoursesAllEnrollmentsLoaded', handleAllEnrollments as EventListener);
+            window.removeEventListener('myCoursesFilteredChanged', handleFilteredEnrollments as EventListener)
         }
-    }, []);
+    }, [enrollments])
+
+    // Update filtered enrollments when enrollments change (initial load)
+    useEffect(() => {
+        if (enrollments.length > 0 && !isLoading) {
+            setFilteredEnrollments(enrollments)
+        }
+    }, [enrollments, isLoading])
 
     // Function to reset filters
-    const handleResetFilters = () => {
-        window.dispatchEvent(new CustomEvent('resetMyCoursesFilters'));
-    }
+    const handleResetFilters = useCallback(() => {
+        window.dispatchEvent(new CustomEvent('resetMyCoursesFilters'))
+    }, [])
 
-    // Show skeletons while loading
-    if (loading) {
+    // Show skeletons while loading - THIS PREVENTS THE FLASH
+    if (isLoading) {
         return (
             <div className={styles.enrollmentsList}>
                 {[1, 2, 3].map((i) => (
@@ -50,7 +58,7 @@ export default function MyCoursesList() {
     }
 
     // No courses at all (user has no enrollments)
-    if (allEnrollments.length === 0) {
+    if (enrollments.length === 0) {
         return (
             <div className={styles.emptyCourses}>
                 <Icon icon={Icons.school} />
@@ -60,11 +68,11 @@ export default function MyCoursesList() {
     }
 
     // No results with filters applied
-    if (filteredEnrollments.length === 0 && allEnrollments.length > 0) {
+    if (filteredEnrollments.length === 0 && enrollments.length > 0) {
         return (
             <div className={styles.emptyCourses}>
-                <Icon icon={Icons.filter} />
-                <p>هیچ کلاسی با فیلترهای انتخاب شده وجود ندارد</p>
+                <Icon icon={Icons.school} />
+                <p>هیچ دوره‌ای با فیلترهای انتخاب شده وجود ندارد</p>
                 <button 
                     onClick={handleResetFilters}
                     className={styles.resetFiltersButton}

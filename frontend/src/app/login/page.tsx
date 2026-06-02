@@ -41,7 +41,7 @@ function AuthPageContent() {
             hasShownPopup.current = true
             showPopUp({
                 title: 'نیاز به ورود',
-                message: 'صفحه انتخاب شده ورود به حساب شخصی نیاز دارد',
+                message: 'برای مشاهده بخش انتخاب شده وارد حساب خود شوید',
                 type: 'warning',
                 duration: 5000,
             })

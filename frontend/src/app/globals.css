@@ -318,18 +318,18 @@ body {
 }
 
 /* Responsive */
-@media (min-width: 640px) {
+@media (min-width: 450px) {
   .app-shell {
     padding: 32px;
   }
 
   .app-container {
-    width: min(430px, calc(100vw - 64px));
+    width: min(450px, calc(100vw - 64px));
     height: 100%;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 450px) {
   .app-shell {
     padding: 0;
     display: block;

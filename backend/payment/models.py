@@ -143,15 +143,23 @@ class Payment(models.Model):
         course = self.enrollment.course
         paid_message = self.paid_at.strftime('%Y-%m-%d %H:%M:%S') if self.paid_at else 'Not paid yet'
         
+        # Get course schedules - CHANGE 'schedules' to 'schedule'
+        course_schedules = course.schedule.all().order_by('weekday', 'start_time')
+        schedule_list = [
+            f"{s.weekday_name} {s.start_time.strftime('%H:%M')}-{s.end_time.strftime('%H:%M')}"
+            for s in course_schedules
+        ]
+        schedules_text = ", ".join(schedule_list) if schedule_list else "Not scheduled"
+        
         description = (
             f"Payment for course enrollment:\n"
-            f"• User: {user.full_name} (Phone: {user.phone_number}, ID: {user.national_id})\n"
-            f"• Course: {course.sport.name} at {course.academy.name}\n"
-            f"• Instructor: {course.instructor_name or 'Not specified'}\n"
-            f"• Price: {self.amount:,} Rials ({self.amount_in_toman:,} Tomans)\n"
-            f"• Enrollment Date: {self.enrollment.enrolled_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
-            f"• Paid at: {paid_message}\n"
-            f"• Status: {self.status}\n"
+            f"User: #{user.national_id}: {user.full_name} (Phone: {user.phone_number})\n"
+            f"Course #{course.id}: {course.sport.name} at {course.academy.name}\n"
+            f"Schedule: {schedules_text}\n"
+            f"Price: {self.amount:,} Rials ({self.amount_in_toman:,} Tomans)\n"
+            f"Enrollment Date: {self.enrollment.enrolled_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"Paid at: {paid_message}\n"
+            f"Status: {self.enrollment.get_enrollment_status_display() if hasattr(self.enrollment, 'get_enrollment_status_display') else self.enrollment.enrollment_status}\n"
         )
         return description
     

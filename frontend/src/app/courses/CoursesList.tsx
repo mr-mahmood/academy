@@ -1,31 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Icon, Icons } from '@/components/icon'
 import CourseCard from '@/components/CourseCard/CourseCard'
 import type { Course } from '@/types/Course'
 import styles from './courses.module.css'
 import { CourseCardSkeleton } from './Skeletons'
 
-export default function CoursesList() {
-    const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
-    const [loading, setLoading] = useState(true)
+interface CoursesListProps {
+    courses: Course[]
+    loading?: boolean
+}
 
-    useEffect(() => {
-        // Listen for filtered courses from filter component
-        const handleFilteredCourses = (event: CustomEvent) => {
-            setFilteredCourses(event.detail)
-            setLoading(false)
-        }
-        
-        window.addEventListener('filteredCoursesChanged', handleFilteredCourses as EventListener);
-        
-        return () => window.removeEventListener('filteredCoursesChanged', handleFilteredCourses as EventListener);
-    }, []);
-
+export default function CoursesList({ courses, loading = false }: CoursesListProps) {
     // Function to reset filters
     const handleResetFilters = () => {
-        // Dispatch event to reset filters in the AcademyFilter component
+        // Dispatch event to reset filters in the Filter component
         window.dispatchEvent(new CustomEvent('resetFilters'));
     }
 
@@ -40,8 +29,7 @@ export default function CoursesList() {
         )
     }
 
-
-    if (filteredCourses.length === 0) {
+    if (courses.length === 0) {
         return (
             <div className={styles.emptyCourses}>
                 <Icon icon={Icons.school} />
@@ -58,7 +46,7 @@ export default function CoursesList() {
 
     return (
         <div className={styles.coursesList}>
-            {filteredCourses.map((course) => (
+            {courses.map((course) => (
                 <CourseCard
                     key={course.id}
                     id={course.id}

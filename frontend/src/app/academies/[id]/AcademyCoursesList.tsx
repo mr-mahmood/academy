@@ -1,39 +1,21 @@
+// app/academy-details/AcademyCoursesList.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Icon, Icons } from '@/components/icon'
 import CourseCard from '@/components/CourseCard/CourseCard'
 import type { Course } from '@/types/Course'
-import styles from './AcademyDetails.module.css'
+import styles from './academyDetails.module.css'
 import { AcademyCoursesSkeleton } from './AcademySkeletons'
 
-// Module-level cache to store last dispatched courses
-let lastDispatchedCourses: Course[] | null = null
+interface AcademyCoursesListProps {
+    courses: Course[]
+    loading?: boolean
+}
 
-export default function AcademyCoursesList() {
-    const [filteredCourses, setFilteredCourses] = useState<Course[]>(() => {
-        // Initialize from cache if available
-        return lastDispatchedCourses || []
-    })
-    const [loading, setLoading] = useState(() => !lastDispatchedCourses)
-
-    useEffect(() => {
-        // Listen for filtered courses from filter component
-        const handleCoursesChanged = (event: CustomEvent) => {
-            const courses = event.detail
-            lastDispatchedCourses = courses // Store in cache
-            setFilteredCourses(courses)
-            setLoading(false)
-        }
-        
-        window.addEventListener('academyCoursesChanged', handleCoursesChanged as EventListener);
-        
-        return () => window.removeEventListener('academyCoursesChanged', handleCoursesChanged as EventListener);
-    }, []);
-
+export default function AcademyCoursesList({ courses, loading = false }: AcademyCoursesListProps) {
     // Function to reset filters
     const handleResetFilters = () => {
-        // Dispatch event to reset filters in the AcademyFilter component
+        // Dispatch event to reset filters in the Filter component
         window.dispatchEvent(new CustomEvent('resetFilters'));
     }
 
@@ -42,7 +24,7 @@ export default function AcademyCoursesList() {
         return <AcademyCoursesSkeleton />
     }
 
-    if (filteredCourses.length === 0) {
+    if (courses.length === 0) {
         return (
             <div className={styles.emptyCourses}>
                 <Icon icon={Icons.school} />
@@ -59,7 +41,7 @@ export default function AcademyCoursesList() {
 
     return (
         <div className={styles.coursesList}>
-            {filteredCourses.map((course) => (
+            {courses.map((course) => (
                 <CourseCard
                     key={course.id}
                     id={course.id}

@@ -1,4 +1,5 @@
-import styles from './AcademyDetails.module.css'
+// app/academy-details/AcademySkeletons.tsx
+import styles from './academyDetails.module.css'
 
 // Academy Info Skeleton
 export function AcademyInfoSkeleton() {

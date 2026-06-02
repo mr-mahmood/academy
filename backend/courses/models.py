@@ -193,7 +193,7 @@ class CourseSchedule(models.Model):
     
     class Meta:
         db_table = "course_schedules"
-        ordering = ['course', 'weekday', 'start_time']
+        ordering = ['weekday', 'start_time', 'course']
         unique_together = [['course', 'weekday', 'start_time']]
         verbose_name = "Course Schedule"
         verbose_name_plural = "Course Schedules"
