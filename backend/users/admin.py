@@ -21,21 +21,16 @@ class UserAdmin(BaseUserAdmin):
         "national_id",
         "full_name",
         "gender",
-        "role",
+        "age_category",
         "is_active",
         "is_staff",
         "is_superuser",
-        "created_at",
     )
     
     # Filters in sidebar
     list_filter = (
         "gender",
-        "role",
-        "is_active",
-        "is_staff",
-        "is_superuser",
-        "created_at",
+        "age_category",
     )
     
     # Search fields

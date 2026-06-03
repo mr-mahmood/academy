@@ -37,14 +37,21 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    
     # Project apps
     "users",   
     "authentication",
-    "academy_management.payment",
+    
     "academy_management.sports",
     "academy_management.academies",
     "academy_management.courses",
     "academy_management.enrollment",
+    "academy_management.payment",
+    
+    'football_talent.academies',
+    'football_talent.courses',
+    'football_talent.enrollment',
+    "football_talent.payment",
 ]
 
 MIDDLEWARE = [

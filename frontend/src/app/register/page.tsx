@@ -75,7 +75,7 @@ export default function RegisterPage() {
 
             try {
                 const coursesResult = await apiFetch({
-                    url: 'api/courses/',
+                    url: 'api/academy/courses/',
                     method: 'GET'
                 })
 

@@ -84,6 +84,9 @@ class SportError(APIError):
 # ============================================================================
 class AcademyError(APIError):
     ACADEMY_NOT_EXIST = (301, "Academy does not exist")
+    
+    # Football Academy specific errors
+    FOOTBALL_ACADEMY_NOT_EXIST = (350, "Football academy does not exist")
 
 # ============================================================================
 # classes APP
@@ -100,6 +103,19 @@ class ClassError(APIError):
     COURSE_UPDATE_FAILED = (409, "Failed to update course")
     COURSE_HAS_ENROLLMENTS = (410, "Cannot delete course with existing enrollments")
     SCHEDULE_NOT_FOUND = (411, "Schedule not found")
+    
+    # Football Course specific errors
+    FOOTBALL_COURSE_NOT_EXIST = (450, "Football course does not exist")
+    FOOTBALL_COURSE_CREATION_FAILED = (451, "Failed to create football course")
+    FOOTBALL_COURSE_UPDATE_FAILED = (452, "Failed to update football course")
+    FOOTBALL_ACADEMY_NOT_EXIST = (453, "Football academy does not exist")
+    FOOTBALL_ACADEMY_REQUIRED = (454, "Football academy ID is required")
+    INVALID_TEST_DATE = (455, "Test date cannot be in the past")
+    INVALID_MAX_PARTICIPANTS = (456, "Maximum participants must be greater than 0")
+    INVALID_AGE_CATEGORY = (457, "Invalid age category. OUT_OF_RANGE is not allowed")
+    INVALID_POSITION = (458, "Invalid position selected")
+    INVALID_STATUS = (459, "Invalid status value")
+    TEST_DATE_REQUIRED = (460, "Test date is required")
 
 # ============================================================================
 # ENROLLMENTS APP
@@ -115,6 +131,15 @@ class RegistrationError(APIError):
     GENDER_MISMATCH = (508, "This course is not available for your gender")
     ALREADY_ENROLLED = (509, "You are already enrolled in this course")
     TIME_CONFLICT = (510, "This course conflicts with your existing schedule")
+    
+    # Football specific enrollment errors
+    FOOTBALL_ENROLLMENT_NOT_FOUND = (551, "Football enrollment not found")
+    FOOTBALL_ENROLLMENT_ACCESS_DENIED = (552, "You don't have permission to access this football enrollment")
+    FOOTBALL_COURSE_REQUIRED = (553, "Football course ID is required")
+    FOOTBALL_COURSE_NOT_FOUND = (554, "Football course not found")
+    FOOTBALL_COURSE_FULL = (555, "This football test is full")
+    FOOTBALL_COURSE_NOT_ACTIVE = (556, "This football test is not active for enrollment")
+    FOOTBALL_COURSE_ALREADY_ENROLLED = (557, "You are already enrolled in this football test")
 
 # ============================================================================
 # PAYMENT app

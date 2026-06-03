@@ -5,7 +5,7 @@ from config.admin import admin_site
 class AcademyAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'phone', 'is_active']
     list_display_links = ['name']
-    
+    readonly_fields = ['created_at', 'updated_at']
     
 # Register explicitly
 admin_site.register(Academy, AcademyAdmin)

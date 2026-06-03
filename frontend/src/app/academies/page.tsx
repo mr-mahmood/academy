@@ -23,7 +23,7 @@ export default function AcademiesListPage() {
 
             try {
                 const result = await apiFetch({
-                    url: 'api/academies/',
+                    url: 'api/academy/academies/',
                     method: 'GET'
                 })
 

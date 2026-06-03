@@ -7,7 +7,7 @@ from django.core.cache import cache
 class Academy(models.Model):
     id:int
     
-    name = models.CharField(max_length=200, verbose_name="Academy Name")
+    name = models.CharField(max_length=200, verbose_name="Name")
     address_text = models.TextField(blank=True, null=True, verbose_name="Address")
     latitude = models.DecimalField(max_digits=10, decimal_places=7, blank=True, null=True, verbose_name="Latitude")
     longitude = models.DecimalField(max_digits=10, decimal_places=7, blank=True, null=True, verbose_name="Longitude")
@@ -18,9 +18,9 @@ class Academy(models.Model):
     
     class Meta:
         db_table = "academies"
-        ordering = ['name']
         verbose_name = "Academy"
         verbose_name_plural = "Academies"
+        ordering = ['name']
     
     
         indexes = [

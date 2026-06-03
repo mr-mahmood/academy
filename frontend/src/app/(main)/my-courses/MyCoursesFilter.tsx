@@ -31,7 +31,7 @@ export default function MyCoursesFilter({ onEnrollmentsLoaded, onFilterChange, o
         const fetchEnrollments = async () => {
             try {
                 const result = await apiFetch({
-                    url: 'api/enrollment/',
+                    url: 'api/academy/enrollment/',
                     method: 'GET'
                 })
 

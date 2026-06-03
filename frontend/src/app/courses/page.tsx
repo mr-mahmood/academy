@@ -21,7 +21,7 @@ export default function CoursesStreamingPage() {
             setLoading(true)
             try {
                 const result = await apiFetch({
-                    url: 'api/courses/',
+                    url: 'api/academy/courses/',
                     method: 'GET'
                 })
 

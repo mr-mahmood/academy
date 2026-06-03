@@ -79,9 +79,9 @@ class Course(models.Model):
     
     class Meta:
         db_table = "courses"
-        ordering = ['-created_at']
         verbose_name = "Course"
         verbose_name_plural = "Courses"
+        ordering = ['-created_at']
 
         indexes = [
             models.Index(fields=['status']),

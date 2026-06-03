@@ -97,8 +97,10 @@ class Payment(models.Model):
     )
     
     class Meta:
-        ordering = ['-created_at']
         db_table = "payments"
+        verbose_name = "Payment"
+        verbose_name_plural = "Payments"
+        ordering = ['-created_at']
         
         indexes = [
             models.Index(fields=['status'], name='idx_payment_status'),

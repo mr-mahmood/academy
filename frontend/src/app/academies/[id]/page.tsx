@@ -35,7 +35,7 @@ export default function AcademyDetailsPage() {
         const fetchAcademy = async () => {
             try {
                 const academyResult = await apiFetch({
-                    url: `api/academies/${academyId}/`,
+                    url: `api/academy/academies/${academyId}/`,
                     method: 'GET',
                 })
                 
@@ -59,7 +59,7 @@ export default function AcademyDetailsPage() {
             setLoading(true)
             try {
                 const coursesResult = await apiFetch({
-                    url: `api/courses/academies/${academyId}/`,
+                    url: `api/academy/courses/academies/${academyId}/`,
                     method: 'GET'
                 })
 

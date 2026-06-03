@@ -92,7 +92,7 @@ export default function ClassDetailPage() {
         if (!activeUser || !isValidId) return
         const fetchEnrollments = async () => {
             if (!activeUser) return
-            const result = await apiFetch({ url: 'api/enrollment/', method: 'GET' })
+            const result = await apiFetch({ url: 'api/academy/enrollment/', method: 'GET' })
             if (result.success) {
                 const data = result.data?.enrollments || result.data?.enrollments || result.data || []
                 setUserEnrollments(Array.isArray(data) ? data : [])
@@ -108,7 +108,7 @@ export default function ClassDetailPage() {
         const fetchCourse = async () => {
             setLoading(true)
             try {
-                const result = await apiFetch({ url: `api/courses/${classId}/`, method: 'GET' })
+                const result = await apiFetch({ url: `api/academy/courses/${classId}/`, method: 'GET' })
                 if (result.success) {
                     setCourse(result.data?.course || result.data as Course)
                 } else {
@@ -162,7 +162,7 @@ export default function ClassDetailPage() {
     }
 
     const refreshEnrollments = async () => {
-        const result = await apiFetch({ url: 'api/enrollment/', method: 'GET' })
+        const result = await apiFetch({ url: 'api/academy/enrollment/', method: 'GET' })
         if (result.success) {
             const data = result.data?.enrollments || result.data || []
             setUserEnrollments(Array.isArray(data) ? data : [])
@@ -176,7 +176,7 @@ export default function ClassDetailPage() {
         setError('')
 
         try {
-            const result = await apiFetch({ url: 'api/enrollment/', method: 'POST', body: { course_id: course.id } })
+            const result = await apiFetch({ url: 'api/academy/enrollment/', method: 'POST', body: { course_id: course.id } })
             if (result.success) {
                 setSuccess('پیش‌ ثبت‌ نام با موفقیت انجام شد')
                 await refreshEnrollments()
@@ -200,7 +200,7 @@ export default function ClassDetailPage() {
 
         try {
             const result = await apiFetch({
-                url: 'api/payment/initiate/',
+                url: 'api/academy/payment/initiate/',
                 method: 'POST',
                 body: { course_id: course.id, enrollment_id: enrollment.id }
             }) as PaymentInitiateResponse
@@ -227,7 +227,7 @@ export default function ClassDetailPage() {
         setCancelProcessing(true)
 
         try {
-            const result = await apiFetch({ url: `api/enrollment/${enrollment.id}/`, method: 'DELETE' })
+            const result = await apiFetch({ url: `api/academy/enrollment/${enrollment.id}/`, method: 'DELETE' })
 
             if (result.success) {
                 setEnrollment(null)

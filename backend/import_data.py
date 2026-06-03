@@ -10,7 +10,7 @@ from academy_management.academies.models import Academy
 from academy_management.sports.models import Sport
 from users.models import User
 from academy_management.courses.models import Course, CourseSchedule
-from academy_management.payment.models import Payment
+from backend.academy_management.payment.models import Payment
 from academy_management.enrollment.models import Enrollment
 
 print("=" * 60)

@@ -121,7 +121,7 @@ class InitiatePaymentAPIView(APIView):
             payment.save(update_fields=['res_num'])
         
         # 5. Build dynamic callback URL
-        callback_url = request.build_absolute_uri('/api/payment/callback/')
+        callback_url = request.build_absolute_uri('/api/academy/payment/callback/')
         
         # 6. Request NEW trackId from Zibal with current price
         service = ZibalPaymentService()

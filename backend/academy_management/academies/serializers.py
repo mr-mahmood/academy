@@ -56,12 +56,6 @@ class AcademySerializer(serializers.ModelSerializer):
         if (latitude is not None and longitude is None) or (latitude is None and longitude is not None):
             raise serializers.ValidationError("Both latitude and longitude must be provided together")
         
-        # Ensure address_text is provided if coordinates are provided
-        if latitude is not None and longitude is not None:
-            address_text = attrs.get('address_text')
-            if not address_text:
-                raise serializers.ValidationError("Address text is required when providing coordinates")
-        
         return attrs
     
     def create(self, validated_data):

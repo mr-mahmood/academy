@@ -48,7 +48,7 @@ function PaymentResultContent() {
     const verifyPaymentStatus = async (resNum: string) => {
         try {
             const result = await apiFetch({
-                url: `api/payment/status/${resNum}/`,
+                url: `api/academy/payment/status/${resNum}/`,
                 method: 'GET'
             })
 

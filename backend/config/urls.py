@@ -27,11 +27,17 @@ urlpatterns = [
     path('api/users/', include('users.urls')),
     
     # academy_management
-    path('api/sports/', include('academy_management.sports.urls')),
-    path('api/academies/', include('academy_management.academies.urls')),
-    path('api/courses/', include('academy_management.courses.urls')),
-    path('api/enrollment/', include('academy_management.enrollment.urls')),
-    path('api/payment/', include('academy_management.payment.urls')),
+    path('api/academy/sports/', include('academy_management.sports.urls')),
+    path('api/academy/academies/', include('academy_management.academies.urls')),
+    path('api/academy/courses/', include('academy_management.courses.urls')),
+    path('api/academy/enrollment/', include('academy_management.enrollment.urls')),
+    path('api/academy/payment/', include('academy_management.payment.urls')),
+    
+    # football_talent
+    path('api/football/academies/', include('football_talent.academies.urls')),
+    path('api/football/courses/', include('football_talent.courses.urls')),
+    path('api/football/enrollment/', include('football_talent.enrollment.urls')),
+    path('api/football/payment/', include('football_talent.payment.urls')),
 ]
 
 if settings.DEBUG:

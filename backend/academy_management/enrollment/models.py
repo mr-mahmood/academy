@@ -33,6 +33,8 @@ class Enrollment(models.Model):
     
     class Meta:
         db_table = "enrollments"
+        verbose_name = "Enrollment"
+        verbose_name_plural = "Enrollments"
         unique_together = [['user', 'course']]
         ordering = ['-enrolled_at']
         
