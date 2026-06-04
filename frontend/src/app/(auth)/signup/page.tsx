@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import styles from '@/app/login/login.module.css'
+import styles from '@/app/(auth)/login/login.module.css'
 import UserForm from '@/components/UserForm'
 import { usePopup } from '@/hooks/Popup'
 

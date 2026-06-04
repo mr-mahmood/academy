@@ -7,22 +7,20 @@ class FootballCourseAdmin(admin.ModelAdmin):
     """Simple Football Course admin"""
     
     list_display = [
-        'id', 'academy', 'position', 'age_category', 'gender_requirement',
-        'test_date', 'start_time', 'end_time', 'max_participants', 'current_participants',
+        'id', 'academy', 'position', 'gender_requirement',
         'price', 'status'
     ]
     
-    list_filter = ['status', 'age_category', 'position', 'academy']
+    list_filter = ['status', 'position', 'academy']
     
     search_fields = ['head_coach', 'academy__name']
     
-    readonly_fields = ['current_participants', 'created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at']
     
     fieldsets = (
         ('Basic Information', {
             'fields': (
-                'academy', 'position', 'age_category', 'gender_requirement', 'coache',
-                'test_date', 'start_time', 'end_time', 'max_participants', 'current_participants',
+                'academy', 'position', 'gender_requirement', 'coache',
                 'price', 'status'
             )
         }),

@@ -105,9 +105,6 @@ export default function FootballTestCard({
                     <h3 className={styles.title}>
                         {'پست '} {test.position_display} ({test.position})
                     </h3>
-                    <span className={styles.ageText}>
-                        {'رده سنی '}{getAgeCategoryLabel(test.age_category)} ({test.age_category})
-                    </span>
                 </div>
                 {statusInfo && (
                     <div className={`${styles.statusBadge} ${styles[statusInfo.className]}`}>
@@ -127,7 +124,7 @@ export default function FootballTestCard({
             </div>
 
             {/* Test Date & Time */}
-            <div className={styles.dateTimeContainer}>
+            {/* <div className={styles.dateTimeContainer}>
                 <div className={styles.dateTimeRow}>
                     <div className={styles.dateTimeDay}>
                         <Icon icon={Icons.calendar} className={styles.dateTimeIcon} />
@@ -146,7 +143,7 @@ export default function FootballTestCard({
                         <span>{formatTime(test.start_time)} - {formatTime(test.end_time)}</span>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Academy & Address */}
             <div className={styles.addressRow}>

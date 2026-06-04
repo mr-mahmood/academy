@@ -1,3 +1,4 @@
+# football_talent/enrollments/serializers.py
 from rest_framework import serializers
 from .models import FootballEnrollment
 from football_talent.courses.serializers import FootballCourseSerializer
@@ -12,9 +13,12 @@ class FootballEnrollmentSerializer(serializers.ModelSerializer):
         model = FootballEnrollment
         fields = [
             'id', 'user', 'course',
-            'enrollment_status',
+            'age_category', 'enrollment_status',
             'enrolled_at', 'updated_at', 'cancelled_at'
         ]
         read_only_fields = [
-            'id', 'enrolled_at', 'updated_at', 'cancelled_at'
+            'id', 'enrolled_at', 'updated_at', 'cancelled_at', 'age_category'
         ]
+    
+    def get_age_category_display(self, obj):
+        return obj.get_age_category_display()

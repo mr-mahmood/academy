@@ -6,7 +6,6 @@ from core.exceptions import APIError, UserAccountError
 from core.cache_service import CacheService
 from django.core.cache import cache
 
-
 class UserManager(BaseUserManager['User']):
     
     def create_user(self, phone_number, national_id, full_name, **extra_fields):
@@ -206,6 +205,10 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         new_category = self.calculate_age_category()
         if self.age_category != new_category:
+            
+            from football_talent.enrollment.models import FootballEnrollment
+            FootballEnrollment.update_all_enrollments_for_user(self)
+            
             self.age_category = new_category
         
         # Save once with all updates

@@ -50,7 +50,7 @@ export default function FootballFilter({
         { id: 'U17', name: 'زیر ۱۷ سال (U17)' },
         { id: 'U18', name: 'زیر ۱۸ سال (U18)' },
         { id: 'YOUTH', name: 'جوانان (YOUTH)' },
-        { id: 'U21', name: 'زیر ۲۱ سال (U21)' },
+        { id: 'U21', name: 'امید (U21)' },
     ]
 
     // Position options

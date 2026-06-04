@@ -20,7 +20,6 @@ export default function RegisterPage() {
     const { activeUser } = useActiveUser()
     const { apiFetch } = useApi()
 
-
     // Wizard state
     const [step, setStep] = useState<1 | 2 | 3>(1)
     const [selectedSport, setSelectedSport] = useState<Sport | null>(null)
@@ -37,16 +36,46 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(true)
     const [filtering, setFiltering] = useState(false)
     const [initialStep3Load, setInitialStep3Load] = useState(false)
-    const [showEmptyState, setShowEmptyState] = useState(false) // New state for empty state delay
+    const [showEmptyState, setShowEmptyState] = useState(false)
     const [error, setError] = useState('')
     const [registering, setRegistering] = useState<number | null>(null)
+
+    // Handle browser back button
+    useEffect(() => {
+        // Add popstate listener for browser back button
+        const handlePopState = () => {
+            if (step === 1) {
+                // Allow normal browser back
+                router.back()
+            } else {
+                // Prevent default and handle manually
+                if (step === 2) {
+                    setSelectedGender('')
+                    setStep(1)
+                } else if (step === 3) {
+                    setSelectedSport(null)
+                    setStep(2)
+                }
+            }
+        }
+
+        window.addEventListener('popstate', handlePopState)
+        
+        // Push initial state only once
+        if (window.history.state === null) {
+            window.history.pushState({ step: 1 }, '')
+        }
+
+        return () => {
+            window.removeEventListener('popstate', handlePopState)
+        }
+    }, [step, router])
 
     // Reset initialStep3Load when entering step 3
     useEffect(() => {
         if (step === 3 && selectedSport && selectedGender) {
             setInitialStep3Load(true)
-            setShowEmptyState(false) // Reset empty state visibility
-            // Set a timeout to turn off initial load after a delay
+            setShowEmptyState(false)
             const timer = setTimeout(() => {
                 setInitialStep3Load(false)
             }, 200)
@@ -57,7 +86,6 @@ export default function RegisterPage() {
     // Handle empty state with delay
     useEffect(() => {
         if (!initialStep3Load && !filtering && availableCourses.length === 0 && step === 3) {
-            // Add delay before showing empty state
             const timer = setTimeout(() => {
                 setShowEmptyState(true)
             }, 200)
@@ -84,11 +112,11 @@ export default function RegisterPage() {
                     setAllCourses(Array.isArray(coursesData) ? coursesData : [])
 
                     const uniqueSports = new Map<number, Sport>()
-                        ; (Array.isArray(coursesData) ? coursesData : []).forEach((course: Course) => {
-                            if (course.sport && !uniqueSports.has(course.sport.id)) {
-                                uniqueSports.set(course.sport.id, course.sport)
-                            }
-                        })
+                    ;(Array.isArray(coursesData) ? coursesData : []).forEach((course: Course) => {
+                        if (course.sport && !uniqueSports.has(course.sport.id)) {
+                            uniqueSports.set(course.sport.id, course.sport)
+                        }
+                    })
                     setSports(Array.from(uniqueSports.values()))
                 } else {
                     setError('خطا در دریافت اطلاعات دوره‌ها')
@@ -114,7 +142,6 @@ export default function RegisterPage() {
 
         setFiltering(true)
 
-        // Add delay to show loading state and prevent flash
         const timer = setTimeout(() => {
             let filtered = [...allCourses]
             filtered = filtered.filter(course => course.sport?.id === selectedSport.id)
@@ -130,21 +157,25 @@ export default function RegisterPage() {
         setSelectedGender(gender)
         setStep(2)
         setError('')
+        window.history.pushState({ step: 2 }, '')
     }
 
     const handleSportSelect = (sport: Sport) => {
         setSelectedSport(sport)
         setStep(3)
         setError('')
+        window.history.pushState({ step: 3 }, '')
     }
 
     const handleBack = () => {
         if (step === 2) {
             setSelectedGender('')
             setStep(1)
+            setError('')
         } else if (step === 3) {
             setSelectedSport(null)
             setStep(2)
+            setError('')
         }
     }
 
@@ -153,6 +184,8 @@ export default function RegisterPage() {
         setSelectedGender('')
         setStep(1)
         setError('')
+        // Replace history to prevent multiple back presses
+        window.history.replaceState({ step: 1 }, '')
     }
 
     // Step 1: Gender Selection
@@ -178,15 +211,14 @@ export default function RegisterPage() {
                     </div>
                 </div>
 
-                {/* Selected Options Banner */}
+                {/* Selected Options Banner - Step 1 */}
                 <div className={styles.selectedBanner}>
-                    <div className={styles.bannerTitleLine}>
-                        <div className={styles.bannerTitle}>
-                            <span>انتخاب‌های شما</span>
-                        </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <span className={styles.bannerTitle}>انتخاب‌های شما</span>
                     </div>
-                    <div className={styles.bannerItemsLine}>
-                        <div className={styles.bannerItem}>
+
+                    <div className={styles.bannerTable}>
+                        <div className={styles.bannerRow}>
                             <span className={styles.bannerLabel}>جنسیت:</span>
                             <span className={styles.bannerValue}>
                                 {selectedGender !== '' ? (
@@ -196,7 +228,7 @@ export default function RegisterPage() {
                                 )}
                             </span>
                         </div>
-                        <div className={styles.bannerItem}>
+                        <div className={styles.bannerRow}>
                             <span className={styles.bannerLabel}>ورزش:</span>
                             <span className={styles.bannerValue}>{selectedSport?.name || 'انتخاب نشده'}</span>
                         </div>
@@ -247,15 +279,14 @@ export default function RegisterPage() {
                 </div>
             </div>
 
-            {/* Selected Options Banner */}
+            {/* Selected Options Banner - Step 2 & 3 */}
             <div className={styles.selectedBanner}>
-                <div className={styles.bannerTitleLine}>
-                    <div className={styles.bannerTitle}>
-                        <span>انتخاب‌های شما</span>
-                    </div>
+                <div style={{ textAlign: 'center' }}>
+                    <span className={styles.bannerTitle}>انتخاب‌های شما</span>
                 </div>
-                <div className={styles.bannerItemsLine}>
-                    <div className={styles.bannerItem}>
+
+                <div className={styles.bannerTable}>
+                    <div className={styles.bannerRow}>
                         <span className={styles.bannerLabel}>جنسیت:</span>
                         <span className={styles.bannerValue}>
                             {selectedGender !== '' ? (
@@ -265,16 +296,21 @@ export default function RegisterPage() {
                             )}
                         </span>
                     </div>
-                    <div className={styles.bannerItem}>
+                    <div className={styles.bannerRow}>
                         <span className={styles.bannerLabel}>ورزش:</span>
                         <span className={styles.bannerValue}>{selectedSport?.name || 'انتخاب نشده'}</span>
                     </div>
                 </div>
+
                 <div className={styles.bannerActionsLine}>
-                    {(step === 2 || step === 3) && (
-                        <button onClick={handleBack} className={styles.bannerBackButton}>
-                            <Icon icon={Icons.chevronRight} />
-                            <span>بازگشت</span>
+                    <button onClick={handleBack} className={styles.bannerBackButton}>
+                        <Icon icon={Icons.chevronRight} />
+                        <span>بازگشت</span>
+                    </button>
+                    {step === 3 && (
+                        <button onClick={handleReset} className={styles.bannerResetButton}>
+                            <Icon icon={Icons.times} />
+                            <span>شروع مجدد</span>
                         </button>
                     )}
                 </div>
@@ -298,7 +334,7 @@ export default function RegisterPage() {
                 </div>
             )}
 
-            {/* Step 3: Show Courses with Register Button */}
+            {/* Step 3: Show Courses */}
             {step === 3 && selectedSport && selectedGender && (
                 <div className={styles.stepContainer}>
                     <div className={styles.resultsHeader}>

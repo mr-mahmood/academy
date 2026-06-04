@@ -1,3 +1,4 @@
+# football_talent/enrollments/models.py
 from django.db import models
 from django.utils import timezone
 from django.db import transaction
@@ -9,7 +10,7 @@ from django.core.cache import cache
 
 
 class FootballEnrollment(models.Model):
-    """User enrollment in a football test/course"""
+    """User enrollment in a football test/course - stores age category"""
     id: int
     
     class EnrollmentStatus(models.TextChoices):
@@ -17,6 +18,16 @@ class FootballEnrollment(models.Model):
         CONFIRMED = 'CONFIRMED', 'Confirmed'
         CANCELLED = 'CANCELLED', 'Cancelled'
         COMPLETED = 'COMPLETED', 'Completed'
+    
+    class AgeCategory(models.TextChoices):
+        U12 = "U12", "زیر ۱۲ سال"
+        U13 = "U13", "زیر ۱۳ سال"
+        U14 = "U14", "زیر ۱۴ سال"
+        U15 = "U15", "زیر ۱۵ سال"
+        U17 = "U17", "زیر ۱۷ سال"
+        U18 = "U18", "زیر ۱۸ سال"
+        YOUTH = "YOUTH", "جوانان"
+        U21 = "U21", "امید"
     
     user = models.ForeignKey(
         User, 
@@ -30,6 +41,15 @@ class FootballEnrollment(models.Model):
         on_delete=models.CASCADE, 
         related_name='enrollments',
         verbose_name="Football Course"
+    )
+    
+    # Age category is stored on enrollment
+    age_category = models.CharField(
+        max_length=20,
+        choices=AgeCategory.choices,
+        verbose_name="Age Category at Enrollment",
+        db_index=True,
+        default=AgeCategory.U12
     )
     
     enrollment_status = models.CharField(
@@ -53,76 +73,56 @@ class FootballEnrollment(models.Model):
         indexes = [
             models.Index(fields=['enrolled_at']),
             models.Index(fields=['enrollment_status']),
+            models.Index(fields=['age_category']),
             models.Index(fields=['user', 'enrollment_status']),
             models.Index(fields=['course', 'enrollment_status']),
             models.Index(fields=['user', 'enrollment_status', '-enrolled_at']),
         ]
     
     def __str__(self):
-        return f"{self.user.full_name} - {self.course}"
+        return f"{self.user.full_name} - {self.course} - {self.age_category}"
     
-    def check_time_conflict(self):
-        """
-        Check if this football test conflicts with existing enrollments.
-        Uses the course's test_date, start_time, and end_time for accurate conflict detection.
-        """
-        # Get the current test's time range
-        current_test_date = self.course.test_date
-        current_start_time = self.course.start_time
-        current_end_time = self.course.end_time
+    def update_age_category(self, save=True):
+        """Update age category from user's current age category"""
+        user_age_category = self.user.age_category
         
-        # Check if user has any other active enrollments (confirmed or waiting for payment)
-        # that have overlapping test times on the same date
-        conflicting_enrollments = FootballEnrollment.objects.filter(
-            user=self.user,
-            enrollment_status__in=[
-                self.EnrollmentStatus.WAITING_FOR_PAYMENT,
-                self.EnrollmentStatus.CONFIRMED
-            ]
-        ).exclude(
-            # Exclude current enrollment if updating
-            pk=self.pk if self.pk else None
-        ).filter(
-            # Same date
-            course__test_date=current_test_date
-        ).filter(
-            # Time overlap condition: existing test starts before current ends AND ends after current starts
-            course__start_time__lt=current_end_time,
-            course__end_time__gt=current_start_time
-        )
-        
-        return conflicting_enrollments.exists()
+        # Only update if user has a valid age category (not OOR)
+        if user_age_category and user_age_category != User.AgeCategory.OUT_OF_RANGE:
+            if self.age_category != user_age_category:
+                self.age_category = user_age_category
+                if save:
+                    self.save(update_fields=['age_category', 'updated_at'])
+                return True
+        return False
     
-    def _get_user_age_category(self):
-        """Get user's age category from birth date"""
-        if not self.user.birth_date:
-            return None
+    @classmethod
+    def update_all_enrollments_for_user(cls, user: User):
+        """
+        Update all enrollments for a user when age category changes.
+        If user becomes OUT_OF_RANGE, delete all enrollments.
+        """
+        # If user is OUT_OF_RANGE, delete all enrollments
+        if user.age_category == User.AgeCategory.OUT_OF_RANGE:
+            deleted_count, _ = cls.objects.filter(user=user).delete()
+            if deleted_count > 0:
+                # Clear cache for this user
+                cache.delete(f"football_user:{user.id}:enrollments")
+                cache.delete(f"football_user:{user.id}:active_enrollments")
+            return deleted_count
         
-        today = timezone.now().date()
-        age = today.year - self.user.birth_date.year
+        # Otherwise, update age categories
+        updated = 0
+        enrollments = cls.objects.filter(user=user)
+        for enrollment in enrollments:
+            if enrollment.update_age_category(save=True):
+                updated += 1
         
-        if today.month < self.user.birth_date.month or \
-           (today.month == self.user.birth_date.month and today.day < self.user.birth_date.day):
-            age -= 1
+        # Clear cache
+        if updated > 0:
+            cache.delete(f"football_user:{user.id}:enrollments")
+            cache.delete(f"football_user:{user.id}:active_enrollments")
         
-        if age < 12:
-            return 'U12'
-        elif age == 12:
-            return 'U13'
-        elif age == 13:
-            return 'U14'
-        elif age == 14:
-            return 'U15'
-        elif 15 <= age <= 16:
-            return 'U17'
-        elif 17 <= age <= 18:
-            return 'U18'
-        elif age == 19:
-            return 'YOUTH'
-        elif age == 20:
-            return 'U21'
-        else:
-            return None
+        return updated
     
     @classmethod
     def get_enrollment(cls, id: int, user=None) -> 'FootballEnrollment':
@@ -147,10 +147,8 @@ class FootballEnrollment(models.Model):
         if not is_new:
             try:
                 old = FootballEnrollment.objects.get(pk=self.pk)
-                # Check if status changed to CANCELLED
                 if old.enrollment_status != self.EnrollmentStatus.CANCELLED and self.enrollment_status == self.EnrollmentStatus.CANCELLED:
                     was_cancelled = True
-                # Check if status changed from CANCELLED to active
                 if old.enrollment_status == self.EnrollmentStatus.CANCELLED and self.enrollment_status in [
                     self.EnrollmentStatus.WAITING_FOR_PAYMENT,
                     self.EnrollmentStatus.CONFIRMED
@@ -164,10 +162,6 @@ class FootballEnrollment(models.Model):
             self.course = FootballCourse.objects.select_for_update().get(id=self.course.id)
             
             if is_new:
-                # Check capacity
-                if self.course.is_full:
-                    raise APIError(RegistrationError.FOOTBALL_COURSE_FULL)
-                
                 # Check if course is active
                 if self.course.status != FootballCourse.Status.ACTIVE:
                     raise APIError(RegistrationError.FOOTBALL_COURSE_NOT_ACTIVE)
@@ -182,45 +176,25 @@ class FootballEnrollment(models.Model):
                 if self.course.gender_requirement == FootballCourse.GenderRequirement.FEMALE and self.user.gender != 'FEMALE':
                     raise APIError(RegistrationError.FOOTBALL_GENDER_MISMATCH)
                 
-                # Check for time conflict with other football tests
-                if self.check_time_conflict():
-                    raise APIError(RegistrationError.FOOTBALL_TIME_CONFLICT)
+                # Set age category from user's current age category
+                if not self.user.age_category or self.user.age_category == User.AgeCategory.OUT_OF_RANGE:
+                    raise APIError(RegistrationError.FOOTBALL_AGE_CATEGORY_NOT_FOUND)
                 
-                # Check age category compatibility
-                user_age_category = self._get_user_age_category()
-                if user_age_category and user_age_category != self.course.age_category:
-                    raise APIError(RegistrationError.FOOTBALL_AGE_CATEGORY_MISMATCH)
+                self.age_category = self.user.age_category
                 
-                # Check if test date is in the future
-                if self.course.test_date and self.course.start_time:
-                    from datetime import datetime
-                    test_datetime = datetime.combine(self.course.test_date, self.course.start_time)
-                    if timezone.is_naive(test_datetime):
-                        test_datetime = timezone.make_aware(test_datetime)
-                    
-                    if test_datetime < timezone.now():
-                        raise APIError(RegistrationError.FOOTBALL_TEST_DATE_PASSED)
-                
-                # Increment enrolled participants for new enrollment
-                self.course.current_participants += 1
-                self.course.save(update_fields=['current_participants', 'status'])
+                self.course.save(update_fields=['status'])
             
             elif was_reactivated:
-                # Reactivating a cancelled enrollment - increment count again
-                self.course.current_participants += 1
-                self.course.save(update_fields=['current_participants', 'status'])
-                # Clear cancelled_at timestamp
+                self.course.save(update_fields=['status'])
                 self.cancelled_at = None
         
-        # Handle cancellation - decrement count
+        # Handle cancellation
         if was_cancelled:
             if not self.cancelled_at:
                 self.cancelled_at = timezone.now()
             
-            # Lock and decrement course count
             course = FootballCourse.objects.select_for_update().get(id=self.course.id)
-            course.current_participants = max(0, course.current_participants - 1)
-            course.save(update_fields=['current_participants', 'status'])
+            course.save(update_fields=['status'])
         
         super().save(*args, **kwargs)
         
@@ -229,7 +203,6 @@ class FootballEnrollment(models.Model):
         cache.delete(f"football_user:{self.user.id}:enrollments")
         cache.delete(f"football_user:{self.user.id}:active_enrollments")
         cache.delete(f"football_course:{self.course.id}:enrollments")
-        cache.delete(f"football_course:capacity:{self.course.id}")
         cache.delete("football_enrollments:all_list")
         cache.delete("football_enrollments:active_list")
     
@@ -241,7 +214,6 @@ class FootballEnrollment(models.Model):
         course_id = self.course.id
         enrollment_id = self.pk
         
-        # Only decrement if this enrollment was counted in current_participants
         was_counted = self.enrollment_status in [
             self.EnrollmentStatus.WAITING_FOR_PAYMENT,
             self.EnrollmentStatus.CONFIRMED
@@ -250,15 +222,12 @@ class FootballEnrollment(models.Model):
         result = super().delete(*args, **kwargs)
         
         if was_counted:
-            course.current_participants = max(0, course.current_participants - 1)
-            course.save(update_fields=['current_participants', 'status'])
+            course.save(update_fields=['status'])
         
-        # Clear cache
         CacheService.invalidate_model(self.__class__, enrollment_id)
         cache.delete(f"football_user:{user_id}:enrollments")
         cache.delete(f"football_user:{user_id}:active_enrollments")
         cache.delete(f"football_course:{course_id}:enrollments")
-        cache.delete(f"football_course:capacity:{course_id}")
         cache.delete("football_enrollments:all_list")
         cache.delete("football_enrollments:active_list")
         

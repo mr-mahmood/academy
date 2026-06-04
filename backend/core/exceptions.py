@@ -144,6 +144,9 @@ class RegistrationError(APIError):
     FOOTBALL_AGE_CATEGORY_MISMATCH = (559, "This football test is not available for your age category")
     FOOTBALL_TEST_DATE_PASSED = (560, "Cannot enroll in a test that has already passed")
     FOOTBALL_GENDER_MISMATCH = (561, "This football test is not available for your gender")
+    FOOTBALL_POSITION_REQUIRED = (562, "Position is required")
+    FOOTBALL_ACADEMY_REQUIRED = (563, "Academy is required")
+    FOOTBALL_AGE_CATEGORY_NOT_FOUND = (584, "Could not determine your age category from your birth date")
 
 # ============================================================================
 # PAYMENT app

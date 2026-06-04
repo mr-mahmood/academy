@@ -5,9 +5,9 @@ import styles from './footballTests.module.css'
 import FootballTestsList from './FootballTestsList'
 import { FootballTestsGridSkeleton } from './Skeletons'
 import FootballFilter from './FootballFilter'
+import AgeCategoryBadge from '@/components/AgeCategoryBadge/AgeCategoryBadge'
 import { useApi } from '@/hooks/useApi'
 import { useActiveUser } from '@/contexts/active_user_context'
-import { Icon, Icons } from '@/components/icon'
 
 export default function FootballTestsStreamingPage() {
     const topRef = useRef<HTMLDivElement>(null)
@@ -55,44 +55,18 @@ export default function FootballTestsStreamingPage() {
         setFilteredTests(newFilteredData)
     }
 
-    const ageCategoryLabels: Record<string, string> = {
-        'U12': 'زیر ۱۲ سال',
-        'U13': 'زیر ۱۳ سال',
-        'U14': 'زیر ۱۴ سال',
-        'U15': 'زیر ۱۵ سال',
-        'U17': 'زیر ۱۷ سال',
-        'U18': 'زیر ۱۸ سال',
-        'YOUTH': 'جوانان',
-        'U21': 'زیر ۲۱ سال',
-    }
-
     return (
         <>
             <div ref={topRef} />
             <div className={styles.container}>
-                {/* Age Category Info Badge */}
-                {activeUser?.age_category && (
-                    <div className={styles.ageCategoryBanner}>
-                        <div className={styles.ageCategoryIcon}>
-                            <Icon icon={Icons.user} />
-                        </div>
-                        <div className={styles.ageCategoryContent}>
-                            <span className={styles.ageCategoryLabel}>رده سنی شما:</span>
-                            <span className={styles.ageCategoryValue}>{ageCategoryLabels[activeUser.age_category]}</span>
-                        </div>
-                        <div className={styles.ageCategoryNote}>
-                            <Icon icon={Icons.info} />
-                            <span>این رده سنی بر اساس تاریخ تولد شما محاسبه شده است. در صورت مغایرت، تاریخ تولد خود را در پروفایل اصلاح کنید.</span>
-                        </div>
-                    </div>
-                )}
-
                 <FootballFilter
                     data={originalTests}
                     onFilterChange={handleFilterChange}
                     onFilterCountChange={setActiveFilterCount}
                     loading={loading}
                 />
+
+                <AgeCategoryBadge ageCategory={activeUser?.age_category} />
 
                 <FootballTestsList
                     tests={filteredTests}

@@ -757,3 +757,33 @@
     color: #666;
     margin-bottom: 2rem;
 }
+
+/* Table Style Banner */
+.bannerTable {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.bannerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.875rem;
+    background: var(--bg-secondary, #F8FAFC);
+    border-radius: 1rem;
+    border: 1px solid var(--border-color, #E2E8F0);
+}
+
+.bannerLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary, #64748B);
+}
+
+.bannerValue {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-primary, #102A43);
+}

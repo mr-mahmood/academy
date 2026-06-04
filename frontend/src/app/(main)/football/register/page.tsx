@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Icon, Icons } from '@/components/icon'
 import { useApi } from '@/hooks/useApi'
 import FootballTestCard from '@/components/FootballTestCard/FootballTestCard'
+import AgeCategoryBadge from '@/components/AgeCategoryBadge/AgeCategoryBadge'
 import type { FootballTest } from '@/types/FootballTest'
 import styles from './register.module.css'
 import { useActiveUser } from '@/contexts/active_user_context'
@@ -29,8 +30,8 @@ export default function FootballRegisterPage() {
     // Wizard state
     const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
     const [selectedGender, setSelectedGender] = useState<string>('')
-    const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
     const [selectedCity, setSelectedCity] = useState<City | null>(null)
+    const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
 
     // All data
     const [allTests, setAllTests] = useState<FootballTest[]>([])
@@ -46,6 +47,7 @@ export default function FootballRegisterPage() {
     const [initialStep4Load, setInitialStep4Load] = useState(false)
     const [showEmptyState, setShowEmptyState] = useState(false)
     const [error, setError] = useState('')
+    const [isNavigating, setIsNavigating] = useState(false)
 
     // Get unique positions from tests
     const extractPositions = (tests: FootballTest[]): Position[] => {
@@ -93,12 +95,8 @@ export default function FootballRegisterPage() {
                 if (testsResult.success) {
                     const tests = testsResult.data?.courses || testsResult.data || []
                     setAllTests(Array.isArray(tests) ? tests : [])
-
-                    // Extract positions and cities from tests
-                    const extractedPositions = extractPositions(Array.isArray(tests) ? tests : [])
-                    const extractedCities = extractCities(Array.isArray(tests) ? tests : [])
-                    setPositions(extractedPositions)
-                    setCities(extractedCities)
+                    setPositions(extractPositions(Array.isArray(tests) ? tests : []))
+                    setCities(extractCities(Array.isArray(tests) ? tests : []))
                 } else {
                     setError('خطا در دریافت اطلاعات تست‌ها')
                 }
@@ -115,22 +113,18 @@ export default function FootballRegisterPage() {
 
     // Reset initialStep4Load when entering step 4
     useEffect(() => {
-        if (step === 4 && selectedGender && selectedPosition && selectedCity) {
+        if (step === 4 && selectedGender && selectedCity && selectedPosition) {
             setInitialStep4Load(true)
             setShowEmptyState(false)
-            const timer = setTimeout(() => {
-                setInitialStep4Load(false)
-            }, 400)
+            const timer = setTimeout(() => setInitialStep4Load(false), 400)
             return () => clearTimeout(timer)
         }
-    }, [step, selectedGender, selectedPosition, selectedCity])
+    }, [step, selectedGender, selectedCity, selectedPosition])
 
     // Handle empty state with delay
     useEffect(() => {
         if (!initialStep4Load && !filtering && availableTests.length === 0 && step === 4) {
-            const timer = setTimeout(() => {
-                setShowEmptyState(true)
-            }, 300)
+            const timer = setTimeout(() => setShowEmptyState(true), 300)
             return () => clearTimeout(timer)
         } else {
             setShowEmptyState(false)
@@ -139,64 +133,188 @@ export default function FootballRegisterPage() {
 
     // Filter tests based on selections
     useEffect(() => {
-        if (!selectedGender || !selectedPosition || !selectedCity) {
+        if (!selectedGender || !selectedCity || !selectedPosition) {
             setAvailableTests([])
             setFiltering(false)
             return
         }
 
         setFiltering(true)
-
         const timer = setTimeout(() => {
             let filtered = [...allTests]
             filtered = filtered.filter(test => test.gender_requirement === selectedGender)
-            filtered = filtered.filter(test => test.position === selectedPosition.id)
             filtered = filtered.filter(test => test.academy?.city === selectedCity.id)
+            filtered = filtered.filter(test => test.position === selectedPosition.id)
             setAvailableTests(filtered)
             setFiltering(false)
         }, 300)
 
         return () => clearTimeout(timer)
-    }, [selectedGender, selectedPosition, selectedCity, allTests])
+    }, [selectedGender, selectedCity, selectedPosition, allTests])
+
+    // Simple back button handler - just use router.back() for step 1
+    const handleBrowserBack = () => {
+        if (step === 1) {
+            router.back()
+        } else {
+            // Manually go to previous step
+            if (step === 2) {
+                setSelectedGender('')
+                setStep(1)
+            } else if (step === 3) {
+                setSelectedCity(null)
+                setStep(2)
+            } else if (step === 4) {
+                setSelectedPosition(null)
+                setStep(3)
+            }
+        }
+    }
+
+    // Add popstate listener for browser back button
+    useEffect(() => {
+        const handlePopState = () => {
+            if (step === 1) {
+                // Allow normal browser back
+                router.back()
+            } else {
+                // Prevent default and handle manually
+                if (step === 2) {
+                    setSelectedGender('')
+                    setStep(1)
+                } else if (step === 3) {
+                    setSelectedCity(null)
+                    setStep(2)
+                } else if (step === 4) {
+                    setSelectedPosition(null)
+                    setStep(3)
+                }
+            }
+        }
+
+        window.addEventListener('popstate', handlePopState)
+        
+        // Push initial state only once
+        if (window.history.state === null) {
+            window.history.pushState({ step: 1 }, '')
+        }
+
+        return () => {
+            window.removeEventListener('popstate', handlePopState)
+        }
+    }, [step, router])
 
     const handleGenderSelect = (gender: string) => {
         setSelectedGender(gender)
         setStep(2)
         setError('')
-    }
-
-    const handlePositionSelect = (position: Position) => {
-        setSelectedPosition(position)
-        setStep(3)
-        setError('')
+        window.history.pushState({ step: 2 }, '')
     }
 
     const handleCitySelect = (city: City) => {
         setSelectedCity(city)
+        setStep(3)
+        setError('')
+        window.history.pushState({ step: 3 }, '')
+    }
+
+    const handlePositionSelect = (position: Position) => {
+        setSelectedPosition(position)
         setStep(4)
         setError('')
+        window.history.pushState({ step: 4 }, '')
     }
 
     const handleBack = () => {
         if (step === 2) {
             setSelectedGender('')
             setStep(1)
+            setError('')
         } else if (step === 3) {
-            setSelectedPosition(null)
-            setStep(2)
-        } else if (step === 4) {
             setSelectedCity(null)
+            setStep(2)
+            setError('')
+        } else if (step === 4) {
+            setSelectedPosition(null)
             setStep(3)
+            setError('')
         }
     }
 
     const handleReset = () => {
         setSelectedGender('')
-        setSelectedPosition(null)
         setSelectedCity(null)
+        setSelectedPosition(null)
         setStep(1)
         setError('')
+        // Replace history to prevent multiple back presses
+        window.history.replaceState({ step: 1 }, '')
     }
+
+    // Selection banner component to avoid duplication
+    const SelectionBanner = ({ showBackButton = true, showResetButton = true }: { showBackButton?: boolean; showResetButton?: boolean }) => (
+        <div className={styles.selectedBanner}>
+            <div style={{ textAlign: 'center' }}>
+                <span className={styles.bannerTitle}>انتخاب‌های شما</span>
+            </div>
+            <div className={styles.bannerTable}>
+                <div className={styles.bannerRow}>
+                    <span className={styles.bannerLabel}>جنسیت:</span>
+                    <span className={styles.bannerValue}>
+                        {selectedGender === 'MALE' ? 'آقایان' : selectedGender === 'FEMALE' ? 'بانوان' : 'انتخاب نشده'}
+                    </span>
+                </div>
+                <div className={styles.bannerRow}>
+                    <span className={styles.bannerLabel}>شهر:</span>
+                    <span className={styles.bannerValue}>{selectedCity?.name || 'انتخاب نشده'}</span>
+                </div>
+                <div className={styles.bannerRow}>
+                    <span className={styles.bannerLabel}>پست:</span>
+                    <span className={styles.bannerValue}>{selectedPosition?.display_name || 'انتخاب نشده'}</span>
+                </div>
+            </div>
+            <div className={styles.bannerActionsLine}>
+                {showBackButton && (
+                    <button onClick={handleBack} className={styles.bannerBackButton}>
+                        <Icon icon={Icons.chevronRight} />
+                        <span>بازگشت</span>
+                    </button>
+                )}
+                {showResetButton && (
+                    <button onClick={handleReset} className={styles.bannerResetButton}>
+                        <Icon icon={Icons.times} />
+                        <span>شروع مجدد</span>
+                    </button>
+                )}
+            </div>
+        </div>
+    )
+
+    const ProgressSteps = () => (
+        <div className={styles.progressContainer}>
+            <div className={styles.progressSteps}>
+                <div className={`${styles.step} ${step >= 1 ? styles.active : ''}`}>
+                    <div className={styles.stepNumber}>1</div>
+                    <span className={styles.stepLabel}>جنسیت</span>
+                </div>
+                <div className={`${styles.stepLine} ${step >= 2 ? styles.activeLine : ''}`}></div>
+                <div className={`${styles.step} ${step >= 2 ? styles.active : ''}`}>
+                    <div className={styles.stepNumber}>2</div>
+                    <span className={styles.stepLabel}>شهر</span>
+                </div>
+                <div className={`${styles.stepLine} ${step >= 3 ? styles.activeLine : ''}`}></div>
+                <div className={`${styles.step} ${step >= 3 ? styles.active : ''}`}>
+                    <div className={styles.stepNumber}>3</div>
+                    <span className={styles.stepLabel}>پست</span>
+                </div>
+                <div className={`${styles.stepLine} ${step >= 4 ? styles.activeLine : ''}`}></div>
+                <div className={`${styles.step} ${step >= 4 ? styles.active : ''}`}>
+                    <div className={styles.stepNumber}>4</div>
+                    <span className={styles.stepLabel}>تست</span>
+                </div>
+            </div>
+        </div>
+    )
 
     if (loading) {
         return <LoadingSpinner />
@@ -206,62 +324,10 @@ export default function FootballRegisterPage() {
     if (step === 1) {
         return (
             <div className={styles.container}>
-                <div className={styles.progressContainer}>
-                    <div className={styles.progressSteps}>
-                        <div className={`${styles.step} ${styles.active}`}>
-                            <div className={styles.stepNumber}>1</div>
-                            <span className={styles.stepLabel}>جنسیت</span>
-                        </div>
-                        <div className={styles.stepLine}></div>
-                        <div className={styles.step}>
-                            <div className={styles.stepNumber}>2</div>
-                            <span className={styles.stepLabel}>پست</span>
-                        </div>
-                        <div className={styles.stepLine}></div>
-                        <div className={styles.step}>
-                            <div className={styles.stepNumber}>3</div>
-                            <span className={styles.stepLabel}>شهر</span>
-                        </div>
-                        <div className={styles.stepLine}></div>
-                        <div className={styles.step}>
-                            <div className={styles.stepNumber}>4</div>
-                            <span className={styles.stepLabel}>تست</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Selected Options Banner */}
-                <div className={styles.selectedBanner}>
-                    <div className={styles.bannerTitleLine}>
-                        <div className={styles.bannerTitle}>
-                            <span>انتخاب‌های شما</span>
-                        </div>
-                    </div>
-                    <div className={styles.bannerItemsLine}>
-                        <div className={styles.bannerItem}>
-                            <span className={styles.bannerLabel}>جنسیت:</span>
-                            <span className={styles.bannerValue}>
-                                {selectedGender !== '' ? (
-                                    selectedGender === 'MALE' ? 'آقایان' : 'بانوان'
-                                ) : (
-                                    'انتخاب نشده'
-                                )}
-                            </span>
-                        </div>
-                        <div className={styles.bannerItem}>
-                            <span className={styles.bannerLabel}>پست:</span>
-                            <span className={styles.bannerValue}>{selectedPosition?.display_name || 'انتخاب نشده'}</span>
-                        </div>
-                        <div className={styles.bannerItem}>
-                            <span className={styles.bannerLabel}>شهر:</span>
-                            <span className={styles.bannerValue}>{selectedCity?.name || 'انتخاب نشده'}</span>
-                        </div>
-                    </div>
-                </div>
-
+                <ProgressSteps />
+                <SelectionBanner showBackButton={false} showResetButton={false} />
                 <div className={styles.stepContainer}>
                     <h2 className={styles.stepTitle}>جنسیت خود را انتخاب کنید</h2>
-
                     <div className={styles.genderOptions}>
                         <button onClick={() => handleGenderSelect('MALE')} className={styles.genderCard}>
                             <div className={styles.genderIcon}><Icon icon={Icons.user} /></div>
@@ -281,142 +347,12 @@ export default function FootballRegisterPage() {
         )
     }
 
-    // Step 2: Position Selection
+    // Step 2: City Selection
     if (step === 2) {
         return (
             <div className={styles.container}>
-                <div className={styles.progressContainer}>
-                    <div className={styles.progressSteps}>
-                        <div className={`${styles.step} ${styles.active}`}>
-                            <div className={styles.stepNumber}>1</div>
-                            <span className={styles.stepLabel}>جنسیت</span>
-                        </div>
-                        <div className={`${styles.stepLine} ${styles.activeLine}`}></div>
-                        <div className={`${styles.step} ${styles.active}`}>
-                            <div className={styles.stepNumber}>2</div>
-                            <span className={styles.stepLabel}>پست</span>
-                        </div>
-                        <div className={styles.stepLine}></div>
-                        <div className={styles.step}>
-                            <div className={styles.stepNumber}>3</div>
-                            <span className={styles.stepLabel}>شهر</span>
-                        </div>
-                        <div className={styles.stepLine}></div>
-                        <div className={styles.step}>
-                            <div className={styles.stepNumber}>4</div>
-                            <span className={styles.stepLabel}>تست</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Selected Options Banner */}
-                <div className={styles.selectedBanner}>
-                    <div className={styles.bannerTitleLine}>
-                        <div className={styles.bannerTitle}>
-                            <span>انتخاب‌های شما</span>
-                        </div>
-                    </div>
-                    <div className={styles.bannerItemsLine}>
-                        <div className={styles.bannerItem}>
-                            <span className={styles.bannerLabel}>جنسیت:</span>
-                            <span className={styles.bannerValue}>
-                                {selectedGender === 'MALE' ? 'آقایان' : 'بانوان'}
-                            </span>
-                        </div>
-                        <div className={styles.bannerItem}>
-                            <span className={styles.bannerLabel}>پست:</span>
-                            <span className={styles.bannerValue}>{selectedPosition?.display_name || 'انتخاب نشده'}</span>
-                        </div>
-                        <div className={styles.bannerItem}>
-                            <span className={styles.bannerLabel}>شهر:</span>
-                            <span className={styles.bannerValue}>{selectedCity?.name || 'انتخاب نشده'}</span>
-                        </div>
-                    </div>
-                    <div className={styles.bannerActionsLine}>
-                        <button onClick={handleBack} className={styles.bannerBackButton}>
-                            <Icon icon={Icons.chevronRight} />
-                            <span>بازگشت</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div className={styles.stepContainer}>
-                    <h2 className={styles.stepTitle}>پست تخصصی خود را انتخاب کنید</h2>
-                    <div className={styles.optionsGrid}>
-                        {positions.map((position) => (
-                            <button key={position.id} onClick={() => handlePositionSelect(position)} className={styles.optionCard}>
-                                <div className={styles.optionIcon}><Icon icon={Icons.football} /></div>
-                                <div className={styles.optionContent}>
-                                    <h3 className={styles.optionTitle}>{position.display_name}</h3>
-                                </div>
-                                <Icon icon={Icons.arrowLeft} className={styles.optionArrow} />
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    // Step 3: City Selection
-    if (step === 3) {
-        return (
-            <div className={styles.container}>
-                <div className={styles.progressContainer}>
-                    <div className={styles.progressSteps}>
-                        <div className={`${styles.step} ${styles.active}`}>
-                            <div className={styles.stepNumber}>1</div>
-                            <span className={styles.stepLabel}>جنسیت</span>
-                        </div>
-                        <div className={`${styles.stepLine} ${styles.activeLine}`}></div>
-                        <div className={`${styles.step} ${styles.active}`}>
-                            <div className={styles.stepNumber}>2</div>
-                            <span className={styles.stepLabel}>پست</span>
-                        </div>
-                        <div className={`${styles.stepLine} ${styles.activeLine}`}></div>
-                        <div className={`${styles.step} ${styles.active}`}>
-                            <div className={styles.stepNumber}>3</div>
-                            <span className={styles.stepLabel}>شهر</span>
-                        </div>
-                        <div className={styles.stepLine}></div>
-                        <div className={styles.step}>
-                            <div className={styles.stepNumber}>4</div>
-                            <span className={styles.stepLabel}>تست</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Selected Options Banner */}
-                <div className={styles.selectedBanner}>
-                    <div className={styles.bannerTitleLine}>
-                        <div className={styles.bannerTitle}>
-                            <span>انتخاب‌های شما</span>
-                        </div>
-                    </div>
-                    <div className={styles.bannerItemsLine}>
-                        <div className={styles.bannerItem}>
-                            <span className={styles.bannerLabel}>جنسیت:</span>
-                            <span className={styles.bannerValue}>
-                                {selectedGender === 'MALE' ? 'آقایان' : 'بانوان'}
-                            </span>
-                        </div>
-                        <div className={styles.bannerItem}>
-                            <span className={styles.bannerLabel}>پست:</span>
-                            <span className={styles.bannerValue}>{selectedPosition?.display_name || 'انتخاب نشده'}</span>
-                        </div>
-                        <div className={styles.bannerItem}>
-                            <span className={styles.bannerLabel}>شهر:</span>
-                            <span className={styles.bannerValue}>{selectedCity?.name || 'انتخاب نشده'}</span>
-                        </div>
-                    </div>
-                    <div className={styles.bannerActionsLine}>
-                        <button onClick={handleBack} className={styles.bannerBackButton}>
-                            <Icon icon={Icons.chevronRight} />
-                            <span>بازگشت</span>
-                        </button>
-                    </div>
-                </div>
-
+                <ProgressSteps />
+                <SelectionBanner showBackButton={true} showResetButton={false} />
                 <div className={styles.stepContainer}>
                     <h2 className={styles.stepTitle}>شهر مورد نظر خود را انتخاب کنید</h2>
                     <div className={styles.optionsGrid}>
@@ -435,73 +371,42 @@ export default function FootballRegisterPage() {
         )
     }
 
+    // Step 3: Position Selection
+    if (step === 3) {
+        return (
+            <div className={styles.container}>
+                <ProgressSteps />
+                <SelectionBanner showBackButton={true} showResetButton={false} />
+                <div className={styles.stepContainer}>
+                    <h2 className={styles.stepTitle}>پست تخصصی خود را انتخاب کنید</h2>
+                    <div className={styles.optionsGrid}>
+                        {positions.map((position) => (
+                            <button key={position.id} onClick={() => handlePositionSelect(position)} className={styles.optionCard}>
+                                <div className={styles.optionIcon}><Icon icon={Icons.football} /></div>
+                                <div className={styles.optionContent}>
+                                    <h3 className={styles.optionTitle}>{position.display_name}</h3>
+                                </div>
+                                <Icon icon={Icons.arrowLeft} className={styles.optionArrow} />
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     // Step 4: Show Tests
     return (
         <div className={styles.container}>
-            <div className={styles.progressContainer}>
-                <div className={styles.progressSteps}>
-                    <div className={`${styles.step} ${styles.active}`}>
-                        <div className={styles.stepNumber}>1</div>
-                        <span className={styles.stepLabel}>جنسیت</span>
-                    </div>
-                    <div className={`${styles.stepLine} ${styles.activeLine}`}></div>
-                    <div className={`${styles.step} ${styles.active}`}>
-                        <div className={styles.stepNumber}>2</div>
-                        <span className={styles.stepLabel}>پست</span>
-                    </div>
-                    <div className={`${styles.stepLine} ${styles.activeLine}`}></div>
-                    <div className={`${styles.step} ${styles.active}`}>
-                        <div className={styles.stepNumber}>3</div>
-                        <span className={styles.stepLabel}>شهر</span>
-                    </div>
-                    <div className={`${styles.stepLine} ${styles.activeLine}`}></div>
-                    <div className={`${styles.step} ${styles.active}`}>
-                        <div className={styles.stepNumber}>4</div>
-                        <span className={styles.stepLabel}>تست</span>
-                    </div>
-                </div>
-            </div>
+            <ProgressSteps />
+            <SelectionBanner showBackButton={true} showResetButton={true} />
 
-            {/* Selected Options Banner */}
-            <div className={styles.selectedBanner}>
-                <div className={styles.bannerTitleLine}>
-                    <div className={styles.bannerTitle}>
-                        <span>انتخاب‌های شما</span>
-                    </div>
-                </div>
-                <div className={styles.bannerItemsLine}>
-                    <div className={styles.bannerItem}>
-                        <span className={styles.bannerLabel}>جنسیت:</span>
-                        <span className={styles.bannerValue}>
-                            {selectedGender === 'MALE' ? 'آقایان' : 'بانوان'}
-                        </span>
-                    </div>
-                    <div className={styles.bannerItem}>
-                        <span className={styles.bannerLabel}>پست:</span>
-                        <span className={styles.bannerValue}>{selectedPosition?.display_name || 'انتخاب نشده'}</span>
-                    </div>
-                    <div className={styles.bannerItem}>
-                        <span className={styles.bannerLabel}>شهر:</span>
-                        <span className={styles.bannerValue}>{selectedCity?.name || 'انتخاب نشده'}</span>
-                    </div>
-                </div>
-                <div className={styles.bannerActionsLine}>
-                    <button onClick={handleBack} className={styles.bannerBackButton}>
-                        <Icon icon={Icons.chevronRight} />
-                        <span>بازگشت</span>
-                    </button>
-                    <button onClick={handleReset} className={styles.bannerResetButton}>
-                        <Icon icon={Icons.times} />
-                        <span>شروع مجدد</span>
-                    </button>
-                </div>
-            </div>
-
-            {/* Step 4: Show Tests */}
             <div className={styles.stepContainer}>
                 <div className={styles.resultsHeader}>
                     <h2 className={styles.stepTitle} style={{ textAlign: 'center' }}>تست‌های موجود</h2>
                 </div>
+
+                <AgeCategoryBadge ageCategory={activeUser?.age_category} />
 
                 {(initialStep4Load || filtering) ? (
                     <div className={styles.loadingState}>
@@ -513,7 +418,7 @@ export default function FootballRegisterPage() {
                         <Icon icon={Icons.football} />
                         <h3>تستی یافت نشد</h3>
                         <p>متاسفانه هیچ تستی با شرایط انتخاب شده وجود ندارد</p>
-                        <button onClick={handleReset} className={styles.emptyStateResetBtn}>
+                        <button onClick={handleReset} className={styles.bannerResetButton}>
                             <Icon icon={Icons.times} />
                             <span>شروع مجدد</span>
                         </button>

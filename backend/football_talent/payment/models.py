@@ -141,14 +141,14 @@ class FootballPayment(models.Model):
         user = self.enrollment.user
         course = self.enrollment.course
         paid_message = self.paid_at.strftime('%Y-%m-%d %H:%M:%S') if self.paid_at else 'Not paid yet'
+        age_category_display = self.enrollment.get_age_category_display() if self.enrollment.age_category else 'N/A'
         
         description = (
             f"Payment for football talent test:\n"
             f"User: #{user.national_id}: {user.full_name} (Phone: {user.phone_number})\n"
-            f"Test #{course.id}: {course.get_position_display()} - {course.age_category} at {course.academy.name}\n"
-            f"Test Date: {course.test_date.strftime('%Y-%m-%d %H:%M') if course.test_date else 'N/A'}\n"
+            f"Test #{course.id}: {course.get_position_display()} - {age_category_display} at {course.academy.name}\n"
             f"Price: {self.amount:,} Rials ({self.amount_in_toman:,} Tomans)\n"
-            f"Enrollment Date: {self.enrollment.enrolled_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"Enrollment Date: {self.enrollment.enrolled_at.strftime('%Y-%m-%d %H:%M:%S') if self.enrollment.enrolled_at else 'N/A'}\n"
             f"Paid at: {paid_message}\n"
             f"Status: {self.enrollment.get_enrollment_status_display() if hasattr(self.enrollment, 'get_enrollment_status_display') else self.enrollment.enrollment_status}\n"
         )

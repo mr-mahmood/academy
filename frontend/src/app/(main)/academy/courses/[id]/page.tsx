@@ -378,7 +378,7 @@ export default function ClassDetailPage() {
                     <div>
                         <label>ظرفیت</label>
                         <span className={styles.capacityValue}>
-                            {course.max_students}
+                            {course.max_students} نفر
                         </span>
                     </div>
                 </div>

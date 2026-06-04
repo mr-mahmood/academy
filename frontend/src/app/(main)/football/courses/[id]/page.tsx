@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Icon, Icons } from '@/components/icon'
 import { useActiveUser } from '@/contexts/active_user_context'
 import { useApi } from '@/hooks/useApi'
+import { usePopup } from '@/hooks/Popup'
 import type { FootballTest } from '@/types/FootballTest'
 import type { FootballEnrollment } from '@/types/FootballEnrollment'
 import styles from './footballTestDetail.module.css'
@@ -29,16 +30,16 @@ export default function FootballTestDetailPage() {
     const router = useRouter()
     const { activeUser, isLoadingActiveUser } = useActiveUser()
     const { apiFetch } = useApi()
+    const { showPopUp, PopupComponent } = usePopup()
     const [test, setTest] = useState<FootballTest | null>(null)
     const [enrollment, setEnrollment] = useState<FootballEnrollment | null>(null)
     const [userEnrollments, setUserEnrollments] = useState<FootballEnrollment[]>([])
     const [loading, setLoading] = useState(true)
-    const [processing, setProcessing] = useState(false)
+    const [registering, setRegistering] = useState(false)
     const [cancelProcessing, setCancelProcessing] = useState(false)
-    const [paymentProcessing, setPaymentProcessing] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
-    const [showModal, setShowModal] = useState<'preRegister' | 'pay' | 'cancel' | null>(null)
+    const [showModal, setShowModal] = useState<'register' | 'cancel' | null>(null)
 
     const testId = params.id as string
 
@@ -96,36 +97,24 @@ export default function FootballTestDetailPage() {
         }
     }, [userEnrollments, test])
 
-    const hasTimeConflict = (): boolean => {
-        if (!test?.test_date || !test?.start_time || !test?.end_time) return false
-        return userEnrollments.some(e => {
-            const ec = e.course
-            if (!ec || ec.id === test.id) return false
-            return ec.test_date === test.test_date &&
-                ec.start_time < test.end_time &&
-                ec.end_time > test.start_time
-        })
-    }
-
     const isEnrolled = enrollment?.enrollment_status === 'CONFIRMED'
-    const isPreRegistered = ['WAITING_FOR_PAYMENT', 'PENDING'].includes(enrollment?.enrollment_status || '')
+    const isRegistered = enrollment !== null
 
-    const canPreRegister = (): boolean => {
+    const canRegister = (): boolean => {
         if (!test || !activeUser) return false
         if (test.status !== 'ACTIVE') return false
-        if (isEnrolled || isPreRegistered) return false
+        if (isEnrolled) return false
         if (test.gender_requirement && test.gender_requirement !== activeUser.gender) return false
-        if (hasTimeConflict()) return false
+        if (activeUser.age_category === 'OOR') return false
         return true
     }
 
     const getDisableReason = (): string | null => {
         if (!test || !activeUser) return null
         if (isEnrolled) return 'شما قبلاً در این تست ثبت‌نام کرده‌اید'
-        if (isPreRegistered) return 'پیش‌ ثبت‌ نام انجام شده است. برای تکمیل، پرداخت را انجام دهید'
         if (test.status !== 'ACTIVE') return 'این تست در حال حاضر فعال نیست'
         if (test.gender_requirement && test.gender_requirement !== activeUser.gender) return 'این تست برای جنسیت شما مناسب نیست'
-        if (hasTimeConflict()) return 'تداخل زمانی با تست‌های دیگر شما وجود دارد'
+        if (activeUser.age_category === 'OOR') return 'رده سنی شما برای ثبت‌نام معتبر نیست'
         return null
     }
 
@@ -137,59 +126,84 @@ export default function FootballTestDetailPage() {
         }
     }
 
-    const handlePreRegister = async () => {
+    const handleRegisterAndPay = async () => {
         if (!activeUser || !test) return
         setShowModal(null)
-        setProcessing(true)
+        setRegistering(true)
         setError('')
 
         try {
-            const result = await apiFetch({
+            // First, create enrollment
+            const enrollmentResult = await apiFetch({
                 url: 'api/football/enrollment/',
                 method: 'POST',
-                body: { course_id: test.id }
+                body: {
+                    position: test.position,
+                    academy_id: test.academy.id,
+                    gender_requirement: test.gender_requirement
+                }
             })
-            if (result.success) {
-                setSuccess('پیش‌ ثبت‌ نام با موفقیت انجام شد')
-                await refreshEnrollments()
-                setTimeout(() => setSuccess(''), 3000)
-            } else {
-                setError(result.message || 'خطا در پیش‌ ثبت‌ نام')
-                setTimeout(() => setError(''), 4000)
+
+            if (!enrollmentResult.success) {
+                let errorMessage = 'خطا در ثبت‌نام'
+                switch (enrollmentResult.code) {
+                    case 555:
+                        errorMessage = 'این تست تکمیل شده است'
+                        break
+                    case 556:
+                        errorMessage = 'این تست در حال حاضر فعال نیست'
+                        break
+                    case 557:
+                        errorMessage = 'شما قبلاً در این تست ثبت‌نام کرده‌اید'
+                        break
+                    case 558:
+                        errorMessage = 'تداخل زمانی با تست‌های دیگر شما وجود دارد'
+                        break
+                    case 559:
+                        errorMessage = 'این تست برای رده سنی شما مناسب نیست'
+                        break
+                    case 561:
+                        errorMessage = 'این تست برای جنسیت شما مناسب نیست'
+                        break
+                    default:
+                        errorMessage = enrollmentResult.message || 'خطا در ثبت‌نام'
+                }
+                showPopUp({
+                    title: 'خطا',
+                    message: errorMessage,
+                    type: 'error',
+                    duration: 4000
+                })
+                setRegistering(false)
+                return
             }
-        } catch (err) {
-            setError('خطا در ارتباط با سرور')
-            setTimeout(() => setError(''), 4000)
-        } finally {
-            setProcessing(false)
-        }
-    }
 
-    const handlePayment = async () => {
-        if (!activeUser || !test || !enrollment) return
-        setShowModal(null)
-        setPaymentProcessing(true)
+            const newEnrollment = enrollmentResult.data.enrollment
 
-        try {
-            const result = await apiFetch({
+            // Then, initiate payment
+            const paymentResult = await apiFetch({
                 url: 'api/football/payment/initiate/',
                 method: 'POST',
-                body: { course_id: test.id, enrollment_id: enrollment.id }
+                body: {
+                    course_id: test.id,
+                    enrollment_id: newEnrollment.id
+                }
             }) as PaymentInitiateResponse
 
-            if (result.success && result.data) {
+            if (paymentResult.success && paymentResult.data) {
                 sessionStorage.setItem('football_payment_pending', 'true')
                 sessionStorage.setItem('football_payment_test_id', String(test.id))
-                window.location.href = result.data.gateway_url
+                window.location.href = paymentResult.data.gateway_url
             } else {
-                setError(result.message || 'خطا در اتصال به درگاه پرداخت')
+                setError(paymentResult.message || 'خطا در اتصال به درگاه پرداخت')
                 setTimeout(() => setError(''), 4000)
-                setPaymentProcessing(false)
+                setRegistering(false)
             }
         } catch (err) {
+            console.error('Registration error:', err)
             setError('خطا در ارتباط با سرور')
             setTimeout(() => setError(''), 4000)
-            setPaymentProcessing(false)
+            setRegistering(false)
         }
     }
 
@@ -260,7 +274,7 @@ export default function FootballTestDetailPage() {
     let statusBadge = null
     if (isEnrolled) {
         statusBadge = { text: 'ثبت‌ نام قطعی', class: styles.confirmedBadge, icon: Icons.check }
-    } else if (isPreRegistered) {
+    } else if (isRegistered) {
         statusBadge = { text: 'در انتظار پرداخت', class: styles.pendingBadge, icon: Icons.clock }
     } else {
         statusBadge = { text: 'ثبت‌ نام نشده', class: styles.notRegisteredBadge, icon: Icons.infoCircle }
@@ -283,22 +297,10 @@ export default function FootballTestDetailPage() {
             'U17': 'زیر ۱۷ سال',
             'U18': 'زیر ۱۸ سال',
             'YOUTH': 'جوانان',
-            'U21': 'زیر ۲۱ سال',
+            'U21': 'امید',
+            'OOR': 'خارج از محدوده'
         }
         return ageMap[ageCategory] || ageCategory
-    }
-
-    const formatPersianDate = (dateString: string) => {
-        const date = new Date(dateString)
-        return new Intl.DateTimeFormat('fa-IR', {
-            year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
-        }).format(date)
-    }
-
-    const formatTime = (timeString: string) => {
-        return timeString.slice(0, 5)
     }
 
     const formatPrice = (price: string | number) => {
@@ -325,7 +327,17 @@ export default function FootballTestDetailPage() {
                     <Icon icon={Icons.football} />
                 </div>
                 <div className={styles.headerInfo}>
-                    <h3 className={styles.testName}>{'پست '} {test.position_display} ({test.position})</h3>
+                    <div className={styles.headerTopRow}>
+                        <h3 className={styles.testName}>
+                            {'پست '} {test.position_display} ({test.position})
+                        </h3>
+                        {statusBadge && (
+                            <div className={`${styles.statusBadge} ${statusBadge.class}`}>
+                                <Icon icon={statusBadge.icon} />
+                                <span>{statusBadge.text}</span>
+                            </div>
+                        )}
+                    </div>
                     {test.academy && (
                         <>
                             <p className={styles.academyName}>ورزشگاه {test.academy.name}</p>
@@ -338,59 +350,15 @@ export default function FootballTestDetailPage() {
                         </>
                     )}
                 </div>
-                {statusBadge && (
-                    <div className={`${styles.statusBadge} ${statusBadge.class}`}>
-                        <Icon icon={statusBadge.icon} /><span>{statusBadge.text}</span>
-                    </div>
-                )}
-            </div>
-
-            {/* Schedule Card */}
-            <div className={styles.scheduleCard}>
-                <h3 className={styles.cardTitle}>زمان برگزاری</h3>
-                <div className={styles.scheduleContainer}>
-                    <div className={styles.scheduleRow}>
-                        <div className={styles.scheduleDay}>
-                            <Icon icon={Icons.calendar} className={styles.scheduleIcon} />
-                            <span>تاریخ</span>
-                        </div>
-                        <div className={styles.scheduleTime}>
-                            <span>{formatPersianDate(test.test_date)}</span>
-                        </div>
-                    </div>
-                    <div className={styles.scheduleRow}>
-                        <div className={styles.scheduleDay}>
-                            <Icon icon={Icons.clock} className={styles.scheduleIcon} />
-                            <span>ساعت</span>
-                        </div>
-                        <div className={styles.scheduleTime}>
-                            <span>{formatTime(test.start_time)} تا {formatTime(test.end_time)}</span>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             {/* Info Grid */}
             <div className={styles.infoGrid}>
                 <div className={styles.infoCard}>
-                    <Icon icon={Icons.users} />
-                    <div>
-                        <label>ظرفیت</label>
-                        <span>{test.max_participants} نفر</span>
-                    </div>
-                </div>
-                <div className={styles.infoCard}>
                     <Icon icon={Icons.user} />
                     <div>
                         <label>جنسیت</label>
                         <span>{getGenderDisplay(test.gender_requirement)}</span>
-                    </div>
-                </div>
-                <div className={styles.infoCard}>
-                    <Icon icon={Icons.user} />
-                    <div>
-                        <label>رده سنی</label>
-                        <span>{getAgeCategoryLabel(test.age_category)}</span>
                     </div>
                 </div>
                 <div className={styles.infoCard}>
@@ -421,29 +389,12 @@ export default function FootballTestDetailPage() {
                     <button onClick={() => setShowModal('cancel')} className={styles.cancelButton}>
                         <Icon icon={Icons.timesCircle} /><span>لغو ثبت‌نام</span>
                     </button>
-                ) : isPreRegistered ? (
-                    <div style={{ display: 'grid', gap: '1rem' }}>
-                        <button onClick={() => setShowModal('pay')} disabled={paymentProcessing} className={styles.payButton}>
-                            {paymentProcessing ? (
-                                <><span>پرداخت و تکمیل ثبت‌نام</span> <div className={styles.smallSpinner}></div></>
-                            ) : (
-                                <><Icon icon={Icons.creditCard} /><span>پرداخت و تکمیل ثبت‌نام</span></>
-                            )}
-                        </button>
-                        <button onClick={() => setShowModal('cancel')} disabled={cancelProcessing} className={styles.cancelButton}>
-                            {cancelProcessing ? (
-                                <><span>لغو ثبت‌نام</span> <div className={styles.smallSpinner}></div></>
-                            ) : (
-                                <><Icon icon={Icons.timesCircle} /><span>لغو ثبت‌نام</span></>
-                            )}
-                        </button>
-                    </div>
-                ) : canPreRegister() ? (
-                    <button onClick={() => setShowModal('preRegister')} disabled={processing} className={styles.preRegisterButton}>
-                        {processing ? (
-                            <><span>پیش‌ ثبت‌نام</span> <div className={styles.smallSpinner}></div></>
+                ) : canRegister() ? (
+                    <button onClick={() => setShowModal('register')} disabled={registering} className={styles.registerButton}>
+                        {registering ? (
+                            <><span>در حال ثبت‌نام و پرداخت</span> <div className={styles.smallSpinner}></div></>
                         ) : (
-                            <><Icon icon={Icons.edit} /><span>پیش‌ ثبت‌نام</span></>
+                            <><Icon icon={Icons.creditCard} /><span>ثبت‌نام و پرداخت</span></>
                         )}
                     </button>
                 ) : (
@@ -455,69 +406,65 @@ export default function FootballTestDetailPage() {
                         )
                     ) : (
                         <button
-                            className={styles.preRegisterButton}
+                            className={styles.registerButton}
                             onClick={() => {
                                 sessionStorage.setItem('pendingRegistration', JSON.stringify({ courseId: test.id, parent: "football" }))
                                 router.push('/login')
                             }}
                         >
-                            <Icon icon={Icons.edit} /><span>پیش‌ ثبت‌ نام</span>
+                            <Icon icon={Icons.edit} /><span>ورود و ثبت‌نام</span>
                         </button>
                     )
                 )}
             </div>
 
-            {/* Modals */}
-            {showModal && (
-                <div className={styles.modalOverlay} onClick={() => !processing && !cancelProcessing && !paymentProcessing && setShowModal(null)}>
+            {/* Modal */}
+            {showModal === 'register' && (
+                <div className={styles.modalOverlay} onClick={() => !registering && setShowModal(null)}>
                     <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        {showModal === 'preRegister' && (
-                            <>
-                                <div className={styles.modalIcon}><Icon icon={Icons.edit} /></div>
-                                <h3 className={styles.modalTitle}>تأیید پیش‌ثبت‌نام</h3>
-                                <p className={styles.modalText}>آیا مایل به پیش‌ثبت‌نام در تست "{test.position_display}" هستید؟</p>
-                                <div className={styles.modalWarning}>
-                                    <Icon icon={Icons.infoCircle} /><span>پس از پیش‌ثبت‌نام، برای تکمیل باید پرداخت را انجام دهید</span>
-                                </div>
-                                <div className={styles.modalActions}>
-                                    <button onClick={() => setShowModal(null)} disabled={processing} className={styles.modalCancelBtn}>انصراف</button>
-                                    <button onClick={handlePreRegister} disabled={processing} className={styles.modalConfirmBtn}>
-                                        {processing ? <div className={styles.smallSpinner}></div> : 'تأیید'}
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                        {showModal === 'pay' && (
-                            <>
-                                <div className={styles.modalIcon}><Icon icon={Icons.creditCard} /></div>
-                                <h3 className={styles.modalTitle}>تأیید پرداخت</h3>
-                                <p className={styles.modalText}>برای تکمیل ثبت‌نام در تست "{test.position_display}" مبلغ <strong>{formatPrice(test.price)} تومان</strong> پرداخت می‌شود</p>
-                                <div className={styles.modalWarning}><Icon icon={Icons.infoCircle} /><span>این عملیات غیرقابل بازگشت است</span></div>
-                                <div className={styles.modalActions}>
-                                    <button onClick={() => setShowModal(null)} disabled={paymentProcessing} className={styles.modalCancelBtn}>انصراف</button>
-                                    <button onClick={handlePayment} disabled={paymentProcessing} className={styles.modalConfirmBtn}>
-                                        {paymentProcessing ? <div className={styles.smallSpinner}></div> : 'پرداخت'}
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                        {showModal === 'cancel' && (
-                            <>
-                                <div className={styles.modalIcon}><Icon icon={Icons.timesCircle} /></div>
-                                <h3 className={styles.modalTitle}>لغو ثبت‌نام</h3>
-                                <p className={styles.modalText}>آیا از لغو ثبت‌نام در تست اطمینان دارید؟</p>
-                                <div className={styles.modalWarning}><Icon icon={Icons.infoCircle} /><span>این عملیات غیرقابل بازگشت است</span></div>
-                                <div className={styles.modalActions}>
-                                    <button onClick={() => setShowModal(null)} disabled={cancelProcessing} className={styles.modalCancelBtn}>انصراف</button>
-                                    <button onClick={handleCancelEnrollment} disabled={cancelProcessing} className={styles.modalDangerBtn}>
-                                        {cancelProcessing ? <div className={styles.smallSpinner}></div> : 'لغو ثبت‌نام'}
-                                    </button>
-                                </div>
-                            </>
-                        )}
+                        <div className={styles.modalIcon}><Icon icon={Icons.creditCard} /></div>
+                        <h3 className={styles.modalTitle}>تأیید ثبت‌نام و پرداخت</h3>
+                        <p className={styles.modalText}>
+                            آیا مایل به ثبت‌نام در تست "{test.position_display}" و پرداخت مبلغ <strong>{formatPrice(test.price)} تومان</strong> هستید؟
+                        </p>
+                        <div className={styles.modalWarning}>
+                            <Icon icon={Icons.infoCircle} />
+                            <span>پس از پرداخت، ثبت‌نام شما نهایی خواهد شد</span>
+                        </div>
+                        <div className={styles.modalActions}>
+                            <button onClick={() => setShowModal(null)} disabled={registering} className={styles.modalCancelBtn}>
+                                انصراف
+                            </button>
+                            <button onClick={handleRegisterAndPay} disabled={registering} className={styles.modalConfirmBtn}>
+                                {registering ? <div className={styles.smallSpinner}></div> : 'تأیید و پرداخت'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
+
+            {showModal === 'cancel' && (
+                <div className={styles.modalOverlay} onClick={() => !cancelProcessing && setShowModal(null)}>
+                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalIcon}><Icon icon={Icons.timesCircle} /></div>
+                        <h3 className={styles.modalTitle}>لغو ثبت‌نام</h3>
+                        <p className={styles.modalText}>آیا از لغو ثبت‌نام در تست اطمینان دارید؟</p>
+                        <div className={styles.modalWarning}>
+                            <Icon icon={Icons.infoCircle} />
+                            <span>این عملیات غیرقابل بازگشت است</span>
+                        </div>
+                        <div className={styles.modalActions}>
+                            <button onClick={() => setShowModal(null)} disabled={cancelProcessing} className={styles.modalCancelBtn}>
+                                انصراف
+                            </button>
+                            <button onClick={handleCancelEnrollment} disabled={cancelProcessing} className={styles.modalDangerBtn}>
+                                {cancelProcessing ? <div className={styles.smallSpinner}></div> : 'لغو ثبت‌نام'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {PopupComponent}
         </div>
     )
 }

@@ -1,3 +1,4 @@
+# football_talent/enrollments/admin.py
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
@@ -6,14 +7,14 @@ from config.admin import admin_site
 
 
 class FootballEnrollmentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user_link', 'course_link', 'enrollment_status', 'enrolled_at']
-    list_filter = ['enrollment_status']
+    list_display = ['id', 'user_link', 'course_link', 'age_category', 'course__position', 'enrollment_status', 'enrolled_at']
+    list_filter = ['enrollment_status', 'age_category']
     search_fields = ['user__full_name', 'user__phone_number', 'course__academy__name']
-    readonly_fields = ['enrolled_at', 'updated_at']
+    readonly_fields = ['enrolled_at', 'updated_at', 'age_category']
     
     fieldsets = (
         ('Enrollment Info', {
-            'fields': ('user', 'course')
+            'fields': ('user', 'course', 'age_category')
         }),
         ('Status', {
             'fields': ('enrollment_status',)

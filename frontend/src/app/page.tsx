@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Icon, Icons } from '@/components/icon'
 import { useActiveUser } from '@/contexts/active_user_context'
-import styles from '../styles/home.module.css'
+import styles from '@/styles/home.module.css'
 import Footer from '@/components/Footer/Footer'
 import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
 
@@ -25,43 +24,28 @@ export default function HomePage() {
 
                 <button
                     className={styles.navCard}
-                    onClick={() => router.push('/register')}
+                    onClick={() => router.push('/academy')}
                 >
                     <div className={styles.cardIcon}>
                         <Icon icon={Icons.school} />
                     </div>
                     <div className={styles.cardContent}>
-                        <h3>ثبت‌ نام</h3>
-                        <p>دوره‌های آموزشی | تست‌های استعدادیابی</p>
+                        <h3>مدرسه تخصصی</h3>
+                        <p>مشاهده و ثبت نام در دوره‌های آموزشی</p>
                     </div>
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>
 
-
                 <button
                     className={styles.navCard}
-                    onClick={() => router.push('/courses')}
+                    onClick={() => router.push('/football')}
                 >
                     <div className={styles.cardIcon}>
                         <Icon icon={Icons.calendar} />
                     </div>
                     <div className={styles.cardContent}>
-                        <h3>دوره‌های آموزشی و تست</h3>
-                        <p>دوره‌های آموزشی | تست‌های استعدادیابی</p>
-                    </div>
-                    <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
-                </button>
-
-                <button
-                    className={styles.navCard}
-                    onClick={() => router.push('/academies')}
-                >
-                    <div className={styles.cardIcon}>
-                        <Icon icon={Icons.building} />
-                    </div>
-                    <div className={styles.cardContent}>
-                        <h3>ورزشگاه‌ها</h3>
-                        <p>مشاهده لیست ورزشگاه‌ ها</p>
+                        <h3>تست فوتبال</h3>
+                        <p>مشاهده و ثبت نام در تست های فوتبال</p>
                     </div>
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>

@@ -37,7 +37,7 @@ class FootballAcademy(models.Model):
     
     class Meta:
         db_table = "football_academies"
-        ordering = ['city', 'name']
+        ordering = ['name']
         verbose_name = "Football Academy"
         verbose_name_plural = "Football Academies"
         

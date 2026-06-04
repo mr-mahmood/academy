@@ -1,3 +1,4 @@
+# football_talent/enrollments/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -31,7 +32,6 @@ class FootballEnrollmentAPIView(APIView):
         """Get user's enrollments (users can only see their own)"""
         user: User = request.user
         if pk:
-            # Get single enrollment
             enrollment = FootballEnrollment.get_enrollment(pk, user)
             
             if enrollment.user != user:
@@ -43,36 +43,67 @@ class FootballEnrollmentAPIView(APIView):
                 "enrollment": serializer.data
             }, status=status.HTTP_200_OK)
         else:
-            # List enrollments with eager loading
             base_queryset = FootballEnrollment.objects.select_related(
                 'user',
                 'course',
                 'course__academy'
             )
             
-            enrollments = base_queryset.filter(user=user)
-            message = "Your football enrollments retrieved successfully"
-            
+            enrollments = base_queryset.filter(
+                user=user,
+                enrollment_status__in=[
+                    FootballEnrollment.EnrollmentStatus.CONFIRMED,
+                    FootballEnrollment.EnrollmentStatus.COMPLETED
+                ]
+            )
             serializer = FootballEnrollmentSerializer(enrollments, many=True)
             return Response({
-                "message": message,
+                "message": "Your football enrollments retrieved successfully",
                 "enrollments": serializer.data,
             }, status=status.HTTP_200_OK)
     
     def post(self, request):
-        """Register for a football course/test"""
-        course_id = request.data.get('course_id')
+        """Register for a football test by position (age category auto-detected)"""
+        position = request.data.get('position')
+        academy_id = request.data.get('academy_id')
+        gender_requirement = request.data.get('gender_requirement', 'MALE')
         
-        if not course_id:
-            raise APIError(RegistrationError.FOOTBALL_COURSE_REQUIRED)
+        if not position:
+            raise APIError(RegistrationError.FOOTBALL_POSITION_REQUIRED)
         
-        # Check if course exists
-        try:
-            course = FootballCourse.objects.get(id=course_id)
-        except FootballCourse.DoesNotExist:
-            raise APIError(RegistrationError.FOOTBALL_COURSE_NOT_FOUND)
+        if not academy_id:
+            raise APIError(RegistrationError.FOOTBALL_ACADEMY_REQUIRED)
         
-        # Create enrollment for the logged-in user
+        # Find or create the course (without age category)
+        course, created = FootballCourse.objects.get_or_create(
+            academy_id=academy_id,
+            position=position,
+            gender_requirement=gender_requirement,
+            defaults={
+                'coache': "Coach",
+                'price': 4500000,
+                'status': FootballCourse.Status.ACTIVE
+            }
+        )
+        
+        # Check for existing enrollment
+        existing_enrollment = FootballEnrollment.objects.filter(
+            user=request.user, 
+            course=course
+        ).first()
+        
+        # If enrollment exists and is in WAITING_FOR_PAYMENT state, return it
+        if existing_enrollment:
+            if existing_enrollment.enrollment_status == FootballEnrollment.EnrollmentStatus.WAITING_FOR_PAYMENT:
+                serializer = FootballEnrollmentSerializer(existing_enrollment)
+                return Response({
+                    "message": "You already have a pending enrollment for this test. Please complete payment.",
+                    "enrollment": serializer.data
+                }, status=status.HTTP_200_OK)
+            else:
+                raise APIError(RegistrationError.FOOTBALL_COURSE_ALREADY_ENROLLED)
+        
+        # Create new enrollment
         enrollment = FootballEnrollment(
             user=request.user,
             course=course
@@ -93,7 +124,6 @@ class FootballEnrollmentAPIView(APIView):
         
         enrollment = FootballEnrollment.get_enrollment(pk)
         
-        # Update enrollment status
         new_status = request.data.get('enrollment_status')
         if new_status:
             enrollment.enrollment_status = new_status

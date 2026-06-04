@@ -94,9 +94,6 @@ class FootballCourseAPIView(APIView):
         except FootballCourse.DoesNotExist:
             raise APIError(ClassError.FOOTBALL_COURSE_NOT_EXIST)
         
-        if course.current_participants > 0:
-            raise APIError(ClassError.COURSE_HAS_ENROLLMENTS)
-        
         course.delete()
         return Response({
             "message": "Football course deleted successfully"
