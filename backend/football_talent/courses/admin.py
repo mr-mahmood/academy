@@ -7,8 +7,8 @@ class FootballCourseAdmin(admin.ModelAdmin):
     """Simple Football Course admin"""
     
     list_display = [
-        'id', 'academy', 'position', 'age_category',
-        'test_date', 'current_participants', 'max_participants',
+        'id', 'academy', 'position', 'age_category', 'gender_requirement',
+        'test_date', 'start_time', 'end_time', 'max_participants', 'current_participants',
         'price', 'status'
     ]
     
@@ -21,8 +21,8 @@ class FootballCourseAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Basic Information', {
             'fields': (
-                'academy', 'position', 'age_category', 'coache',
-                'test_date', 'max_participants', 'current_participants',
+                'academy', 'position', 'age_category', 'gender_requirement', 'coache',
+                'test_date', 'start_time', 'end_time', 'max_participants', 'current_participants',
                 'price', 'status'
             )
         }),

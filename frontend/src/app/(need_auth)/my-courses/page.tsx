@@ -1,4 +1,3 @@
-// app/my-courses/page.tsx
 'use client'
 
 import { useState, useCallback } from 'react'

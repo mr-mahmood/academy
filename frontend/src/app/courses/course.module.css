@@ -1,0 +1,121 @@
+/* course.module.css */
+
+.container {
+    padding: 1rem;
+    min-height: 100%;
+}
+
+/* Welcome Section */
+.welcomeSection {
+    text-align: center;
+    padding: 1.5rem 0.5rem;
+    margin-bottom: 1rem;
+    background: var(--bg-primary);
+    border-radius: 1.5rem;
+}
+
+.welcomeTitle {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.welcomeText {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Navigation Cards */
+.navigationCards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.navCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 2rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: all 200ms ease;
+    width: 100%;
+    text-align: right;
+}
+
+.navCard:hover {
+    transform: translateX(-4px);
+    box-shadow: 0 4px 16px var(--shadow-color);
+    border-color: var(--accent-color);
+}
+
+.cardIcon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(var(--accent-color-rgb), 0.12), rgba(var(--accent-color-rgb), 0.04));
+    color: var(--accent-color);
+    border-radius: 1.2rem;
+    flex-shrink: 0;
+}
+
+.cardIcon svg {
+    width: 24px !important;
+    height: 24px !important;
+}
+
+.cardContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.cardContent h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.cardContent p {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.cardTags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+}
+
+.cardTags span {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    background: var(--bg-secondary, #F1F5F9);
+    border-radius: 1rem;
+    color: var(--text-primary, #102A43);
+    font-weight: 500;
+}
+
+.cardArrow {
+    width: 20px !important;
+    height: 20px !important;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: all 200ms ease;
+}
+
+.navCard:hover .cardArrow {
+    transform: translateX(-4px);
+    color: var(--accent-color);
+}

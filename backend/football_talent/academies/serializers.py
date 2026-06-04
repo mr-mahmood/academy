@@ -3,13 +3,18 @@ from .models import FootballAcademy
 from users.validators import validate_phone_number
 
 class FootballAcademySerializer(serializers.ModelSerializer):
+    city_display = serializers.SerializerMethodField()
+    
     class Meta:
         model = FootballAcademy
         fields = [
-            'id', 'name', 'address_text', 'latitude', 'longitude',
+            'id', 'name', 'city', 'city_display', 'address_text', 'latitude', 'longitude',
             'phone', 'is_active', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+    
+    def get_city_display(self, obj):
+        return obj.get_city_display()
     
     def validate_name(self, value):
         """Validate football academy name"""
@@ -19,7 +24,6 @@ class FootballAcademySerializer(serializers.ModelSerializer):
         if len(value.strip()) < 2:
             raise serializers.ValidationError("Football academy name must be at least 2 characters")
         
-        # Check for duplicate name (excluding current instance)
         instance = self.instance
         if instance:
             if FootballAcademy.objects.filter(name__iexact=value.strip()).exclude(pk=instance.pk).exists():
@@ -53,7 +57,6 @@ class FootballAcademySerializer(serializers.ModelSerializer):
         latitude = attrs.get('latitude')
         longitude = attrs.get('longitude')
         
-        # If coordinates are provided, ensure both are provided
         if (latitude is not None and longitude is None) or (latitude is None and longitude is not None):
             raise serializers.ValidationError("Both latitude and longitude must be provided together")
         

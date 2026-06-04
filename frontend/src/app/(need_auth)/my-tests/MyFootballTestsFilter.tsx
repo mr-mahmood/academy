@@ -1,26 +1,30 @@
-// app/my-courses/MyCoursesFilter.tsx
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import styles from './my-courses.module.css'
+import styles from './my-tests.module.css'
 import FilterModal from '@/components/FilterModal/FilterModal'
 import { Icon, Icons } from '@/components/icon'
-import { MyCoursesFilterSkeleton } from './MyCoursesSkeletons'
-import type { Enrollment } from '@/types/enrollment'
+import { MyFootballTestsFilterSkeleton } from './MyFootballTestsSkeletons'
+import type { FootballEnrollment } from '@/types/FootballEnrollment'
 import { useApi } from '@/hooks/useApi'
 
-interface MyCoursesFilterProps {
-    onEnrollmentsLoaded?: (enrollments: Enrollment[]) => void
+interface MyFootballTestsFilterProps {
+    onEnrollmentsLoaded?: (enrollments: FootballEnrollment[]) => void
     onFilterChange?: (filteredData: any[]) => void
     onFilterCountChange?: (count: number) => void
     isLoading?: boolean
 }
 
-export default function MyCoursesFilter({ onEnrollmentsLoaded, onFilterChange, onFilterCountChange, isLoading = false }: MyCoursesFilterProps) {
+export default function MyFootballTestsFilter({
+    onEnrollmentsLoaded,
+    onFilterChange,
+    onFilterCountChange,
+    isLoading = false
+}: MyFootballTestsFilterProps) {
     const filterRef = useRef<HTMLDivElement>(null)
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
     const [activeFilterCount, setActiveFilterCount] = useState(0)
-    const [allEnrollments, setAllEnrollments] = useState<Enrollment[]>([])
+    const [allEnrollments, setAllEnrollments] = useState<FootballEnrollment[]>([])
     const { apiFetch } = useApi()
     const [fetched, setFetched] = useState(false)
 
@@ -31,15 +35,13 @@ export default function MyCoursesFilter({ onEnrollmentsLoaded, onFilterChange, o
         const fetchEnrollments = async () => {
             try {
                 const result = await apiFetch({
-                    url: 'api/academy/enrollment/',
+                    url: 'api/football/enrollment/',
                     method: 'GET'
                 })
 
                 if (result.success) {
-                    let enrollmentsData: Enrollment[] = []
+                    let enrollmentsData: FootballEnrollment[] = []
                     if (result.data?.enrollments) {
-                        enrollmentsData = result.data.enrollments
-                    } else if (result.data?.enrollments) {
                         enrollmentsData = result.data.enrollments
                     }
 
@@ -50,19 +52,18 @@ export default function MyCoursesFilter({ onEnrollmentsLoaded, onFilterChange, o
                         onEnrollmentsLoaded(enrollmentsData)
                     }
 
-                    // Dispatch initial courses (all enrollments, no filters)
-                    const initialCourses = enrollmentsData.map(enrollment => ({
+                    // Dispatch initial tests (all enrollments, no filters)
+                    const initialTests = enrollmentsData.map(enrollment => ({
                         ...enrollment.course,
                         enrollment_status: enrollment.enrollment_status
                     }))
-                    
-                    window.dispatchEvent(new CustomEvent('myCoursesFilteredChanged', {
-                        detail: initialCourses
+
+                    window.dispatchEvent(new CustomEvent('myFootballTestsFilteredChanged', {
+                        detail: initialTests
                     }))
                 }
             } catch (error) {
-                console.error('Error fetching enrollments:', error)
-                // Still need to notify that loading is done even on error
+                console.error('Error fetching football enrollments:', error)
                 if (onEnrollmentsLoaded) {
                     onEnrollmentsLoaded([])
                 }
@@ -80,21 +81,45 @@ export default function MyCoursesFilter({ onEnrollmentsLoaded, onFilterChange, o
                 onFilterCountChange(e.detail)
             }
         }
-        
+
         window.addEventListener('filterCountChanged', handleFilterCount as EventListener)
         return () => window.removeEventListener('filterCountChanged', handleFilterCount as EventListener)
     }, [onFilterCountChange])
 
     // Show skeleton while loading
     if (isLoading) {
-        return <MyCoursesFilterSkeleton />
+        return <MyFootballTestsFilterSkeleton />
     }
+
+    // Age category options
+    const ageCategoryOptions = [
+        { id: 'U12', name: 'زیر ۱۲ سال (U12)' },
+        { id: 'U13', name: 'زیر ۱۳ سال (U13)' },
+        { id: 'U14', name: 'زیر ۱۴ سال (U14)' },
+        { id: 'U15', name: 'زیر ۱۵ سال (U15)' },
+        { id: 'U17', name: 'زیر ۱۷ سال (U17)' },
+        { id: 'U18', name: 'زیر ۱۸ سال (U18)' },
+        { id: 'YOUTH', name: 'جوانان (YOUTH)' },
+        { id: 'U21', name: 'زیر ۲۱ سال (U21)' },
+    ]
+
+    // Position options
+    const positionOptions = [
+        { id: 'GK', name: 'دروازه بان (GK)' },
+        { id: 'CB', name: 'مدافع میانی (CB)' },
+        { id: 'LB', name: 'مدافع چپ (LB)' },
+        { id: 'RB', name: 'مدافع راست (RB)' },
+        { id: 'CM', name: 'هافبک وسط (CM)' },
+        { id: 'RW', name: 'وینگر راست (RW)' },
+        { id: 'LW', name: 'وینگر چپ (LW)' },
+        { id: 'ST', name: 'مهاجم (ST)' },
+    ]
 
     return (
         <>
             {/* Filter Section */}
             <div className={styles.filterSection}>
-                <button 
+                <button
                     onClick={() => setIsFilterModalOpen(true)}
                     className={`${styles.filterButton} ${activeFilterCount > 0 ? styles.filterButtonActive : ''}`}
                 >
@@ -106,34 +131,54 @@ export default function MyCoursesFilter({ onEnrollmentsLoaded, onFilterChange, o
                     <Icon icon={Icons.chevronDown} className={styles.chevron} />
                 </button>
             </div>
-            
+
             <div ref={filterRef}>
                 <FilterModal
                     isOpen={isFilterModalOpen}
                     onClose={() => setIsFilterModalOpen(false)}
-                    title="فیلتر دوره‌های من"
+                    title="فیلتر تست‌های من"
                     data={allEnrollments.map(enrollment => ({
                         ...enrollment.course,
                         enrollment_status: enrollment.enrollment_status
                     }))}
                     filterFields={[
                         {
-                            key: 'sport',
-                            label: 'ورزش',
+                            key: 'position',
+                            label: 'پست تخصصی',
                             type: 'select',
-                            extractFrom: (item) => item.sport
+                            options: positionOptions,
+                            extractFrom: (item) => ({ id: item.position, name: item.position_display })
                         },
                         {
                             key: 'academy',
-                            label: 'ورزشگاه',
+                            label: 'آکادمی',
                             type: 'select',
                             extractFrom: (item) => item.academy
+                        },
+                        {
+                            key: 'age_category',
+                            label: 'رده سنی',
+                            type: 'select',
+                            options: ageCategoryOptions,
+                            extractFrom: (item) => ({ id: item.age_category, name: item.age_category_display })
+                        },
+                        {
+                            key: 'enrollment_status',
+                            label: 'وضعیت ثبت‌نام',
+                            type: 'select',
+                            options: [
+                                { id: 'WAITING_FOR_PAYMENT', name: 'در انتظار پرداخت' },
+                                { id: 'CONFIRMED', name: 'تایید شده' },
+                                { id: 'CANCELLED', name: 'لغو شده' },
+                                { id: 'COMPLETED', name: 'اتمام یافته' },
+                            ],
+                            extractFrom: (item) => ({ id: item.enrollment_status, name: '' })
                         }
                     ]}
                     onFilterApply={onFilterChange}
                     onFilterCountChange={setActiveFilterCount}
-                    filterChangeEvent="myCoursesFilteredChanged"
-                    resetEvent="resetMyCoursesFilters"
+                    filterChangeEvent="myFootballTestsFilteredChanged"
+                    resetEvent="resetMyFootballTestsFilters"
                 />
             </div>
         </>

@@ -6,41 +6,22 @@ from football_talent.academies.serializers import FootballAcademySerializer
 
 
 class FootballCourseSerializer(serializers.ModelSerializer):
-    available_seats = serializers.IntegerField(read_only=True)
-    can_register = serializers.BooleanField(read_only=True)
-    is_upcoming = serializers.BooleanField(read_only=True)
-    is_past = serializers.BooleanField(read_only=True)
-    
-    # Display names for choices
-    age_category_display = serializers.SerializerMethodField()
     position_display = serializers.SerializerMethodField()
-    status_display = serializers.SerializerMethodField()
-    
-    # Nested serializers for read
     academy = FootballAcademySerializer(read_only=True)
     
     class Meta:
         model = FootballCourse
         fields = [
-            'id', 'academy', 'coache',
-            'age_category', 'age_category_display',
-            'position', 'position_display', 'test_date',
-            'max_participants', 'current_participants', 'available_seats',
-            'price', 'status', 'status_display',
-            'can_register', 'is_upcoming', 'is_past',
-            'created_at', 'updated_at'
+            'id', 'academy', 'coache', 'age_category', 'gender_requirement',
+            'position', 'position_display', 'test_date', 'start_time', 'end_time',
+            'max_participants', 'current_participants',
+            'price', 'status', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'current_participants', 'created_at', 'updated_at']
     
-    def get_age_category_display(self, obj):
-        return obj.get_age_category_display()
-    
     def get_position_display(self, obj):
-        return obj.get_position_display()
-    
-    def get_status_display(self, obj):
-        return obj.get_status_display()
-    
+        return obj.get_position_display()    
+
     def validate_test_date(self, value):
         """Validate test date is in the future"""
         if value < timezone.now():

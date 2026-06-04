@@ -163,13 +163,13 @@ class PaymentCallbackAPIView(APIView):
         logger.info(f"Callback received: trackId={track_id}, success={success_flag}, orderId={order_id}, status={gateway_status}")
         
         if not track_id or not order_id:
-            return redirect('/payment/result?status=failed&error=missing_parameters')
+            return redirect('/academy/payment/result?status=failed&error=missing_parameters')
         
         # Find payment
         try:
             payment = Payment.objects.select_for_update().get(res_num=order_id)
         except Payment.DoesNotExist:
-            return redirect(f"/payment/result?status=failed&error=order_not_found")
+            return redirect(f"/academy/payment/result?status=failed&error=order_not_found")
         
         # Update track_id if needed
         if not payment.track_id:
@@ -178,10 +178,10 @@ class PaymentCallbackAPIView(APIView):
         
         # Prevent double processing
         if payment.status == PaymentStatus.PAID:
-            return redirect(f"/payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")
+            return redirect(f"/academy/payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")
         
         if payment.status == PaymentStatus.REVERSED:
-            return redirect(f"/payment/result?status=failed&res_num={order_id}&error=already_reversed")
+            return redirect(f"/academy/payment/result?status=failed&res_num={order_id}&error=already_reversed")
         
         # Check success flag
         if success_flag != '1':
@@ -189,7 +189,7 @@ class PaymentCallbackAPIView(APIView):
                 payment.mark_as_cancelled()
             else:
                 payment.mark_as_failed()
-            return redirect(f"/payment/result?status=failed&res_num={order_id}&error=payment_unsuccessful")
+            return redirect(f"/academy/payment/result?status=failed&res_num={order_id}&error=payment_unsuccessful")
         
         # IMPORTANT: Update amount one more time before verification
         # This ensures the user pays the absolute latest price
@@ -206,7 +206,7 @@ class PaymentCallbackAPIView(APIView):
             if verify_result.get('amount') != payment.amount:
                 payment.mark_as_failed()
                 logger.error(f"Amount mismatch: expected {payment.amount}, got {verify_result.get('amount')}")
-                return redirect(f"/payment/result?status=failed&res_num={order_id}&error=amount_mismatch")
+                return redirect(f"/academy/payment/result?status=failed&res_num={order_id}&error=amount_mismatch")
             
             # Mark as paid - this FREEZES the amount
             payment.mark_as_paid(
@@ -221,12 +221,12 @@ class PaymentCallbackAPIView(APIView):
                 enrollment.save(update_fields=['enrollment_status'])
             
             logger.info(f"Payment {payment.id} verified successfully. Amount frozen at {payment.amount}")
-            return redirect(f"/payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")
+            return redirect(f"/academy/payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")
         else:
             payment.mark_as_failed()
             error_msg = verify_result.get('message', 'verification_failed')
             logger.error(f"Verification failed for payment {payment.id}: {error_msg}")
-            return redirect(f"/payment/result?status=failed&res_num={order_id}&error={error_msg}")
+            return redirect(f"/academy/payment/result?status=failed&res_num={order_id}&error={error_msg}")
 
 
 class PaymentStatusAPIView(APIView):

@@ -8,6 +8,7 @@
     transition: all 200ms ease;
     position: relative;
     cursor: pointer;
+    pointer-events: auto;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;

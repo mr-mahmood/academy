@@ -140,6 +140,10 @@ class RegistrationError(APIError):
     FOOTBALL_COURSE_FULL = (555, "This football test is full")
     FOOTBALL_COURSE_NOT_ACTIVE = (556, "This football test is not active for enrollment")
     FOOTBALL_COURSE_ALREADY_ENROLLED = (557, "You are already enrolled in this football test")
+    FOOTBALL_TIME_CONFLICT = (558, "This football test conflicts with your existing schedule")
+    FOOTBALL_AGE_CATEGORY_MISMATCH = (559, "This football test is not available for your age category")
+    FOOTBALL_TEST_DATE_PASSED = (560, "Cannot enroll in a test that has already passed")
+    FOOTBALL_GENDER_MISMATCH = (561, "This football test is not available for your gender")
 
 # ============================================================================
 # PAYMENT app

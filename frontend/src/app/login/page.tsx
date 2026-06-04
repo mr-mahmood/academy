@@ -1,4 +1,3 @@
-// app/(auth)/login/page.tsx
 'use client'
 
 import { useState, useEffect, useRef, Suspense } from 'react'
@@ -24,7 +23,6 @@ function AuthPageContent() {
     const [loading, setLoading] = useState<boolean>(false)
     const [redirecting, setRedirecting] = useState<boolean>(false)
     const [isNewUser, setIsNewUser] = useState<boolean>(false)
-    const [pendingRegistration, setPendingRegistration] = useState<{ courseId: number } | null>(null)
     const [otpVerificationStatus, setOtpVerificationStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle')
     const [phoneVerificationStatus, setPhoneVerificationStatus] = useState<'idle' | 'verifying' | 'error'>('idle')
     const inputRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -33,6 +31,11 @@ function AuthPageContent() {
     const hasShownPopup = useRef(false)
     const { apiFetch } = useApi() 
     const showReloginPopup = searchParams.get('popup') === 'show'
+
+    // Get pending registration from sessionStorage
+    const pendingRegistration = typeof window !== 'undefined' 
+        ? JSON.parse(sessionStorage.getItem('pendingRegistration') || 'null')
+        : null
 
     useEffect(() => {
         setStep('phone')
@@ -45,13 +48,6 @@ function AuthPageContent() {
                 type: 'warning',
                 duration: 5000,
             })
-        }
-
-        // Check for pending registration from register page
-        const pending = sessionStorage.getItem('pendingRegistration')
-        if (pending) {
-            setPendingRegistration(JSON.parse(pending))
-            console.log('Pending registration found:', JSON.parse(pending))
         }
     }, [showReloginPopup, showPopUp])
 
@@ -199,37 +195,6 @@ function AuthPageContent() {
         setLoading(false)
     }
 
-    // Register for course after authentication
-    const registerForCourse = async (): Promise<{ success: boolean; message?: string; code?: number }> => {
-        if (!pendingRegistration) return { success: false, message: 'No pending registration' }
-
-        try {
-            const result = await apiFetch({
-                url: 'api/academy/enrollment/',
-                method: 'POST',
-                body: {
-                    course_id: pendingRegistration.courseId
-                }
-            })
-
-            if (result.success) {
-                sessionStorage.removeItem('pendingRegistration')
-                console.log('Successfully registered for course')
-                return { success: true }
-            } else {
-                console.error('Registration failed:', result.message, 'Code:', result.code)
-                return {
-                    success: false,
-                    message: result.message,
-                    code: result.code
-                }
-            }
-        } catch (error) {
-            console.error('Error registering for course:', error)
-            return { success: false, message: 'خطا در ارتباط با سرور' }
-        }
-    }
-
     // Verify OTP with Backend
     const verifyOtpRequest = async (phoneNumber: string, otpCode: string): Promise<boolean> => {
         try {
@@ -270,57 +235,21 @@ function AuthPageContent() {
                 } else if (data?.user) {
                     setActiveUser(data.user)
 
-                    // Check for pending registration
+                    // Check for pending registration and redirect to course detail page
                     if (pendingRegistration) {
-                        const registrationResult = await registerForCourse()
-
-                        if (registrationResult.success) {
-                            showPopUp({
-                                title: 'ثبت‌ نام موفق',
-                                message: 'شما با موفقیت در دوره ثبت‌ نام شدید',
-                                type: 'success',
-                                duration: 0,
-                                onClose: () => {
-                                    setRedirecting(true)
-                                    router.push(`/courses/${pendingRegistration.courseId}`)
-                                }
-                                
-                            })
-                        } else {
-                            // Handle specific error messages based on error code
-                            let errorMessage = 'ثبت‌ نام در دوره با خطا مواجه شد'
-
-                            switch (registrationResult.code) {
-                                case 506:
-                                    errorMessage = 'این دوره تکمیل شده است'
-                                    break
-                                case 507:
-                                    errorMessage = 'این دوره در حال حاضر فعال نیست'
-                                    break
-                                case 508:
-                                    errorMessage = 'این دوره برای جنسیت شما مناسب نیست'
-                                    break
-                                case 509:
-                                    errorMessage = 'شما قبلاً در این دوره ثبت‌ نام کرده‌اید'
-                                    break
-                                case 510:
-                                    errorMessage = 'تداخل زمانی با دوره‌های دیگر شما وجود دارد'
-                                    break
-                                default:
-                                    errorMessage = registrationResult.message || 'ثبت‌ نام در دوره با خطا مواجه شد'
+                        // Just redirect to the course page - user will register manually
+                        const redirectUrl = `/${pendingRegistration.parent}/courses/${pendingRegistration.courseId}`
+                        
+                        showPopUp({
+                            title: 'ورود موفق',
+                            message: 'شما با موفقیت وارد شدید',
+                            type: 'success',
+                            duration: 0,
+                            onClose: () => {
+                                setRedirecting(true)
+                                router.push(redirectUrl)
                             }
-
-                            showPopUp({
-                                title: 'خطا در ثبت‌ نام',
-                                message: `${errorMessage}`,
-                                type: 'error',
-                                duration: 0,
-                                onClose: () => {
-                                    setRedirecting(true)
-                                    router.push(`/courses/${pendingRegistration.courseId}`)
-                                }
-                            })
-                        }
+                        })
                     } else {
                         setRedirecting(true)
                         setTimeout(() => {

@@ -14,7 +14,7 @@ export default function HomePage() {
     const { activeUser, isLoadingActiveUser } = useActiveUser()
 
     if (isLoadingActiveUser) {
-        return <LoadingSpinner/>
+        return <LoadingSpinner />
     }
 
     return (
@@ -22,7 +22,7 @@ export default function HomePage() {
 
             {/* Navigation Cards */}
             <div className={styles.navigationCards}>
-                {/* ثبت نام دوره ها */}
+
                 <button
                     className={styles.navCard}
                     onClick={() => router.push('/register')}
@@ -31,26 +31,12 @@ export default function HomePage() {
                         <Icon icon={Icons.school} />
                     </div>
                     <div className={styles.cardContent}>
-                        <h3>ثبت نام دوره‌ها</h3>
-                        <p>مشاهده و ثبت نام در دوره‌های آموزشی</p>
+                        <h3>ثبت‌ نام</h3>
+                        <p>دوره‌های آموزشی | تست‌های استعدادیابی</p>
                     </div>
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>
 
-                {/* ورزشگاه ها */}
-                <button
-                    className={styles.navCard}
-                    onClick={() => router.push('/academies')}
-                >
-                    <div className={styles.cardIcon}>
-                        <Icon icon={Icons.building} />
-                    </div>
-                    <div className={styles.cardContent}>
-                        <h3>ورزشگاه‌ها</h3>
-                        <p>مشاهده لیست ورزشگاه‌های فعال</p>
-                    </div>
-                    <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
-                </button>
 
                 <button
                     className={styles.navCard}
@@ -60,28 +46,26 @@ export default function HomePage() {
                         <Icon icon={Icons.calendar} />
                     </div>
                     <div className={styles.cardContent}>
-                        <h3>دوره ها</h3>
-                        <p>مشاهده لیست دوره های فعال</p>
+                        <h3>دوره‌های آموزشی و تست</h3>
+                        <p>دوره‌های آموزشی | تست‌های استعدادیابی</p>
                     </div>
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>
 
-                {/* رویداد ها */}
                 <button
                     className={styles.navCard}
-                    onClick={() => router.push('/events')}
+                    onClick={() => router.push('/academies')}
                 >
                     <div className={styles.cardIcon}>
-                        <Icon icon={Icons.calendar} />
+                        <Icon icon={Icons.building} />
                     </div>
                     <div className={styles.cardContent}>
-                        <h3>رویدادها</h3>
-                        <p>مسابقات، اردوها و رویدادهای ویژه</p>
+                        <h3>ورزشگاه‌ها</h3>
+                        <p>مشاهده لیست ورزشگاه‌ ها</p>
                     </div>
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>
 
-                {/* ورود اعضا */}
                 <button
                     className={`${styles.navCard} ${styles.memberCard}`}
                     onClick={() => router.push(activeUser ? '/dashboard' : '/login')}

@@ -1,0 +1,651 @@
+.container {
+    min-height: 100%;
+    padding: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Loading */
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 1rem;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color, #E2E8F0);
+    border-top-color: var(--accent-color, #D4A017);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.smallSpinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Messages */
+.successMessage {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: #D1FAE5;
+    border-radius: 1rem;
+    color: #059669;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+}
+
+.successMessage svg {
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0;
+}
+
+.errorMessage {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: #FEE2E2;
+    border-radius: 1rem;
+    color: #DC2626;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+}
+
+.errorMessage svg {
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0;
+}
+
+/* Test Header Card */
+.testHeaderCard {
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 2rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border-color, #E2E8F0);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.headerIcon {
+    width: 60px;
+    height: 60px;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, rgba(var(--accent-color-rgb, 212, 160, 23), 0.12), rgba(var(--accent-color-rgb, 212, 160, 23), 0.04));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-color, #D4A017);
+    flex-shrink: 0;
+}
+
+.headerIcon svg {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+.headerInfo {
+    flex: 1;
+}
+
+.headerInfo h3 {
+    font-size: 1rem;
+}
+
+.testName {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary, #102A43);
+    margin-bottom: 0.2rem;
+}
+
+.academyName {
+    font-size: 0.8rem;
+    color: var(--text-muted, #64748B);
+}
+
+.addressRow {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.3rem;
+    font-size: 0.7rem;
+    color: var(--text-muted, #64748B);
+}
+
+.addressIcon {
+    width: 12px !important;
+    height: 12px !important;
+    color: var(--accent-color, #D4A017);
+}
+
+.statusBadge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.confirmedBadge {
+    background: rgba(34, 197, 94, 0.12);
+    color: #16A34A;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.pendingBadge {
+    background: rgba(245, 158, 11, 0.12);
+    color: #D97706;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.notRegisteredBadge {
+    background: rgba(107, 114, 128, 0.12);
+    color: #6B7280;
+    border: 1px solid rgba(107, 114, 128, 0.25);
+}
+
+/* Schedule Card */
+.scheduleCard {
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 2rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color, #E2E8F0);
+}
+
+.cardTitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #102A43);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color, #E2E8F0);
+}
+
+.cardTitle2 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #102A43);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+}
+
+.scheduleContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.scheduleRow {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+}
+
+.scheduleRow:not(:last-child) {
+    border-bottom: 1px dashed var(--border-color, #E2E8F0);
+}
+
+.scheduleDay {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary, #64748B);
+    font-weight: 500;
+    min-width: 60px;
+}
+
+.scheduleTime {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-primary, #102A43);
+    font-weight: 600;
+}
+
+.scheduleIcon {
+    width: 16px !important;
+    height: 16px !important;
+    color: var(--accent-color, #D4A017);
+    flex-shrink: 0;
+}
+
+/* Info Grid */
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.infoCard {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem;
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 1.5rem;
+    border: 1px solid var(--border-color, #E2E8F0);
+}
+
+.infoCard svg {
+    color: var(--accent-color, #D4A017);
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.infoCard div {
+    flex: 1;
+}
+
+.infoCard label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-secondary, #64748B);
+    margin-bottom: 0.25rem;
+}
+
+.infoCard span {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #102A43);
+}
+
+.activeStatus {
+    color: #059669;
+}
+
+.inactiveStatus {
+    color: #DC2626;
+}
+
+/* Support Card */
+.supportCard {
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 2rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color, #E2E8F0);
+}
+
+.supportHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color, #E2E8F0);
+}
+
+.supportHeader svg {
+    color: var(--accent-color, #D4A017);
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.supportHeader h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #102A43);
+    margin: 0;
+}
+
+.supportContent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.supportInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.supportLabel {
+    font-weight: 600;
+    color: var(--text-secondary, #64748B);
+}
+
+.supportName {
+    color: var(--text-primary, #102A43);
+    font-weight: 500;
+}
+
+.supportPhone {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent-color, #D4A017);
+    text-decoration: none;
+    font-weight: 600;
+    direction: ltr;
+    background: var(--bg-secondary, #F1F5F9);
+    padding: 0.4rem 0.875rem;
+    border-radius: 2rem;
+    transition: all 200ms ease;
+}
+
+.supportPhone svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.supportPhone:hover {
+    background: var(--accent-color, #D4A017);
+    color: white;
+}
+
+/* Price Card */
+.priceCard {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.priceRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.priceDivider {
+    margin: 0.5rem 0;
+}
+
+.totalRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* Action Buttons */
+.actionsSection {
+    margin-bottom: 1rem;
+}
+
+.preRegisterButton, .payButton, .cancelButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-radius: 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.preRegisterButton {
+    background: #3B82F6;
+    color: white;
+}
+
+.preRegisterButton:hover:not(:disabled) {
+    background: #2563EB;
+    transform: translateY(-1px);
+}
+
+.payButton {
+    background: var(--accent-color, #D4A017);
+    color: white;
+}
+
+.payButton:hover:not(:disabled) {
+    background: var(--accent-hover, #B8860B);
+    transform: translateY(-1px);
+}
+
+.cancelButton {
+    background: #DC2626;
+    color: white;
+}
+
+.cancelButton:hover:not(:disabled) {
+    background: #B91C1C;
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.unavailableBox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--bg-primary);
+    border-radius: 2rem;
+    color: #DC2626;
+    font-size: 0.875rem;
+    justify-content: center;
+    border: 1px solid #FEE2E2;
+    background: #FEF2F2;
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal {
+    background: var(--bg-primary, #FFFFFF);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    animation: modalFadeIn 0.2s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modalIcon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary, #F1F5F9);
+    border-radius: 50%;
+    color: var(--accent-color, #D4A017);
+}
+
+.modalIcon svg {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+.modalTitle {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary, #102A43);
+    margin-bottom: 0.75rem;
+}
+
+.modalText {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #64748B);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.modalWarning {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    background: #FEF3C7;
+    padding: 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    color: #D97706;
+    margin-bottom: 1.25rem;
+}
+
+.modalWarning svg {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+.modalActions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.modalActions button {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 200ms ease;
+}
+
+.modalCancelBtn {
+    background: var(--bg-secondary, #F1F5F9);
+    color: var(--text-primary, #102A43);
+}
+
+.modalCancelBtn:hover:not(:disabled) {
+    background: var(--border-color, #E2E8F0);
+}
+
+.modalConfirmBtn {
+    background: var(--accent-color, #D4A017);
+    color: white;
+}
+
+.modalConfirmBtn:hover:not(:disabled) {
+    background: var(--accent-hover, #B8860B);
+}
+
+.modalDangerBtn {
+    background: #DC2626;
+    color: white;
+}
+
+.modalDangerBtn:hover:not(:disabled) {
+    background: #B91C1C;
+}
+
+/* Error Container */
+.errorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 1rem;
+    text-align: center;
+    padding: 2rem;
+}
+
+.errorIcon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FEE2E2;
+    border-radius: 50%;
+    color: #DC2626;
+}
+
+.errorIcon svg {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+.errorContainer h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #DC2626;
+    margin-bottom: 0.25rem;
+}
+
+.errorContainer p {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #64748B);
+}
+
+.backButton {
+    padding: 0.5rem 1.5rem;
+    background: var(--accent-color, #D4A017);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.backButton:hover {
+    background: var(--accent-hover, #B8860B);
+}

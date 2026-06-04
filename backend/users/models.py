@@ -202,35 +202,11 @@ class User(AbstractUser):
             return User.AgeCategory.U21
         else:
             return User.AgeCategory.OUT_OF_RANGE
-    
-    def update_age_category_if_needed(self) -> bool:
-        """
-        Check if age category needs update and update it if needed.
-        Returns True if category was updated, False otherwise.
-        """
-        # No birth date case
-        if not self.birth_date:
-            if self.age_category != User.AgeCategory.OUT_OF_RANGE:
-                self.age_category = User.AgeCategory.OUT_OF_RANGE
-                return True
-            return False
         
-        # Check if 3 months have passed
-        three_months_ago = timezone.now() - timedelta(days=90)
-        if self.updated_at and self.updated_at > three_months_ago:
-            return False
-        
-        # Calculate and check if update needed
+    def save(self, *args, **kwargs):
         new_category = self.calculate_age_category()
         if self.age_category != new_category:
             self.age_category = new_category
-            return True
-        
-        return False
-
-    def save(self, *args, **kwargs):
-        # Update age category if needed
-        self.update_age_category_if_needed()
         
         # Save once with all updates
         super().save(*args, **kwargs)

@@ -20,7 +20,7 @@ interface CourseCardProps {
     enrollmentStatus?: 'WAITING_FOR_PAYMENT' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | string
     showAddress?: boolean
     showSessions?: boolean
-    onClick?: () => void
+    onClickUrl?: string
     className?: string
 }
 
@@ -36,7 +36,7 @@ export default function CourseCard({
     enrollmentStatus,
     showAddress = true,
     showSessions = true,
-    onClick,
+    onClickUrl,
     className = '',
 }: CourseCardProps) {
     const router = useRouter()
@@ -106,10 +106,8 @@ export default function CourseCard({
     const statusInfo = displayStatus ? getStatusDisplay(displayStatus) : null
 
     const handleClick = () => {
-        if (onClick) {
-            onClick()
-        } else {
-            router.push(`/courses/${id}`)
+        if (onClickUrl) {
+            router.push(onClickUrl)
         }
     }
 
@@ -146,7 +144,7 @@ export default function CourseCard({
             <div className={styles.genderSection}>
                 <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
                     <Icon icon={Icons.user} className={styles.genderIcon} />
-                    <span className={styles.genderLabel}>مناسب برای</span>
+                    <span className={styles.genderLabel}>مناسب</span>
                 </div>
                 <span className={styles.genderValue}>{getGenderDisplay(gender)}</span>
             </div>
@@ -185,7 +183,7 @@ export default function CourseCard({
             {/* Bottom - Price */}
             <div className={styles.bottom}>
                 <div className={styles.priceSection}>
-                    <span className={styles.priceLabel}>قیمت دوره</span>
+                    <span className={styles.priceLabel}>هزینه دوره</span>
                     <span className={styles.price}>{formatPrice(price)} تومان</span>
                 </div>
             </div>

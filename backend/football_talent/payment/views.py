@@ -161,13 +161,13 @@ class FootballPaymentCallbackAPIView(APIView):
         logger.info(f"Football callback received: trackId={track_id}, success={success_flag}, orderId={order_id}, status={gateway_status}")
         
         if not track_id or not order_id:
-            return redirect('/football-payment/result?status=failed&error=missing_parameters')
+            return redirect('/football/payment/result?status=failed&error=missing_parameters')
         
         # Find payment
         try:
             payment = FootballPayment.objects.select_for_update().get(res_num=order_id)
         except FootballPayment.DoesNotExist:
-            return redirect(f"/football-payment/result?status=failed&error=order_not_found")
+            return redirect(f"/football/payment/result?status=failed&error=order_not_found")
         
         # Update track_id if needed
         if not payment.track_id:
@@ -176,10 +176,10 @@ class FootballPaymentCallbackAPIView(APIView):
         
         # Prevent double processing
         if payment.status == FootballPaymentStatus.PAID:
-            return redirect(f"/football-payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")
+            return redirect(f"/football/payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")
         
         if payment.status == FootballPaymentStatus.REVERSED:
-            return redirect(f"/football-payment/result?status=failed&res_num={order_id}&error=already_reversed")
+            return redirect(f"/football/payment/result?status=failed&res_num={order_id}&error=already_reversed")
         
         # Check success flag
         if success_flag != '1':
@@ -187,7 +187,7 @@ class FootballPaymentCallbackAPIView(APIView):
                 payment.mark_as_cancelled()
             else:
                 payment.mark_as_failed()
-            return redirect(f"/football-payment/result?status=failed&res_num={order_id}&error=payment_unsuccessful")
+            return redirect(f"/football/payment/result?status=failed&res_num={order_id}&error=payment_unsuccessful")
         
         # IMPORTANT: Update amount one more time before verification
         # This ensures the user pays the absolute latest price
@@ -204,7 +204,7 @@ class FootballPaymentCallbackAPIView(APIView):
             if verify_result.get('amount') != payment.amount:
                 payment.mark_as_failed()
                 logger.error(f"Amount mismatch: expected {payment.amount}, got {verify_result.get('amount')}")
-                return redirect(f"/football-payment/result?status=failed&res_num={order_id}&error=amount_mismatch")
+                return redirect(f"/football/payment/result?status=failed&res_num={order_id}&error=amount_mismatch")
             
             # Mark as paid - this FREEZES the amount
             payment.mark_as_paid(
@@ -219,12 +219,12 @@ class FootballPaymentCallbackAPIView(APIView):
                 enrollment.save(update_fields=['enrollment_status'])
             
             logger.info(f"Football payment {payment.id} verified successfully. Amount frozen at {payment.amount}")
-            return redirect(f"/football-payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")
+            return redirect(f"/football/payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")
         else:
             payment.mark_as_failed()
             error_msg = verify_result.get('message', 'verification_failed')
             logger.error(f"Verification failed for football payment {payment.id}: {error_msg}")
-            return redirect(f"/football-payment/result?status=failed&res_num={order_id}&error={error_msg}")
+            return redirect(f"/football/payment/result?status=failed&res_num={order_id}&error={error_msg}")
 
 
 class FootballPaymentStatusAPIView(APIView):

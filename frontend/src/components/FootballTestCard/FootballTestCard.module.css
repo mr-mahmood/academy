@@ -1,0 +1,298 @@
+.card {
+    background: var(--bg-primary);
+    border-radius: 2rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border-color);
+    transition: all 200ms ease;
+    position: relative;
+    cursor: pointer;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.card:hover {
+    box-shadow: 0 8px 30px var(--shadow-color);
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.card:active {
+    transform: translateY(0);
+}
+
+/* Status Badge */
+.statusBadge {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.statusIcon {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+/* Status Colors */
+.statusWarning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #D97706;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.statusSuccess {
+    background: rgba(34, 197, 94, 0.12);
+    color: #16A34A;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.statusDanger {
+    background: rgba(239, 68, 68, 0.12);
+    color: #DC2626;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.statusInfo {
+    background: rgba(59, 130, 246, 0.12);
+    color: #2563EB;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.statusDefault {
+    background: rgba(107, 114, 128, 0.12);
+    color: #6B7280;
+    border: 1px solid rgba(107, 114, 128, 0.25);
+}
+
+/* Main Section - Position & Age */
+.mainSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.iconContainer {
+    width: 48px;
+    height: 48px;
+    border-radius: 1.2rem;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.iconContainer svg {
+    width: 24px !important;
+    height: 24px !important;
+}
+
+.mainInfo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.ageText {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Gender Section */
+.genderSection {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.65rem 0.875rem;
+    background: var(--bg-secondary);
+    border-radius: 1.3rem;
+}
+
+.genderIcon {
+    width: 16px !important;
+    height: 16px !important;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.genderLabel {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.genderValue {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: left;
+}
+
+/* Date & Time Container */
+.dateTimeContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: var(--bg-secondary);
+    border-radius: 1.3rem;
+    padding: 0.65rem 0.875rem;
+}
+
+.dateTimeRow {
+    display: flex;
+    gap: 0.2rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dateTimeDay {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.dateTimeTime {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    direction: ltr;
+}
+
+.dateTimeIcon {
+    width: 14px !important;
+    height: 14px !important;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+/* Address Row */
+.addressRow {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    background: var(--bg-secondary);
+    border-radius: 1.3rem;
+    padding: 0.65rem 0.875rem;
+    font-size: 0.8rem;
+}
+
+.addressIcon {
+    width: 16px !important;
+    height: 16px !important;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.addressValue {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.addressSeparator {
+    color: var(--text-muted);
+    margin: 0 0.25rem;
+}
+
+.addressDetail {
+    color: var(--text-muted);
+    font-weight: 400;
+    word-break: break-word;
+    text-align: left;
+    flex: 1;
+}
+
+/* Capacity Row */
+.capacityRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.65rem 0.875rem;
+    background: var(--bg-secondary);
+    border-radius: 1.3rem;
+}
+
+.capacityIcon {
+    width: 16px !important;
+    height: 16px !important;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.capacityLabel {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.capacityValue {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: left;
+}
+
+/* Bottom - Price */
+.bottom {
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.priceSection {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.priceLabel {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding-inline-start: 1rem;
+}
+
+.price {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--accent-color);
+    padding-inline-end: 1rem;
+}
+
+.dateTimeIcon {
+    width: 14px !important;
+    height: 14px !important;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}

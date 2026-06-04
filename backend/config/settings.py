@@ -228,6 +228,7 @@ CELERY_TASK_SERIALIZER = "json"
 # Zibal Payment Gateway Settings
 # -----------------------------
 ZIBAL_MERCHANT = os.environ.get('ZIBAL_MERCHANT')
+ZIBAL_FOOTBALL_MERCHANT = os.environ.get('ZIBAL_FOOTBALL_MERCHANT')
 
 # -----------------------------
 # Sms.ir

@@ -85,6 +85,21 @@ export default function DashboardPage() {
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>
 
+                {/* My Tests */}
+                <button
+                    className={styles.selectionCard}
+                    onClick={() => router.push('/my-tests')}
+                >
+                    <div className={styles.cardIcon}>
+                        <Icon icon={Icons.school} />
+                    </div>
+                    <div className={styles.cardContent}>
+                        <h3>تست های استعدادیابی من</h3>
+                        <p>مشاهده تست هایی که ثبت نام کرده‌اید</p>
+                    </div>
+                    <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
+                </button>
+
                 {/* Payments/Financial */}
                 <button
                     className={styles.selectionCard}

@@ -67,7 +67,7 @@ function PaymentResultContent() {
                             if (prev <= 1) {
                                 clearInterval(interval)
                                 if (courseId) {
-                                    router.push(`/courses/${courseId}`)
+                                    router.push(`/academy/courses/${courseId}`)
                                 } else {
                                     router.push('/dashboard')
                                 }
@@ -140,7 +140,7 @@ function PaymentResultContent() {
                                 onClick={() => {
                                     const courseId = sessionStorage.getItem('payment_course_id')
                                     if (courseId) {
-                                        router.push(`/courses/${courseId}`)
+                                        router.push(`/academy/courses/${courseId}`)
                                     } else {
                                         router.push('/dashboard')
                                     }

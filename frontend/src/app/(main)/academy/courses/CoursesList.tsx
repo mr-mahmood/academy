@@ -1,18 +1,17 @@
-// app/academy-details/AcademyCoursesList.tsx
 'use client'
 
 import { Icon, Icons } from '@/components/icon'
 import CourseCard from '@/components/CourseCard/CourseCard'
 import type { Course } from '@/types/Course'
-import styles from './academyDetails.module.css'
-import { AcademyCoursesSkeleton } from './AcademySkeletons'
+import styles from './courses.module.css'
+import { CourseCardSkeleton } from './Skeletons'
 
-interface AcademyCoursesListProps {
+interface CoursesListProps {
     courses: Course[]
     loading?: boolean
 }
 
-export default function AcademyCoursesList({ courses, loading = false }: AcademyCoursesListProps) {
+export default function CoursesList({ courses, loading = false }: CoursesListProps) {
     // Function to reset filters
     const handleResetFilters = () => {
         // Dispatch event to reset filters in the Filter component
@@ -21,7 +20,13 @@ export default function AcademyCoursesList({ courses, loading = false }: Academy
 
     // Show skeletons while loading
     if (loading) {
-        return <AcademyCoursesSkeleton />
+        return (
+            <div className={styles.coursesList}>
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <CourseCardSkeleton key={i} />
+                ))}
+            </div>
+        )
     }
 
     if (courses.length === 0) {
@@ -54,6 +59,7 @@ export default function AcademyCoursesList({ courses, loading = false }: Academy
                     status={course.status}
                     showAddress={true}
                     showSessions={true}
+                    onClickUrl={`/academy/courses/${course.id}`}
                 />
             ))}
         </div>

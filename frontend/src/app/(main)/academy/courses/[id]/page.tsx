@@ -280,7 +280,7 @@ export default function ClassDetailPage() {
             <div className={styles.errorContainer}>
                 <div className={styles.errorIcon}><Icon icon={Icons.timesCircle} /></div>
                 <div><h3>خطا</h3><p>{error || 'دوره مورد نظر یافت نشد'}</p></div>
-                <button onClick={() => router.push('/dashboard')} className={styles.backButton}>بازگشت</button>
+                <button onClick={() => router.back()} className={styles.backButton}>بازگشت</button>
             </div>
         )
     }
@@ -490,7 +490,7 @@ export default function ClassDetailPage() {
                         <button
                             className={styles.preRegisterButton}
                             onClick={() => {
-                                sessionStorage.setItem('pendingRegistration', JSON.stringify({ courseId: course.id }))
+                                sessionStorage.setItem('pendingRegistration', JSON.stringify({ courseId: course.id, parent: "academy" }))
                                 router.push('/login')
                             }}
                         >
@@ -506,10 +506,10 @@ export default function ClassDetailPage() {
                         {showModal === 'preRegister' && (
                             <>
                                 <div className={styles.modalIcon}><Icon icon={Icons.edit} /></div>
-                                <h3 className={styles.modalTitle}>تأیید پیش‌ثبت‌نام</h3>
+                                <h3 className={styles.modalTitle}>تأیید پیش‌ ثبت‌ نام</h3>
                                 <p className={styles.modalText}>آیا مایل به پیش‌ثبت‌نام در دوره "{course.sport?.name}" هستید؟</p>
                                 <div className={styles.modalWarning}>
-                                    <Icon icon={Icons.infoCircle} /><span>پس از پیش‌ثبت‌نام، برای تکمیل باید پرداخت را انجام دهید</span>
+                                    <Icon icon={Icons.infoCircle} /><span>پس از پیش‌ ثبت‌ نام، برای تکمیل باید پرداخت را انجام دهید</span>
                                 </div>
                                 <div className={styles.modalActions}>
                                     <button onClick={() => setShowModal(null)} disabled={processing} className={styles.modalCancelBtn}>انصراف</button>

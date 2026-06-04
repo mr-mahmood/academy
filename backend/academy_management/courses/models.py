@@ -58,6 +58,7 @@ class Course(models.Model):
         default=20_000_000,
         verbose_name="Price (Rial)"
     )
+    
     gender_requirement = models.CharField(
         max_length=10,
         choices=GenderRequirement.choices,

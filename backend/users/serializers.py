@@ -35,6 +35,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "role",
             "birth_date_timestamp",
             "birth_date",
+            "age_category",
             "is_active",
             "state",
             "city",
@@ -43,7 +44,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "created_at", 
             "updated_at"
         ]
-        read_only_fields = ["id", "created_at", "updated_at", "birth_date"]
+        read_only_fields = ["id", "created_at", "updated_at", "birth_date", "age_category"]
     
     # ==============================================================
     # Validation
