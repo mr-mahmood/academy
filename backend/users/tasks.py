@@ -3,26 +3,25 @@ from celery import shared_task
 from django.utils import timezone
 from django.core.cache import cache
 from users.models import User
-from football_talent.enrollment.models import FootballEnrollment
 import logging
 
 logger = logging.getLogger(__name__)
 
-@shared_task
-def update_all_users_age_categories():
-    """Update age categories for all users (Weekly Sunday 3 AM)"""
-    users = User.objects.all()
-    updated_count = 0
+# @shared_task
+# def send_daily_birthday_wishes():
+#     today = timezone.now().date()
     
-    for user in users:
-        old_category = user.age_category
-        new_category = user.calculate_age_category()
-        
-        if old_category != new_category:
-            user.age_category = new_category
-            user.save(update_fields=['age_category', 'updated_at'])
-            FootballEnrollment.update_all_enrollments_for_user(user)
-            updated_count += 1
+#     # Find users with birthday today
+#     birthday_users = User.objects.filter(
+#         birth_date__isnull=False,
+#         is_active=True,
+#         birth_date__month=today.month,
+#         birth_date__day=today.day
+#     )
     
-    logger.info(f"Updated age categories for {updated_count} users")
-    return updated_count
+#     for user in birthday_users:
+#         full_name = f"{user.first_name} {user.last_name}".strip() or ""
+#         send_birthday_wishes_sms_task.delay(user.phone_number, full_name)
+#         logger.info(f"Birthday wish sent to {user.phone_number}")
+    
+#     return f"Sent {birthday_users.count()} birthday wishes"

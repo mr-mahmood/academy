@@ -57,6 +57,7 @@ class UserAdmin(BaseUserAdmin):
                 "city",
                 "address",
                 "profile_image",
+                "token_version",
                 "is_active",
                 "is_staff",
                 "is_superuser",

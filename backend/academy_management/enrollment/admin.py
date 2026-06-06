@@ -6,7 +6,7 @@ from config.admin import admin_site
 
 
 class EnrollmentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user_link', 'course_link', 'enrollment_status', 'enrolled_at']
+    list_display = ['id', 'user_link', 'course_link', 'enrollment_status', 'reminder_count', 'last_reminder_at', 'enrolled_at']
     list_filter = ['enrollment_status']
     search_fields = ['user__full_name', 'user__phone_number', 'course__sport__name']
     readonly_fields = ['enrolled_at', 'updated_at']
@@ -16,7 +16,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
             'fields': ('user', 'course')
         }),
         ('Status', {
-            'fields': ('enrollment_status',)
+            'fields': ('enrollment_status', 'reminder_count', 'last_reminder_at')
         }),
         ('Timestamps', {
             'fields': ('enrolled_at', 'updated_at', 'cancelled_at'),

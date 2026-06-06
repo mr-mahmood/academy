@@ -234,7 +234,6 @@ ZIBAL_FOOTBALL_MERCHANT = os.environ.get('ZIBAL_FOOTBALL_MERCHANT')
 # Sms.ir
 # -----------------------------
 SMSIR_API_KEY = os.environ.get('SMSIR_API_KEY')
-SMSIR_TEMPLATE_ID = os.environ.get('SMSIR_TEMPLATE_ID')
 
 
 # -----------------------------

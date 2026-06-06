@@ -1,6 +1,6 @@
 # apps/payments/views.py
 import logging
-from datetime import datetime
+from django.utils import timezone
 import random
 import string
 from django.shortcuts import redirect
@@ -13,11 +13,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
+from users.models import User
+
 from .models import Payment, PaymentStatus
 from .services import ZibalPaymentService
 from academy_management.courses.models import Course
 from academy_management.enrollment.models import Enrollment
 from core.exceptions import APIError, PaymentError, RegistrationError
+from core.sms_task import send_payment_success_sms_task
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +91,7 @@ class InitiatePaymentAPIView(APIView):
         
         # Generate unique order number (res_num) if not exists
         if not payment.res_num:
-            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+            timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
             random_digits = ''.join(random.choices(string.digits, k=6))
             payment.res_num = f"A{timestamp}{random_digits}"
             payment.save(update_fields=['res_num'])
@@ -192,6 +195,31 @@ class PaymentCallbackAPIView(APIView):
             if enrollment:
                 enrollment.enrollment_status = Enrollment.EnrollmentStatus.CONFIRMED
                 enrollment.save(update_fields=['enrollment_status'])
+                
+                # === Send payment success SMS asynchronously ===
+                try:
+                    # Get user and course details for SMS
+                    user: User = enrollment.user
+                    course = enrollment.course
+                    
+                    full_name = f"{user.full_name}".strip()
+                    sport_name = course.sport.name
+                    academy_name = course.academy.name
+                    tracking_code = str(verify_result.get('ref_number', payment.ref_num or 'N/A'))
+                    
+                    # Queue SMS task - this returns immediately, doesn't block
+                    send_payment_success_sms_task.delay(
+                        phone_number=user.phone_number,
+                        full_name=full_name,
+                        sport_name=sport_name,
+                        academy_name=academy_name,
+                        tracking_code=tracking_code
+                    )
+                    logger.info(f"Payment success SMS queued for user {user.phone_number}")
+                    
+                except Exception as e:
+                    pass
+                # === END OF SMS TASK ===
             
             logger.info(f"Payment {payment.id} verified successfully. Amount frozen at {payment.amount}")
             return redirect(f"/academy/payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")

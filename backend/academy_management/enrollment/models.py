@@ -27,6 +27,17 @@ class Enrollment(models.Model):
         verbose_name="Enrollment Status"
     )
     
+    reminder_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Number of Reminders Sent",
+        help_text="Count of payment reminders sent for this enrollment"
+    )
+    last_reminder_at = models.DateTimeField(
+        blank=True, 
+        null=True,
+        verbose_name="Last Reminder Sent At"
+    )
+    
     enrolled_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     cancelled_at = models.DateTimeField(blank=True, null=True)
@@ -101,6 +112,7 @@ class Enrollment(models.Model):
         # Track status changes
         was_cancelled = False
         was_reactivated = False
+        was_confirmed = False
         
         # If this is a new enrollment, check for existing enrollment first
         if is_new:
@@ -113,12 +125,16 @@ class Enrollment(models.Model):
                     # Reactivate cancelled enrollment
                     existing_enrollment.enrollment_status = self.EnrollmentStatus.WAITING_FOR_PAYMENT
                     existing_enrollment.cancelled_at = None
+                    existing_enrollment.reminder_count = 0  # Reset reminders
+                    existing_enrollment.last_reminder_at = None
                     existing_enrollment.save()
                     # Copy the data to current instance
                     self.pk = existing_enrollment.pk
                     self.enrollment_status = existing_enrollment.enrollment_status
                     self.enrolled_at = existing_enrollment.enrolled_at
                     self.updated_at = existing_enrollment.updated_at
+                    self.reminder_count = 0
+                    self.last_reminder_at = None
                     is_new = False
                     was_reactivated = True
                 elif existing_enrollment.enrollment_status == self.EnrollmentStatus.WAITING_FOR_PAYMENT:
@@ -127,6 +143,8 @@ class Enrollment(models.Model):
                     self.enrollment_status = existing_enrollment.enrollment_status
                     self.enrolled_at = existing_enrollment.enrolled_at
                     self.updated_at = existing_enrollment.updated_at
+                    self.reminder_count = existing_enrollment.reminder_count
+                    self.last_reminder_at = existing_enrollment.last_reminder_at
                     is_new = False
         
         if not is_new and not was_reactivated:
@@ -141,6 +159,15 @@ class Enrollment(models.Model):
                     self.EnrollmentStatus.CONFIRMED
                 ]:
                     was_reactivated = True
+                    # Reset reminders when reactivating
+                    self.reminder_count = 0
+                    self.last_reminder_at = None
+                # Check if status changed to CONFIRMED (payment completed)
+                if old.enrollment_status == self.EnrollmentStatus.WAITING_FOR_PAYMENT and self.enrollment_status == self.EnrollmentStatus.CONFIRMED:
+                    was_confirmed = True
+                    # Reset reminders when paid
+                    self.reminder_count = 0
+                    self.last_reminder_at = None
             except Enrollment.DoesNotExist:
                 pass
         

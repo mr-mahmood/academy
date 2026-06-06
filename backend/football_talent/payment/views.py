@@ -1,7 +1,7 @@
-# football_talent/payment/views.py - Updated InitiateFootballPaymentAPIView
+# football_talent/payment/views.py
 
 import logging
-from datetime import datetime
+from django.utils import timezone
 import random
 import string
 from django.shortcuts import redirect
@@ -14,10 +14,13 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
+from users.models import User
+
 from .models import FootballPayment, FootballPaymentStatus
 from .services import ZibalFootballPaymentService
 from football_talent.enrollment.models import FootballEnrollment
 from core.exceptions import APIError, PaymentError, RegistrationError
+from core.sms_task import send_football_registration_sms_task
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +86,7 @@ class InitiateFootballPaymentAPIView(APIView):
         
         # Generate unique order number (res_num) if not exists
         if not payment.res_num:
-            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+            timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
             random_digits = ''.join(random.choices(string.digits, k=6))
             payment.res_num = f"F{timestamp}{random_digits}"
             payment.save(update_fields=['res_num'])
@@ -187,6 +190,31 @@ class FootballPaymentCallbackAPIView(APIView):
             if enrollment:
                 enrollment.enrollment_status = FootballEnrollment.EnrollmentStatus.CONFIRMED
                 enrollment.save(update_fields=['enrollment_status'])
+                
+                # === ADD THIS: Send football registration SMS asynchronously ===
+                try:
+                    # Get user and course details for SMS
+                    user: User = enrollment.user
+                    course = enrollment.course
+                    
+                    full_name = f"{user.full_clean()}".strip()
+                    position = course.position
+                    academy_name = course.academy.name
+                    tracking_code = str(verify_result.get('ref_number', payment.ref_num or 'N/A'))
+                    
+                    # Queue SMS task - this returns immediately, doesn't block
+                    send_football_registration_sms_task.delay(
+                        phone_number=user.phone_number,
+                        full_name=full_name,
+                        position=position,
+                        academy_name=academy_name,
+                        tracking_code=tracking_code
+                    )
+                    logger.info(f"Football registration SMS queued for user {user.phone_number}")
+                    
+                except Exception as e:
+                    pass
+                # === END OF SMS TASK ===
             
             logger.info(f"Football payment {payment.id} verified successfully. Amount frozen at {payment.amount}")
             return redirect(f"/football/payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")

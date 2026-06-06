@@ -24,7 +24,7 @@ export default function HomePage() {
 
                 <button
                     className={styles.navCard}
-                    onClick={() => router.push('/academy/register')}
+                    onClick={() => router.push('/academy')}
                 >
                     <div className={styles.cardIcon}>
                         <Icon icon={Icons.school} />
@@ -58,11 +58,11 @@ export default function HomePage() {
                         <Icon icon={Icons.user} />
                     </div>
                     <div className={styles.cardContent}>
-                        <h3>{activeUser ? 'پنل کاربری' : 'ورود اعضا'}</h3>
+                        <h3>{activeUser ? 'پنل کاربری' : 'ورود'}</h3>
                         <p>
                             {activeUser
                                 ? 'مشاهده پنل کاربری'
-                                : 'ورود یا ثبت نام در سامانه'
+                                : 'ورود به حساب شخصی در سامانه'
                             }
                         </p>
                     </div>

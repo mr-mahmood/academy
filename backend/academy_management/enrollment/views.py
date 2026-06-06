@@ -10,6 +10,8 @@ from .serializers import EnrollmentSerializer
 from authentication.permissions import IsAdmin
 from core.exceptions import APIError, RegistrationError
 
+from core.sms_task import send_pre_registration_sms_task  # Your Celery task
+
 
 class EnrollmentAPIView(APIView):
     """
@@ -70,17 +72,38 @@ class EnrollmentAPIView(APIView):
     def post(self, request):
         """Register for a course"""
         course_id = request.data.get('course_id')
+        user: User = request.user
         
         if not course_id:
             raise APIError(RegistrationError.COURSE_REQUIRED)
         
         # Create enrollment for the logged-in user
         enrollment = Enrollment(
-            user=request.user,
+            user=user,
             course_id=course_id
         )
         enrollment.save()
         
+        # Send pre-registration SMS asynchronously (does NOT block the response)
+        try:
+            # Get course details for SMS
+            course = enrollment.course
+            sport_name = course.sport.name
+            academy_name = course.academy.name
+            full_name = f"{user.full_name}".strip()
+            
+            # Queue SMS task - this returns immediately, doesn't wait
+            send_pre_registration_sms_task.delay(
+                phone_number=user.phone_number,
+                full_name=full_name,
+                sport_name=sport_name,
+                academy_name=academy_name
+            )
+            # SMS will be sent in background by Celery worker
+            
+        except Exception as e:
+            pass
+       
         serializer = EnrollmentSerializer(enrollment)
         return Response({
             "message": "Successfully registered for the course. Please complete payment.",
@@ -110,9 +133,10 @@ class EnrollmentAPIView(APIView):
         }, status=status.HTTP_200_OK)
         
     def delete(self, request, pk):
+        user: User = request.user
         enrollment = Enrollment.get_enrollment(pk)
         
-        if enrollment.user != request.user:
+        if enrollment.user != user:
             raise APIError(RegistrationError.ENROLLMENT_ACCESS_DENIED)
         
         enrollment.delete()

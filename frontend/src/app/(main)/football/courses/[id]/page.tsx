@@ -437,14 +437,14 @@ export default function FootballTestDetailPage() {
                         <p className={styles.modalText}>آیا از لغو ثبت‌نام در تست اطمینان دارید؟</p>
                         <div className={styles.modalWarning}>
                             <Icon icon={Icons.infoCircle} />
-                            <span>این عملیات غیرقابل بازگشت است</span>
+                            <span>در صورت لغو ثبت نام وجه پرداختی شما غیر قابل بازگشت است</span>
                         </div>
                         <div className={styles.modalActions}>
                             <button onClick={() => setShowModal(null)} disabled={cancelProcessing} className={styles.modalCancelBtn}>
                                 انصراف
                             </button>
                             <button onClick={handleCancelEnrollment} disabled={cancelProcessing} className={styles.modalDangerBtn}>
-                                {cancelProcessing ? <div className={styles.smallSpinner}></div> : 'لغو ثبت‌نام'}
+                                {cancelProcessing ? <div className={styles.smallSpinner}></div> : 'لغو ثبت‌ نام'}
                             </button>
                         </div>
                     </div>

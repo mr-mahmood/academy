@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.cache import cache
 from users.models import User
 from users.validators import validate_phone_number
-from core.sms import send_sms_verification
+from core.sms_task import send_sms_verification_task
 from core.exceptions import APIError, AuthOTPError
 
 import logging
@@ -73,11 +73,10 @@ def generate_otp(phone_number: str):
     }
     cache.set(cache_key, otp_data, OTP_EXPIRY_SECONDS)
     
-    result = send_sms_verification(phone_number, otp_code)
-    # logger.info(f'OTP code: {otp_code}')
+    send_sms_verification_task.delay(phone_number, otp_code)
     del otp_code
     
-    return result, user_exists
+    return True, user_exists
     
 
 def verify_otp(phone_number: str, otp_code: str) -> bool:

@@ -207,15 +207,18 @@ class User(AbstractUser):
             return User.AgeCategory.OUT_OF_RANGE  # Above 21
             
     def save(self, *args, **kwargs):
+        is_new = self.pk is None
         new_category = self.calculate_age_category()
+        
         if self.age_category != new_category:
             self.age_category = new_category
-            
+        
+        super().save(*args, **kwargs)
+        
+        # NOW the user has an ID, so we can safely query related enrollments
+        if not is_new:  # Only for existing users (updates)
             from football_talent.enrollment.models import FootballEnrollment
             FootballEnrollment.update_all_enrollments_for_user(self)
-        
-        # Save once with all updates
-        super().save(*args, **kwargs)
         
         # Clear caches
         CacheService.invalidate_model(self.__class__, self.pk)

@@ -48,9 +48,10 @@ export default function ClassDetailPage() {
     const [enrollment, setEnrollment] = useState<Enrollment | null>(null)
     const [userEnrollments, setUserEnrollments] = useState<Enrollment[]>([])
     const [loading, setLoading] = useState(true)
-    const [registering, setRegistering] = useState(false)
+    const [preRegistering, setPreRegistering] = useState(false)
+    const [paymentProcessing, setPaymentProcessing] = useState(false)
     const [cancelProcessing, setCancelProcessing] = useState(false)
-    const [showModal, setShowModal] = useState<'register' | 'cancel' | null>(null)
+    const [showModal, setShowModal] = useState<'preRegister' | 'pay' | 'cancel' | null>(null)
 
     const classId = params.id as string
     const isValidId = classId && classId !== 'undefined'
@@ -112,25 +113,27 @@ export default function ClassDetailPage() {
     }, [course, userEnrollments])
 
     const isEnrolled = enrollment?.enrollment_status === 'CONFIRMED'
-    const isRegistered = enrollment !== null
+    const isPreRegistered = enrollment?.enrollment_status === 'WAITING_FOR_PAYMENT'
 
-    const canRegister = useCallback((): boolean => {
+    const canPreRegister = useCallback((): boolean => {
         if (!course || !activeUser) return false
         if (course.status !== 'ACTIVE') return false
         if (isEnrolled) return false
+        if (isPreRegistered) return false
         if (course.gender_requirement && course.gender_requirement !== activeUser?.gender) return false
         if (hasTimeConflict()) return false
         return true
-    }, [course, activeUser, isEnrolled, hasTimeConflict])
+    }, [course, activeUser, isEnrolled, isPreRegistered, hasTimeConflict])
 
     const getDisableReason = useCallback((): string | null => {
         if (!course || !activeUser) return null
         if (isEnrolled) return 'شما قبلاً در این دوره ثبت‌نام کرده‌اید'
+        if (isPreRegistered) return 'پیش‌ ثبت‌ نام انجام شده است. برای تکمیل، پرداخت را انجام دهید'
         if (course.status !== 'ACTIVE') return 'این دوره در حال حاضر فعال نیست'
         if (course.gender_requirement && course.gender_requirement !== activeUser.gender) return 'این دوره برای جنسیت شما مناسب نیست'
         if (hasTimeConflict()) return 'تداخل زمانی با دوره‌های دیگر شما وجود دارد'
         return null
-    }, [course, activeUser, isEnrolled, hasTimeConflict])
+    }, [course, activeUser, isEnrolled, isPreRegistered, hasTimeConflict])
 
     const refreshEnrollments = useCallback(async () => {
         const result = await apiFetch({ url: 'api/academy/enrollment/', method: 'GET' })
@@ -140,21 +143,21 @@ export default function ClassDetailPage() {
         }
     }, [])
 
-    const handleRegisterAndPay = async () => {
+    const handlePreRegister = async () => {
         if (!activeUser || !course) return
         setShowModal(null)
-        setRegistering(true)
+        setPreRegistering(true)
 
         try {
-            const enrollmentResult = await apiFetch({
+            const result = await apiFetch({
                 url: 'api/academy/enrollment/',
                 method: 'POST',
                 body: { course_id: course.id }
             })
 
-            if (!enrollmentResult.success) {
-                let errorMessage = 'خطا در ثبت‌ نام'
-                switch (enrollmentResult.code) {
+            if (!result.success) {
+                let errorMessage = 'خطا در پیش‌ ثبت‌ نام'
+                switch (result.code) {
                     case 506:
                         errorMessage = 'ظرفیت دوره تکمیل شده است'
                         break
@@ -171,7 +174,7 @@ export default function ClassDetailPage() {
                         errorMessage = 'این دوره برای جنسیت شما مناسب نیست'
                         break
                     default:
-                        errorMessage = enrollmentResult.message || 'خطا در ثبت‌نام'
+                        errorMessage = result.message || 'خطا در پیش‌ ثبت‌نام'
                 }
                 showPopUp({
                     title: 'خطا',
@@ -179,43 +182,67 @@ export default function ClassDetailPage() {
                     type: 'error',
                     duration: 4000
                 })
-                setRegistering(false)
+                setPreRegistering(false)
                 return
             }
 
-            const newEnrollment = enrollmentResult.data.enrollment
-
-            const paymentResult = await apiFetch({
-                url: 'api/academy/payment/initiate/',
-                method: 'POST',
-                body: {
-                    course_id: course.id,
-                    enrollment_id: newEnrollment.id
-                }
-            }) as PaymentInitiateResponse
-
-            if (paymentResult.success && paymentResult.data) {
-                sessionStorage.setItem('academy_payment_pending', 'true')
-                sessionStorage.setItem('academy_payment_course_id', String(course.id))
-                window.location.href = paymentResult.data.gateway_url
-            } else {
-                showPopUp({
-                    title: 'خطا',
-                    message: paymentResult.message || 'خطا در اتصال به درگاه پرداخت',
-                    type: 'error',
-                    duration: 4000
-                })
-                setRegistering(false)
-            }
+            showPopUp({
+                title: 'موفق',
+                message: 'پیش‌ ثبت‌ نام با موفقیت انجام شد. لطفاً پرداخت را تکمیل کنید.',
+                type: 'success',
+                duration: 3000
+            })
+            await refreshEnrollments()
         } catch (err) {
-            console.error('Registration error:', err)
+            console.error('Pre-registration error:', err)
             showPopUp({
                 title: 'خطا',
                 message: 'خطا در ارتباط با سرور',
                 type: 'error',
                 duration: 4000
             })
-            setRegistering(false)
+        } finally {
+            setPreRegistering(false)
+        }
+    }
+
+    const handlePayment = async () => {
+        if (!activeUser || !course || !enrollment) return
+        setShowModal(null)
+        setPaymentProcessing(true)
+
+        try {
+            const result = await apiFetch({
+                url: 'api/academy/payment/initiate/',
+                method: 'POST',
+                body: {
+                    course_id: course.id,
+                    enrollment_id: enrollment.id
+                }
+            }) as PaymentInitiateResponse
+
+            if (result.success && result.data) {
+                sessionStorage.setItem('academy_payment_pending', 'true')
+                sessionStorage.setItem('academy_payment_course_id', String(course.id))
+                window.location.href = result.data.gateway_url
+            } else {
+                showPopUp({
+                    title: 'خطا',
+                    message: result.message || 'خطا در اتصال به درگاه پرداخت',
+                    type: 'error',
+                    duration: 4000
+                })
+                setPaymentProcessing(false)
+            }
+        } catch (err) {
+            console.error('Payment error:', err)
+            showPopUp({
+                title: 'خطا',
+                message: 'خطا در ارتباط با سرور',
+                type: 'error',
+                duration: 4000
+            })
+            setPaymentProcessing(false)
         }
     }
 
@@ -267,7 +294,7 @@ export default function ClassDetailPage() {
         if (paymentStatus === 'success' && paymentPending === 'true') {
             showPopUp({
                 title: 'موفق',
-                message: 'پرداخت با موفقیت انجام شد. ثبت ‌نام شما تکمیل گردید.',
+                message: 'پرداخت با موفقیت انجام شد. ثبت‌ نام شما تکمیل گردید.',
                 type: 'success',
                 duration: 5000
             })
@@ -306,7 +333,7 @@ export default function ClassDetailPage() {
     let statusBadge = null
     if (isEnrolled) {
         statusBadge = { text: 'ثبت‌نام قطعی', class: styles.confirmedBadge, icon: Icons.check }
-    } else if (isRegistered) {
+    } else if (isPreRegistered) {
         statusBadge = { text: 'در انتظار پرداخت', class: styles.pendingBadge, icon: Icons.clock }
     } else {
         statusBadge = { text: 'ثبت‌ نام نشده', class: styles.notRegisteredBadge, icon: Icons.infoCircle }
@@ -444,12 +471,29 @@ export default function ClassDetailPage() {
                     <button onClick={() => setShowModal('cancel')} className={styles.cancelButton}>
                         <Icon icon={Icons.timesCircle} /><span>لغو ثبت‌ نام</span>
                     </button>
-                ) : canRegister() ? (
-                    <button onClick={() => setShowModal('register')} disabled={registering} className={styles.registerButton}>
-                        {registering ? (
-                            <><span>در حال ثبت‌ نام و پرداخت</span> <div className={styles.smallSpinner}></div></>
+                ) : isPreRegistered ? (
+                    <>
+                        <button onClick={() => setShowModal('pay')} disabled={paymentProcessing} className={styles.registerButton}>
+                            {paymentProcessing ? (
+                                <><span>پرداخت و تکمیل ثبت‌ نام</span> <div className={styles.smallSpinner}></div></>
+                            ) : (
+                                <><Icon icon={Icons.creditCard} /><span>پرداخت و تکمیل ثبت‌ نام</span></>
+                            )}
+                        </button>
+                        <button onClick={() => setShowModal('cancel')} disabled={cancelProcessing} className={styles.cancelButton}>
+                            {cancelProcessing ? (
+                                <><span>لغو ثبت‌ نام</span> <div className={styles.smallSpinner}></div></>
+                            ) : (
+                                <><Icon icon={Icons.timesCircle} /><span>لغو ثبت‌ نام</span></>
+                            )}
+                        </button>
+                    </>
+                ) : canPreRegister() ? (
+                    <button onClick={() => setShowModal('preRegister')} disabled={preRegistering} className={styles.registerButton}>
+                        {preRegistering ? (
+                            <><span>پیش‌ ثبت‌ نام</span> <div className={styles.smallSpinner}></div></>
                         ) : (
-                            <><Icon icon={Icons.creditCard} /><span>ثبت ‌نام و پرداخت</span></>
+                            <><Icon icon={Icons.edit} /><span>پیش‌ ثبت‌ نام</span></>
                         )}
                     </button>
                 ) : (
@@ -467,30 +511,54 @@ export default function ClassDetailPage() {
                                 router.push('/login')
                             }}
                         >
-                            <Icon icon={Icons.edit} /><span>ورود و ثبت‌ نام</span>
+                            <Icon icon={Icons.edit} /><span>ورود و پیش‌ ثبت‌ نام</span>
                         </button>
                     )
                 )}
             </div>
 
-            {showModal === 'register' && (
-                <div className={styles.modalOverlay} onClick={() => !registering && setShowModal(null)}>
+            {showModal === 'preRegister' && (
+                <div className={styles.modalOverlay} onClick={() => !preRegistering && setShowModal(null)}>
                     <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        <div className={styles.modalIcon}><Icon icon={Icons.creditCard} /></div>
-                        <h3 className={styles.modalTitle}>تأیید ثبت‌ نام و پرداخت</h3>
+                        <div className={styles.modalIcon}><Icon icon={Icons.edit} /></div>
+                        <h3 className={styles.modalTitle}>تأیید پیش‌ ثبت‌ نام</h3>
                         <p className={styles.modalText}>
-                            آیا مایل به ثبت‌ نام در دوره و پرداخت مبلغ <strong>{formatPrice(course.price)} تومان</strong> هستید؟
+                            آیا مایل به پیش‌ ثبت‌ نام در دوره هستید؟
                         </p>
                         <div className={styles.modalWarning}>
                             <Icon icon={Icons.infoCircle} />
-                            <span>پس از پرداخت، ثبت‌ نام شما نهایی خواهد شد</span>
+                            <span>پس از پیش‌ ثبت‌ نام، برای تکمیل باید پرداخت را انجام دهید</span>
                         </div>
                         <div className={styles.modalActions}>
-                            <button onClick={() => setShowModal(null)} disabled={registering} className={styles.modalCancelBtn}>
+                            <button onClick={() => setShowModal(null)} disabled={preRegistering} className={styles.modalCancelBtn}>
                                 انصراف
                             </button>
-                            <button onClick={handleRegisterAndPay} disabled={registering} className={styles.modalConfirmBtn}>
-                                {registering ? <div className={styles.smallSpinner}></div> : 'تأیید و پرداخت'}
+                            <button onClick={handlePreRegister} disabled={preRegistering} className={styles.modalConfirmBtn}>
+                                {preRegistering ? <div className={styles.smallSpinner}></div> : 'تأیید'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showModal === 'pay' && (
+                <div className={styles.modalOverlay} onClick={() => !paymentProcessing && setShowModal(null)}>
+                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalIcon}><Icon icon={Icons.creditCard} /></div>
+                        <h3 className={styles.modalTitle}>تأیید پرداخت</h3>
+                        <p className={styles.modalText}>
+                            برای تکمیل ثبت‌ نام در دوره مبلغ <strong>{formatPrice(course.price)} تومان</strong> پرداخت می‌شود
+                        </p>
+                        <div className={styles.modalWarning}>
+                            <Icon icon={Icons.infoCircle} />
+                            <span>این عملیات غیرقابل بازگشت است</span>
+                        </div>
+                        <div className={styles.modalActions}>
+                            <button onClick={() => setShowModal(null)} disabled={paymentProcessing} className={styles.modalCancelBtn}>
+                                انصراف
+                            </button>
+                            <button onClick={handlePayment} disabled={paymentProcessing} className={styles.modalConfirmBtn}>
+                                {paymentProcessing ? <div className={styles.smallSpinner}></div> : 'پرداخت'}
                             </button>
                         </div>
                     </div>
@@ -505,7 +573,7 @@ export default function ClassDetailPage() {
                         <p className={styles.modalText}>آیا از لغو ثبت‌ نام در دوره اطمینان دارید؟</p>
                         <div className={styles.modalWarning}>
                             <Icon icon={Icons.infoCircle} />
-                            <span>این عملیات غیرقابل بازگشت است</span>
+                            <span>در صورت لغو ثبت نام وجه پرداختی شما غیر قابل بازگشت است</span>
                         </div>
                         <div className={styles.modalActions}>
                             <button onClick={() => setShowModal(null)} disabled={cancelProcessing} className={styles.modalCancelBtn}>

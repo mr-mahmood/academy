@@ -27,7 +27,7 @@ export default function AcademyHeader() {
                         <div className={styles.logoCircle}>
                             <img
                                 src="/logo.png"
-                                alt="مدرسه تخصصی باشگاه سپاهان"
+                                alt="باشگاه فولاد مبارکه سپاهان"
                                 className={styles.logoImage}
                             />
                         </div>
@@ -35,7 +35,7 @@ export default function AcademyHeader() {
                 </div>
                 <div className={styles.headerCenter}>
                     <span className={styles.logoText}>
-                        مدرسه تخصصی باشگاه سپاهان
+                        باشگاه فولاد مبارکه سپاهان
                     </span>
                 </div>
             </div>

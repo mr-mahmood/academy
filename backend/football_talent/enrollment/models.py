@@ -99,22 +99,40 @@ class FootballEnrollment(models.Model):
     def update_all_enrollments_for_user(cls, user: User):
         """
         Update all enrollments for a user when age category changes.
-        If user becomes OUT_OF_RANGE, delete all enrollments.
+        - Never delete paid (CONFIRMED) enrollments
+        - Only delete waiting for payment enrollments when user becomes OOR
         """
-        # If user is OUT_OF_RANGE, delete all enrollments
+        # If user is OUT_OF_RANGE
         if user.age_category == User.AgeCategory.OUT_OF_RANGE:
-            deleted_count, _ = cls.objects.filter(user=user).delete()
-            if deleted_count > 0:
-                # Clear cache for this user
-                cache.delete(f"football_user:{user.id}:enrollments")
-                cache.delete(f"football_user:{user.id}:active_enrollments")
+            # Delete unpaid enrollments
+            deleted_count, _ = cls.objects.filter(
+                user=user,
+                enrollment_status=cls.EnrollmentStatus.WAITING_FOR_PAYMENT
+            ).delete()
+            
+            # For paid enrollments, we keep them as-is
+            # They remain valid even though user is now OOR
+            # (User already paid, can't take that away)
+            
+            # Clear cache
+            cache.delete(f"football_user:{user.id}:enrollments")
+            cache.delete(f"football_user:{user.id}:active_enrollments")
+            
             return deleted_count
         
-        # Otherwise, update age categories
+        # Normal age category change (not OOR)
+        # Update age categories for ALL enrollments (including paid ones)
         updated = 0
         enrollments = cls.objects.filter(user=user)
+        
         for enrollment in enrollments:
-            if enrollment.update_age_category(save=True):
+            # Update age category if changed
+            old_category = enrollment.age_category
+            new_category = user.age_category
+            
+            if old_category != new_category:
+                enrollment.age_category = new_category
+                enrollment.save(update_fields=['age_category', 'updated_at'])
                 updated += 1
         
         # Clear cache
