@@ -27,7 +27,7 @@ class CourseAdmin(admin.ModelAdmin):
         ('Basic Information', {
             'fields': (
                 'sport', 'academy', 'gender_requirement',
-                'total_sessions', 'enrolled_students', 'max_students', 'price', 'instructor_name',
+                'total_sessions', 'max_students', 'enrolled_students', 'price', 'instructor_name',
                 'status'
             )
         }),

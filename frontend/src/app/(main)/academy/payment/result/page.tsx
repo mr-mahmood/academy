@@ -1,4 +1,4 @@
-// app/payment/result/page.tsx
+// app/academy/payment/result/page.tsx
 'use client'
 
 import { Suspense, useEffect, useState } from 'react'
@@ -6,10 +6,8 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { Icon, Icons } from '@/components/icon'
 import { useApi } from '@/hooks/useApi'
 import styles from './result.module.css'
-import Header from '@/components/Header/Header'
 import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
 
-// Separate component that uses useSearchParams
 function PaymentResultContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -18,12 +16,10 @@ function PaymentResultContent() {
     const [message, setMessage] = useState('')
     const [resNum, setResNum] = useState('')
     const [refNum, setRefNum] = useState('')
-    const [EnrollmentId, setEnrollmentId] = useState<number | null>(null)
-    const [countdown, setCountdown] = useState(5)
-    const { apiFetch } = useApi() 
+    const [enrollmentId, setEnrollmentId] = useState<number | null>(null)
+    const { apiFetch } = useApi()
 
     useEffect(() => {
-        // Get parameters from URL
         const urlStatus = searchParams.get('status')
         const urlResNum = searchParams.get('res_num')
         const urlRefNum = searchParams.get('ref_num')
@@ -33,13 +29,11 @@ function PaymentResultContent() {
         setRefNum(urlRefNum || '')
 
         if (urlStatus === 'success' && urlResNum) {
-            // Payment successful - verify with backend
             verifyPaymentStatus(urlResNum)
         } else if (urlStatus === 'failed') {
             setStatus('failed')
             setMessage(urlError || 'پرداخت ناموفق بود. لطفاً مجدداً تلاش کنید.')
         } else {
-            // No status - maybe direct access
             setStatus('failed')
             setMessage('اطلاعات پرداخت یافت نشد')
         }
@@ -57,27 +51,6 @@ function PaymentResultContent() {
                     setStatus('success')
                     setMessage('پرداخت با موفقیت انجام شد و ثبت نام شما تکمیل گردید.')
                     setEnrollmentId(result.data.enrollment_id)
-
-                    // Get the course ID from sessionStorage
-                    const courseId = sessionStorage.getItem('payment_course_id')
-
-                    // Auto redirect back to the course page after 5 seconds
-                    const interval = setInterval(() => {
-                        setCountdown(prev => {
-                            if (prev <= 1) {
-                                clearInterval(interval)
-                                if (courseId) {
-                                    router.push(`/academy/courses/${courseId}`)
-                                } else {
-                                    router.push('/dashboard')
-                                }
-                                return 0
-                            }
-                            return prev - 1
-                        })
-                    }, 1000)
-
-                    return () => clearInterval(interval)
                 } else {
                     setStatus('failed')
                     setMessage('پرداخت تأیید نشد. لطفاً با پشتیبانی تماس بگیرید.')
@@ -115,7 +88,7 @@ function PaymentResultContent() {
 
                     <p className={styles.message}>{message}</p>
 
-                    {status === 'success' && EnrollmentId && (
+                    {status === 'success' && enrollmentId && (
                         <div className={styles.details}>
                             <div className={styles.detailRow}>
                                 <span>شماره پیگیری:</span>
@@ -128,22 +101,12 @@ function PaymentResultContent() {
                         </div>
                     )}
 
-                    {status === 'success' && (
-                        <p className={styles.countdown}>
-                            در حال انتقال به داشبورد در {countdown} ثانیه...
-                        </p>
-                    )}
-
                     <div className={styles.buttons}>
                         {status === 'success' ? (
                             <button
                                 onClick={() => {
-                                    const courseId = sessionStorage.getItem('payment_course_id')
-                                    if (courseId) {
-                                        router.push(`/academy/courses/${courseId}`)
-                                    } else {
-                                        router.push('/dashboard')
-                                    }
+                                    const courseId = sessionStorage.getItem('academy_payment_course_id')
+                                    router.push(`/academy/courses/${courseId}`)
                                 }}
                                 className={styles.primaryButton}
                             >
@@ -172,8 +135,7 @@ function PaymentResultContent() {
     )
 }
 
-// Main component with Suspense boundary
-export default function PaymentResultPage() {
+export default function AcademyPaymentResultPage() {
     return (
         <div className={styles.pageContainer}>
             <Suspense fallback={<LoadingSpinner />}>

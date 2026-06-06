@@ -51,10 +51,6 @@ class FootballEnrollmentAPIView(APIView):
             
             enrollments = base_queryset.filter(
                 user=user,
-                enrollment_status__in=[
-                    FootballEnrollment.EnrollmentStatus.CONFIRMED,
-                    FootballEnrollment.EnrollmentStatus.COMPLETED
-                ]
             )
             serializer = FootballEnrollmentSerializer(enrollments, many=True)
             return Response({

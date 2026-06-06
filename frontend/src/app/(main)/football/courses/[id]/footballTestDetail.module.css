@@ -160,7 +160,6 @@
     color: var(--accent-color, #D4A017);
 }
 
-
 .confirmedBadge {
     background: rgba(34, 197, 94, 0.12);
     color: #16A34A;
@@ -410,6 +409,9 @@
 /* Action Buttons */
 .actionsSection {
     margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 /* Register Button */
@@ -420,7 +422,7 @@
     justify-content: center;
     gap: 0.5rem;
     padding: 1rem;
-    background: var(--accent-color);
+    background: var(--accent-color, #D4A017);
     border: none;
     border-radius: 2rem;
     font-size: 1rem;
@@ -440,33 +442,37 @@
     cursor: not-allowed;
 }
 
-.mismatchValue {
-    color: #DC2626;
-}
-
-.smallSpinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
+/* Cancel Button */
 .cancelButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
     background: #DC2626;
+    border: none;
+    border-radius: 2rem;
+    font-size: 1rem;
+    font-weight: 600;
     color: white;
+    cursor: pointer;
+    transition: all 200ms ease;
 }
 
 .cancelButton:hover:not(:disabled) {
     background: #B91C1C;
     transform: translateY(-1px);
+}
+
+.cancelButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.mismatchValue {
+    color: #DC2626;
 }
 
 button:disabled {
@@ -480,7 +486,6 @@ button:disabled {
     align-items: center;
     gap: 0.75rem;
     padding: 1rem;
-    background: var(--bg-primary);
     border-radius: 2rem;
     color: #DC2626;
     font-size: 0.875rem;
@@ -665,8 +670,10 @@ button:disabled {
     border-radius: 0.5rem;
     font-size: 0.875rem;
     cursor: pointer;
+    transition: all 200ms ease;
 }
 
 .backButton:hover {
     background: var(--accent-hover, #B8860B);
+    transform: translateY(-1px);
 }

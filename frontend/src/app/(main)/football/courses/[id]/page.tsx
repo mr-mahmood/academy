@@ -1,6 +1,7 @@
+// app/football-test/[id]/page.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Icon, Icons } from '@/components/icon'
 import { useActiveUser } from '@/contexts/active_user_context'
@@ -10,20 +11,8 @@ import type { FootballTest } from '@/types/FootballTest'
 import type { FootballEnrollment } from '@/types/FootballEnrollment'
 import styles from './footballTestDetail.module.css'
 import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
-
-interface PaymentInitiateResponse {
-    success: boolean
-    data?: {
-        track_id: number
-        gateway_url: string
-        payment_id: number
-        enrollment_id: number
-        res_num: string
-        amount: number
-    }
-    message?: string
-    code?: number
-}
+import AgeCategoryBadge from '@/components/AgeCategoryBadge/AgeCategoryBadge'
+import { PaymentInitiateResponse } from '@/types/PaymentInitiateResponse'
 
 export default function FootballTestDetailPage() {
     const params = useParams()
@@ -37,12 +26,9 @@ export default function FootballTestDetailPage() {
     const [loading, setLoading] = useState(true)
     const [registering, setRegistering] = useState(false)
     const [cancelProcessing, setCancelProcessing] = useState(false)
-    const [error, setError] = useState('')
-    const [success, setSuccess] = useState('')
     const [showModal, setShowModal] = useState<'register' | 'cancel' | null>(null)
 
     const testId = params.id as string
-
     const isValidId = testId && testId !== 'undefined'
 
     useEffect(() => {
@@ -51,9 +37,9 @@ export default function FootballTestDetailPage() {
         }
     }, [isValidId, router])
 
-    // Fetch user enrollments
     useEffect(() => {
         if (!activeUser || !isValidId) return
+        
         const fetchEnrollments = async () => {
             const result = await apiFetch({ url: 'api/football/enrollment/', method: 'GET' })
             if (result.success) {
@@ -64,7 +50,6 @@ export default function FootballTestDetailPage() {
         fetchEnrollments()
     }, [activeUser, isValidId])
 
-    // Fetch test details
     useEffect(() => {
         if (!isValidId) return
 
@@ -75,10 +60,20 @@ export default function FootballTestDetailPage() {
                 if (result.success) {
                     setTest(result.data?.course || result.data)
                 } else {
-                    setError('تست مورد نظر یافت نشد')
+                    showPopUp({
+                        title: 'خطا',
+                        message: 'تست مورد نظر یافت نشد',
+                        type: 'error',
+                        duration: 4000
+                    })
                 }
             } catch (err) {
-                setError('خطا در بارگذاری اطلاعات تست')
+                showPopUp({
+                    title: 'خطا',
+                    message: 'خطا در بارگذاری اطلاعات تست',
+                    type: 'error',
+                    duration: 4000
+                })
             } finally {
                 setLoading(false)
             }
@@ -86,54 +81,48 @@ export default function FootballTestDetailPage() {
         fetchTest()
     }, [testId, isValidId])
 
-    // Sync enrollment state
     useEffect(() => {
         if (!test) return
-        if (userEnrollments.length > 0) {
-            const found = userEnrollments.find(e => e.course?.id === test.id) || null
-            setEnrollment(found)
-        } else {
-            setEnrollment(null)
-        }
+
+        const found = userEnrollments.find(e => e.course?.id === test.id) || null
+        setEnrollment(found)
     }, [userEnrollments, test])
 
     const isEnrolled = enrollment?.enrollment_status === 'CONFIRMED'
     const isRegistered = enrollment !== null
 
-    const canRegister = (): boolean => {
+    const canRegister = useCallback((): boolean => {
         if (!test || !activeUser) return false
         if (test.status !== 'ACTIVE') return false
         if (isEnrolled) return false
         if (test.gender_requirement && test.gender_requirement !== activeUser.gender) return false
         if (activeUser.age_category === 'OOR') return false
         return true
-    }
+    }, [test, activeUser, isEnrolled])
 
-    const getDisableReason = (): string | null => {
+    const getDisableReason = useCallback((): string | null => {
         if (!test || !activeUser) return null
         if (isEnrolled) return 'شما قبلاً در این تست ثبت‌نام کرده‌اید'
         if (test.status !== 'ACTIVE') return 'این تست در حال حاضر فعال نیست'
         if (test.gender_requirement && test.gender_requirement !== activeUser.gender) return 'این تست برای جنسیت شما مناسب نیست'
         if (activeUser.age_category === 'OOR') return 'رده سنی شما برای ثبت‌نام معتبر نیست'
         return null
-    }
+    }, [test, activeUser, isEnrolled])
 
-    const refreshEnrollments = async () => {
+    const refreshEnrollments = useCallback(async () => {
         const result = await apiFetch({ url: 'api/football/enrollment/', method: 'GET' })
         if (result.success) {
             const data = result.data?.enrollments || result.data || []
             setUserEnrollments(Array.isArray(data) ? data : [])
         }
-    }
+    }, [])
 
     const handleRegisterAndPay = async () => {
         if (!activeUser || !test) return
         setShowModal(null)
         setRegistering(true)
-        setError('')
 
         try {
-            // First, create enrollment
             const enrollmentResult = await apiFetch({
                 url: 'api/football/enrollment/',
                 method: 'POST',
@@ -145,16 +134,16 @@ export default function FootballTestDetailPage() {
             })
 
             if (!enrollmentResult.success) {
-                let errorMessage = 'خطا در ثبت‌نام'
+                let errorMessage = 'خطا در ثبت‌ نام'
                 switch (enrollmentResult.code) {
                     case 555:
-                        errorMessage = 'این تست تکمیل شده است'
+                        errorMessage = 'ظرفیت تست تکمیل شده است'
                         break
                     case 556:
                         errorMessage = 'این تست در حال حاضر فعال نیست'
                         break
                     case 557:
-                        errorMessage = 'شما قبلاً در این تست ثبت‌نام کرده‌اید'
+                        errorMessage = 'شما قبلاً در این تست ثبت‌ نام کرده‌اید'
                         break
                     case 558:
                         errorMessage = 'تداخل زمانی با تست‌های دیگر شما وجود دارد'
@@ -180,7 +169,6 @@ export default function FootballTestDetailPage() {
 
             const newEnrollment = enrollmentResult.data.enrollment
 
-            // Then, initiate payment
             const paymentResult = await apiFetch({
                 url: 'api/football/payment/initiate/',
                 method: 'POST',
@@ -195,14 +183,22 @@ export default function FootballTestDetailPage() {
                 sessionStorage.setItem('football_payment_test_id', String(test.id))
                 window.location.href = paymentResult.data.gateway_url
             } else {
-                setError(paymentResult.message || 'خطا در اتصال به درگاه پرداخت')
-                setTimeout(() => setError(''), 4000)
+                showPopUp({
+                    title: 'خطا',
+                    message: paymentResult.message || 'خطا در اتصال به درگاه پرداخت',
+                    type: 'error',
+                    duration: 4000
+                })
                 setRegistering(false)
             }
         } catch (err) {
             console.error('Registration error:', err)
-            setError('خطا در ارتباط با سرور')
-            setTimeout(() => setError(''), 4000)
+            showPopUp({
+                title: 'خطا',
+                message: 'خطا در ارتباط با سرور',
+                type: 'error',
+                duration: 4000
+            })
             setRegistering(false)
         }
     }
@@ -220,38 +216,58 @@ export default function FootballTestDetailPage() {
 
             if (result.success) {
                 setEnrollment(null)
-                setSuccess('ثبت‌ نام با موفقیت لغو شد')
+                showPopUp({
+                    title: 'موفق',
+                    message: 'ثبت‌ نام با موفقیت لغو شد',
+                    type: 'success',
+                    duration: 3000
+                })
                 await refreshEnrollments()
-                setTimeout(() => setSuccess(''), 3000)
             } else {
-                setError(result.message || 'خطا در لغو ثبت‌نام')
-                setTimeout(() => setError(''), 4000)
+                showPopUp({
+                    title: 'خطا',
+                    message: result.message || 'خطا در لغو ثبت‌نام',
+                    type: 'error',
+                    duration: 4000
+                })
             }
         } catch (err) {
-            setError('خطا در ارتباط با سرور')
-            setTimeout(() => setError(''), 4000)
+            showPopUp({
+                title: 'خطا',
+                message: 'خطا در ارتباط با سرور',
+                type: 'error',
+                duration: 4000
+            })
         } finally {
             setCancelProcessing(false)
         }
     }
 
-    // Handle payment callback
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search)
         const paymentStatus = urlParams.get('status')
         const paymentPending = sessionStorage.getItem('football_payment_pending')
 
         if (paymentStatus === 'success' && paymentPending === 'true') {
-            setSuccess('پرداخت با موفقیت انجام شد. ثبت‌نام شما تکمیل گردید.')
-            sessionStorage.removeItem('football_payment_pending')
-            refreshEnrollments()
-            window.history.replaceState({}, '', window.location.pathname)
-            setTimeout(() => setSuccess(''), 5000)
-        } else if (paymentStatus === 'failed' && paymentPending === 'true') {
-            setError('پرداخت ناموفق بود. لطفاً مجدداً تلاش کنید.')
+            showPopUp({
+                title: 'موفق',
+                message: 'پرداخت با موفقیت انجام شد. ثبت‌نام شما تکمیل گردید.',
+                type: 'success',
+                duration: 5000
+            })
             sessionStorage.removeItem('football_payment_pending')
             sessionStorage.removeItem('football_payment_test_id')
-            setTimeout(() => setError(''), 5000)
+            refreshEnrollments()
+            window.history.replaceState({}, '', window.location.pathname)
+        } else if (paymentStatus === 'failed' && paymentPending === 'true') {
+            showPopUp({
+                title: 'خطا',
+                message: 'پرداخت ناموفق بود. لطفاً مجدداً تلاش کنید.',
+                type: 'error',
+                duration: 5000
+            })
+            sessionStorage.removeItem('football_payment_pending')
+            sessionStorage.removeItem('football_payment_test_id')
         }
     }, [])
 
@@ -259,11 +275,11 @@ export default function FootballTestDetailPage() {
         return <LoadingSpinner />
     }
 
-    if ((error && !test) || !test) {
+    if (!test) {
         return (
             <div className={styles.errorContainer}>
                 <div className={styles.errorIcon}><Icon icon={Icons.timesCircle} /></div>
-                <div><h3>خطا</h3><p>{error || 'تست مورد نظر یافت نشد'}</p></div>
+                <div><h3>خطا</h3><p>تست مورد نظر یافت نشد</p></div>
                 <button onClick={() => router.back()} className={styles.backButton}>بازگشت</button>
             </div>
         )
@@ -288,39 +304,13 @@ export default function FootballTestDetailPage() {
         }
     }
 
-    const getAgeCategoryLabel = (ageCategory: string) => {
-        const ageMap: Record<string, string> = {
-            'U12': 'زیر ۱۲ سال',
-            'U13': 'زیر ۱۳ سال',
-            'U14': 'زیر ۱۴ سال',
-            'U15': 'زیر ۱۵ سال',
-            'U17': 'زیر ۱۷ سال',
-            'U18': 'زیر ۱۸ سال',
-            'YOUTH': 'جوانان',
-            'U21': 'امید',
-            'OOR': 'خارج از محدوده'
-        }
-        return ageMap[ageCategory] || ageCategory
-    }
-
     const formatPrice = (price: string | number) => {
         return (Number(price) / 10).toLocaleString()
     }
 
     return (
         <div className={styles.container}>
-            {success && (
-                <div className={styles.successMessage}>
-                    <Icon icon={Icons.check} />
-                    <span>{success}</span>
-                </div>
-            )}
-            {error && (
-                <div className={styles.errorMessage}>
-                    <Icon icon={Icons.timesCircle} />
-                    <span>{error}</span>
-                </div>
-            )}
+            <AgeCategoryBadge ageCategory={activeUser?.age_category} />
 
             <div className={styles.testHeaderCard}>
                 <div className={styles.headerIcon}>
@@ -352,7 +342,6 @@ export default function FootballTestDetailPage() {
                 </div>
             </div>
 
-            {/* Info Grid */}
             <div className={styles.infoGrid}>
                 <div className={styles.infoCard}>
                     <Icon icon={Icons.user} />
@@ -365,12 +354,11 @@ export default function FootballTestDetailPage() {
                     <Icon icon={Icons.user} />
                     <div>
                         <label>پست تخصصی</label>
-                        <span>{test.position_display}</span>
+                        <span>{test.position_display} ({test.position})</span>
                     </div>
                 </div>
             </div>
 
-            {/* Price Card */}
             <div className={styles.priceCard}>
                 <div className={styles.priceRow}>
                     <span>هزینه تست</span>
@@ -383,18 +371,17 @@ export default function FootballTestDetailPage() {
                 </div>
             </div>
 
-            {/* Actions Section */}
             <div className={styles.actionsSection}>
                 {isEnrolled ? (
                     <button onClick={() => setShowModal('cancel')} className={styles.cancelButton}>
-                        <Icon icon={Icons.timesCircle} /><span>لغو ثبت‌نام</span>
+                        <Icon icon={Icons.timesCircle} /><span>لغو ثبت‌ نام</span>
                     </button>
                 ) : canRegister() ? (
                     <button onClick={() => setShowModal('register')} disabled={registering} className={styles.registerButton}>
                         {registering ? (
-                            <><span>در حال ثبت‌نام و پرداخت</span> <div className={styles.smallSpinner}></div></>
+                            <><span>در حال ثبت‌ نام و پرداخت</span> <div className={styles.smallSpinner}></div></>
                         ) : (
-                            <><Icon icon={Icons.creditCard} /><span>ثبت‌نام و پرداخت</span></>
+                            <><Icon icon={Icons.creditCard} /><span>ثبت ‌نام و پرداخت</span></>
                         )}
                     </button>
                 ) : (
@@ -418,18 +405,17 @@ export default function FootballTestDetailPage() {
                 )}
             </div>
 
-            {/* Modal */}
             {showModal === 'register' && (
                 <div className={styles.modalOverlay} onClick={() => !registering && setShowModal(null)}>
                     <div className={styles.modal} onClick={e => e.stopPropagation()}>
                         <div className={styles.modalIcon}><Icon icon={Icons.creditCard} /></div>
                         <h3 className={styles.modalTitle}>تأیید ثبت‌نام و پرداخت</h3>
                         <p className={styles.modalText}>
-                            آیا مایل به ثبت‌نام در تست "{test.position_display}" و پرداخت مبلغ <strong>{formatPrice(test.price)} تومان</strong> هستید؟
+                            آیا مایل به ثبت‌ نام در تست و پرداخت مبلغ <strong>{formatPrice(test.price)} تومان</strong> هستید؟
                         </p>
                         <div className={styles.modalWarning}>
                             <Icon icon={Icons.infoCircle} />
-                            <span>پس از پرداخت، ثبت‌نام شما نهایی خواهد شد</span>
+                            <span>پس از پرداخت، ثبت‌ نام شما نهایی خواهد شد</span>
                         </div>
                         <div className={styles.modalActions}>
                             <button onClick={() => setShowModal(null)} disabled={registering} className={styles.modalCancelBtn}>

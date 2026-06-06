@@ -32,7 +32,12 @@ class InitiatePaymentAPIView(APIView):
         enrollment_id = request.data.get('enrollment_id')
         
         if not course_id:
-            raise APIError(PaymentError.GATEWAY_ERROR, data="course_id is required")
+            raise APIError(PaymentError.GATEWAY_ERROR)
+        
+        # ADD THIS: Check course capacity before anything else
+        course = Course.objects.select_for_update().get(id=course_id)
+        if course.enrolled_students >= course.max_students:
+            raise APIError(RegistrationError.COURSE_FULL)
         
         # 1. Find enrollment
         enrollment = None
@@ -64,66 +69,34 @@ class InitiatePaymentAPIView(APIView):
             enrollment.enrollment_status = Enrollment.EnrollmentStatus.WAITING_FOR_PAYMENT
             enrollment.save(update_fields=['enrollment_status'])
         
-        # 3. Handle existing payment
-        payment = Payment.objects.filter(enrollment=enrollment).first()
-        current_price = enrollment.course.price
+        # 3. Get or create payment (but always reset it for new attempt)
+        payment, created = Payment.objects.get_or_create(
+            enrollment=enrollment,
+        )
         
-        if payment:
-            # Check if price has changed and payment has a track_id
-            price_changed = payment.amount != current_price
-            has_old_track_id = payment.track_id is not None
-            
-            # If price changed and we have an old track_id, we need to create a new payment
-            if price_changed and has_old_track_id and payment.status == PaymentStatus.PENDING:
-                # Clear the old track_id so a new one will be created
-                payment.track_id = None
-                payment.amount = current_price
-                payment.save(update_fields=['track_id', 'amount', 'description', 'updated_at'])
-                logger.info(f"Price changed for payment {payment.id} from {payment.amount} to {current_price}. Old track_id cleared.")
-            
-            # Update amount for pending payments
-            if payment.status == PaymentStatus.PENDING:
-                payment._update_pending_amount_from_course()
-                payment.save(update_fields=['amount', 'description', 'updated_at'])
-            
-            # Check if existing payment has a valid track_id that's still pending
-            if payment.track_id and payment.status == PaymentStatus.PENDING:
-                return Response({
-                    'success': True,
-                    'message': 'Payment already initiated',
-                    'track_id': payment.track_id,
-                    'payment_id': payment.id,
-                    'enrollment_id': enrollment.id,
-                    'res_num': payment.res_num,
-                    'amount': payment.amount,
-                    'gateway_url': f"{ZibalPaymentService.START_PAGE}{payment.track_id}"
-                }, status=status.HTTP_200_OK)
-            
-            # Reset payment (amount will be updated in save)
+        if not created:
+            # Reset existing payment with fresh values
             payment.status = PaymentStatus.PENDING
             payment.track_id = None
             payment.ref_num = None
+            payment.masked_pan = None
+            payment.paid_at = None
+            payment.amount = enrollment.course.price
+            payment.description = ''
             payment.save()
-            logger.info(f"Resetting payment {payment.id} for enrollment {enrollment.id}")
-        else:
-            # Create new payment - amount will be set in save() from course
-            payment = Payment.objects.create(
-                enrollment=enrollment,
-                status=PaymentStatus.PENDING
-            )
-            logger.info(f"Created new payment {payment.id} for enrollment {enrollment.id}")
+            logger.info(f"Reset existing payment {payment.id} for enrollment {enrollment.id}")
         
-        # 4. Generate unique order number (res_num) if needed
+        # Generate unique order number (res_num) if not exists
         if not payment.res_num:
             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
             random_digits = ''.join(random.choices(string.digits, k=6))
-            payment.res_num = f"{timestamp}{random_digits}"
+            payment.res_num = f"A{timestamp}{random_digits}"
             payment.save(update_fields=['res_num'])
         
-        # 5. Build dynamic callback URL
+        # Build dynamic callback URL
         callback_url = request.build_absolute_uri('/api/academy/payment/callback/')
         
-        # 6. Request NEW trackId from Zibal with current price
+        # Request NEW trackId from Zibal with current price
         service = ZibalPaymentService()
         result = service.request_payment(
             payment=payment,
@@ -144,9 +117,9 @@ class InitiatePaymentAPIView(APIView):
             }, status=status.HTTP_200_OK)
         else:
             payment.mark_as_failed()
-            logger.error(f"Payment initiation failed: {result}")
+            logger.error(f"Football payment initiation failed: {result}")
             raise APIError(PaymentError.GATEWAY_ERROR, data=result.get('error', 'Payment initiation failed'))
-        
+               
         
 @method_decorator(csrf_exempt, name='dispatch')
 class PaymentCallbackAPIView(APIView):

@@ -195,7 +195,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 
 # -----------------------------
-# Channels & Redis (Temporarily disable)
+# Channels & Redis
 # -----------------------------
 CHANNEL_LAYERS = {
     "default": {
@@ -205,7 +205,7 @@ CHANNEL_LAYERS = {
 }
 
 # -----------------------------
-# Caches (Temporarily use local memory)
+# Caches
 # -----------------------------
 CACHES = {
     "default": {
@@ -218,7 +218,7 @@ CACHES = {
 }
 
 # -----------------------------
-# Celery (Temporarily disable)
+# Celery
 # -----------------------------
 CELERY_BROKER_URL = f"redis://{os.getenv('REDIS_HOST', 'redis')}:{os.getenv('REDIS_PORT', 6379)}/0"
 CELERY_ACCEPT_CONTENT = ["json"]

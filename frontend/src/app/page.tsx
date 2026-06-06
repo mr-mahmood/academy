@@ -24,7 +24,7 @@ export default function HomePage() {
 
                 <button
                     className={styles.navCard}
-                    onClick={() => router.push('/academy')}
+                    onClick={() => router.push('/academy/register')}
                 >
                     <div className={styles.cardIcon}>
                         <Icon icon={Icons.school} />
@@ -38,7 +38,7 @@ export default function HomePage() {
 
                 <button
                     className={styles.navCard}
-                    onClick={() => router.push('/football')}
+                    onClick={() => router.push('/football/register')}
                 >
                     <div className={styles.cardIcon}>
                         <Icon icon={Icons.calendar} />
@@ -61,7 +61,7 @@ export default function HomePage() {
                         <h3>{activeUser ? 'پنل کاربری' : 'ورود اعضا'}</h3>
                         <p>
                             {activeUser
-                                ? 'مشاهده پنل کاربری و دوره‌های من'
+                                ? 'مشاهده پنل کاربری'
                                 : 'ورود یا ثبت نام در سامانه'
                             }
                         </p>
@@ -69,43 +69,6 @@ export default function HomePage() {
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>
             </div>
-
-            {/* Quick Links (for logged in users) */}
-            {activeUser && (
-                <div className={styles.quickLinks}>
-                    <h3 className={styles.sectionTitle}>دسترسی سریع</h3>
-                    <div className={styles.quickLinksGrid}>
-                        <button
-                            className={styles.quickLink}
-                            onClick={() => router.push('/dashboard')}
-                        >
-                            <Icon icon={Icons.dashboard} />
-                            <span>داشبورد</span>
-                        </button>
-                        <button
-                            className={styles.quickLink}
-                            onClick={() => router.push('/my-courses')}
-                        >
-                            <Icon icon={Icons.school} />
-                            <span>دوره‌های من</span>
-                        </button>
-                        <button
-                            className={styles.quickLink}
-                            onClick={() => router.push('/profile')}
-                        >
-                            <Icon icon={Icons.user} />
-                            <span>پروفایل</span>
-                        </button>
-                        <button
-                            className={styles.quickLink}
-                            onClick={() => router.push('/payments')}
-                        >
-                            <Icon icon={Icons.creditCard} />
-                            <span>پرداخت‌ها</span>
-                        </button>
-                    </div>
-                </div>
-            )}
 
             {/* About Section */}
             <div className={styles.aboutSection}>

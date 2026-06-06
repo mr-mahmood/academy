@@ -149,6 +149,7 @@ class User(AbstractUser):
         verbose_name = "User"
         verbose_name_plural = "Users"
         indexes = [
+            models.Index(fields=['birth_date']),
             models.Index(fields=['age_category'])
         ]
     
@@ -179,37 +180,39 @@ class User(AbstractUser):
         current_date = timezone.now().date()
         age = current_date.year - self.birth_date.year
         
-        if current_date.month < self.birth_date.month or \
-           (current_date.month == self.birth_date.month and current_date.day < self.birth_date.day):
+        # Adjust if birthday hasn't occurred yet this year
+        if (current_date.month, current_date.day) < (self.birth_date.month, self.birth_date.day):
             age -= 1
         
+        # CORRECT age category mapping
         if age < 12:
-            return User.AgeCategory.U12
+            return User.AgeCategory.U12  # Below U12
         elif age == 12:
-            return User.AgeCategory.U13
+            return User.AgeCategory.U12  # 12 years old = U12
         elif age == 13:
-            return User.AgeCategory.U14
+            return User.AgeCategory.U13  # 13 years old = U13
         elif age == 14:
-            return User.AgeCategory.U15
-        elif 15 <= age <= 16:
-            return User.AgeCategory.U17
-        elif 17 <= age <= 18:
-            return User.AgeCategory.U18
-        elif age == 19:
-            return User.AgeCategory.YOUTH
+            return User.AgeCategory.U14  # 14 years old = U14
+        elif age == 15:
+            return User.AgeCategory.U15  # 15 years old = U15
+        elif age == 16 or age == 17:
+            return User.AgeCategory.U17  # 16-17 years old = U17
+        elif age == 18 or age == 19:
+            return User.AgeCategory.U18  # 18-19 years old = U18
         elif age == 20:
-            return User.AgeCategory.U21
+            return User.AgeCategory.YOUTH  # 20 years old = YOUTH
+        elif age == 21:
+            return User.AgeCategory.U21  # 21 years old = U21
         else:
-            return User.AgeCategory.OUT_OF_RANGE
-        
+            return User.AgeCategory.OUT_OF_RANGE  # Above 21
+            
     def save(self, *args, **kwargs):
         new_category = self.calculate_age_category()
         if self.age_category != new_category:
+            self.age_category = new_category
             
             from football_talent.enrollment.models import FootballEnrollment
             FootballEnrollment.update_all_enrollments_for_user(self)
-            
-            self.age_category = new_category
         
         # Save once with all updates
         super().save(*args, **kwargs)

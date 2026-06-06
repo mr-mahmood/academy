@@ -52,9 +52,8 @@ class Enrollment(models.Model):
     def check_time_conflict(self):
         """
         Check if this enrollment conflicts with existing enrollments.
-        Uses a single optimized database query.
         """
-        from django.db.models import Q, Exists, OuterRef
+        from django.db.models import Exists, OuterRef
         
         # Subquery to get all schedules of the new course
         new_schedule_subquery = CourseSchedule.objects.filter(
@@ -69,9 +68,12 @@ class Enrollment(models.Model):
             # Existing schedules for user's active enrollments
             course__enrollments__user=self.user,
             course__enrollments__enrollment_status__in=[
-                self.EnrollmentStatus.WAITING_FOR_PAYMENT,
-                self.EnrollmentStatus.CONFIRMED
+                self.EnrollmentStatus.CONFIRMED,
+                self.EnrollmentStatus.WAITING_FOR_PAYMENT
             ]
+        ).exclude(
+            # Exclude the SAME course (important!)
+            course=self.course
         ).exclude(
             # Exclude current enrollment if updating
             course__enrollments__pk=self.pk if self.pk else None
@@ -100,13 +102,40 @@ class Enrollment(models.Model):
         was_cancelled = False
         was_reactivated = False
         
-        if not is_new:
+        # If this is a new enrollment, check for existing enrollment first
+        if is_new:
+            existing_enrollment = Enrollment.objects.filter(user=self.user, course=self.course).select_for_update().first()
+            
+            if existing_enrollment:
+                if existing_enrollment.enrollment_status == self.EnrollmentStatus.CONFIRMED:
+                    raise APIError(RegistrationError.ALREADY_ENROLLED)
+                elif existing_enrollment.enrollment_status == self.EnrollmentStatus.CANCELLED:
+                    # Reactivate cancelled enrollment
+                    existing_enrollment.enrollment_status = self.EnrollmentStatus.WAITING_FOR_PAYMENT
+                    existing_enrollment.cancelled_at = None
+                    existing_enrollment.save()
+                    # Copy the data to current instance
+                    self.pk = existing_enrollment.pk
+                    self.enrollment_status = existing_enrollment.enrollment_status
+                    self.enrolled_at = existing_enrollment.enrolled_at
+                    self.updated_at = existing_enrollment.updated_at
+                    is_new = False
+                    was_reactivated = True
+                elif existing_enrollment.enrollment_status == self.EnrollmentStatus.WAITING_FOR_PAYMENT:
+                    # Already waiting for payment, just use existing
+                    self.pk = existing_enrollment.pk
+                    self.enrollment_status = existing_enrollment.enrollment_status
+                    self.enrolled_at = existing_enrollment.enrolled_at
+                    self.updated_at = existing_enrollment.updated_at
+                    is_new = False
+        
+        if not is_new and not was_reactivated:
             try:
                 old = Enrollment.objects.get(pk=self.pk)
                 # Check if status changed to CANCELLED
                 if old.enrollment_status != self.EnrollmentStatus.CANCELLED and self.enrollment_status == self.EnrollmentStatus.CANCELLED:
                     was_cancelled = True
-                # Check if status changed from CANCELLED to active (WAITING_FOR_PAYMENT or CONFIRMED)
+                # Check if status changed from CANCELLED to active
                 if old.enrollment_status == self.EnrollmentStatus.CANCELLED and self.enrollment_status in [
                     self.EnrollmentStatus.WAITING_FOR_PAYMENT,
                     self.EnrollmentStatus.CONFIRMED
@@ -133,10 +162,6 @@ class Enrollment(models.Model):
                     raise APIError(RegistrationError.GENDER_MISMATCH)
                 if self.course.gender_requirement == Course.GenderRequirement.FEMALE and self.user.gender != Course.GenderRequirement.FEMALE:
                     raise APIError(RegistrationError.GENDER_MISMATCH)
-                
-                # Check for existing enrollment
-                if Enrollment.objects.filter(user=self.user, course=self.course).exists():
-                    raise APIError(RegistrationError.ALREADY_ENROLLED)
                 
                 # Check for time conflict
                 if self.check_time_conflict():

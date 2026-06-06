@@ -59,20 +59,6 @@ export default function FootballPage() {
                     </div>
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>
-
-                <button
-                    className={styles.navCard}
-                    onClick={() => router.push('/my-tests')}
-                >
-                    <div className={styles.cardIcon}>
-                        <Icon icon={Icons.football} />
-                    </div>
-                    <div className={styles.cardContent}>
-                        <h3>تست‌های من</h3>
-                        <p>مشاهده تست‌های ثبت‌نامی شما</p>
-                    </div>
-                    <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
-                </button>
             </div>
         </div>
     )

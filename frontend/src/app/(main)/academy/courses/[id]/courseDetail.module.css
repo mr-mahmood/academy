@@ -318,51 +318,70 @@
 /* Action Buttons */
 .actionsSection {
     margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
-.preRegisterButton, .payButton, .cancelButton {
+/* Register Button */
+.registerButton {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     padding: 1rem;
+    background: var(--accent-color, #D4A017);
+    border: none;
     border-radius: 2rem;
     font-size: 1rem;
     font-weight: 600;
-    border: none;
+    color: white;
     cursor: pointer;
     transition: all 200ms ease;
 }
 
-.preRegisterButton {
-    background: #3B82F6;
-    color: white;
-}
-
-.preRegisterButton:hover:not(:disabled) {
-    background: #2563EB;
+.registerButton:hover:not(:disabled) {
     transform: translateY(-1px);
-}
-
-.payButton {
-    background: var(--accent-color, #D4A017);
-    color: white;
-}
-
-.payButton:hover:not(:disabled) {
     background: var(--accent-hover, #B8860B);
-    transform: translateY(-1px);
 }
 
+.registerButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Cancel Button */
 .cancelButton {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
     background: #DC2626;
+    border: none;
+    border-radius: 2rem;
+    font-size: 1rem;
+    font-weight: 600;
     color: white;
+    cursor: pointer;
+    transition: all 200ms ease;
 }
 
 .cancelButton:hover:not(:disabled) {
     background: #B91C1C;
     transform: translateY(-1px);
+}
+
+.cancelButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.mismatchValue {
+    color: #DC2626;
 }
 
 button:disabled {
@@ -376,11 +395,12 @@ button:disabled {
     align-items: center;
     gap: 0.75rem;
     padding: 1rem;
-    background: var(--bg-primary);
     border-radius: 2rem;
     color: #DC2626;
     font-size: 0.875rem;
     justify-content: center;
+    border: 1px solid #FEE2E2;
+    background: #FEF2F2;
 }
 
 /* Modal */

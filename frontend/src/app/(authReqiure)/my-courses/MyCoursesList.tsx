@@ -96,6 +96,7 @@ export default function MyCoursesList({ enrollments = [], isLoading = false }: M
                     price={enrollment.course.price}
                     gender={enrollment.course.gender_requirement}
                     enrollmentStatus={enrollment.enrollment_status}
+                    onClickUrl={`/academy/courses/${enrollment.id}`}
                     showAddress={true}
                     showSessions={true}
                 />

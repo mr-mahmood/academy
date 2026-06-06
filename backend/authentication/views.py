@@ -82,14 +82,6 @@ class VerifyOTPApiView(APIView):
         """Login existing user and set authentication cookies"""
         user = User.get_user_by_phone(phone_number)
         
-        # Always recalculate and save if changed
-        old_category = user.age_category
-        new_category = user.calculate_age_category()
-        
-        if old_category != new_category:
-            user.age_category = new_category
-            user.save(update_fields=["age_category"])
-        
         # Only increment token version if we're not already saving
         user.token_version += 1  # invalidate old JWTs
         user.save(update_fields=["token_version"])

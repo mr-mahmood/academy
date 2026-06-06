@@ -94,7 +94,7 @@ export default function DashboardPage() {
                         <Icon icon={Icons.school} />
                     </div>
                     <div className={styles.cardContent}>
-                        <h3>تست های استعدادیابی من</h3>
+                        <h3>تست های من</h3>
                         <p>مشاهده تست هایی که ثبت نام کرده‌اید</p>
                     </div>
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
@@ -111,51 +111,6 @@ export default function DashboardPage() {
                     <div className={styles.cardContent}>
                         <h3>پرداخت‌های من</h3>
                         <p>مشاهده تاریخچه پرداخت‌ها و صورتحساب</p>
-                    </div>
-                    <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
-                </button>
-
-                {/* Settings */}
-                <button
-                    className={styles.selectionCard}
-                    onClick={() => router.push('/settings')}
-                >
-                    <div className={styles.cardIcon}>
-                        <Icon icon={Icons.settings} />
-                    </div>
-                    <div className={styles.cardContent}>
-                        <h3>تنظیمات</h3>
-                        <p>تنظیمات حساب کاربری و برنامه</p>
-                    </div>
-                    <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
-                </button>
-
-                {/* Notifications */}
-                <button
-                    className={styles.selectionCard}
-                    onClick={() => router.push('/notifications')}
-                >
-                    <div className={styles.cardIcon}>
-                        <Icon icon={Icons.notification} />
-                    </div>
-                    <div className={styles.cardContent}>
-                        <h3>اعلان‌ها</h3>
-                        <p>مشاهده پیام‌ها و اطلاعیه‌ها</p>
-                    </div>
-                    <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
-                </button>
-
-                {/* About/Contact */}
-                <button
-                    className={styles.selectionCard}
-                    onClick={() => router.push('/about')}
-                >
-                    <div className={styles.cardIcon}>
-                        <Icon icon={Icons.info} />
-                    </div>
-                    <div className={styles.cardContent}>
-                        <h3>درباره ما</h3>
-                        <p>ارتباط با ما و اطلاعات ورزشگاه</p>
                     </div>
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>
