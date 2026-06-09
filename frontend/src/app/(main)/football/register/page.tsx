@@ -335,12 +335,12 @@ export default function FootballRegisterPage() {
                             <p className={styles.genderDescription}>تست‌های ویژه آقایان</p>
                             <Icon icon={Icons.arrowLeft} className={styles.genderArrow} />
                         </button>
-                        <button onClick={() => handleGenderSelect('FEMALE')} className={styles.genderCard}>
+                        {/* <button onClick={() => handleGenderSelect('FEMALE')} className={styles.genderCard}>
                             <div className={styles.genderIcon}><Icon icon={Icons.user} /></div>
                             <h3 className={styles.genderTitle}>بانوان</h3>
                             <p className={styles.genderDescription}>تست‌های ویژه بانوان</p>
                             <Icon icon={Icons.arrowLeft} className={styles.genderArrow} />
-                        </button>
+                        </button> */}
                     </div>
                 </div>
             </div>

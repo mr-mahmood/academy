@@ -25,13 +25,8 @@ class BeatSchedule:
     USER = {
         'update-user-age-categories': {
             'task': 'users.tasks.update_all_users_age_categories',
-            'schedule': crontab(minute=0, hour=3, day_of_week='sunday'),
-            'description': 'Update age categories for all users',
-        },
-        'send-daily-birthday-wishes': {
-            'task': 'academy_management.users.tasks.send_daily_birthday_wishes',
-            'schedule': crontab(hour=9, minute=0),
-            'description': 'Send birthday wishes to users',
+            'schedule': crontab(minute=0, hour=3),
+            # 'description': 'Update age categories for all users',
         },
     }
     
@@ -39,8 +34,9 @@ class BeatSchedule:
     ACADEMY = {
         'academy-check-waiting-payments': {
             'task': 'academy_management.enrollment.tasks.check_waiting_payments_and_send_reminders',
-            'schedule': timedelta(hours=24, minutes=10),  # Every 24 hours and 10 minutes
-            'description': 'Send payment reminders every 24 hours up to 3 times, then cancel',
+            'schedule': crontab(minute=30, hour='12,16,20'), 
+            # These run at: 12:30 PM, 4:30 PM, and 8:30 PM Iran time
+            # UTC times: 9,13,17
         },
     }
     
@@ -49,7 +45,7 @@ class BeatSchedule:
         'football-cleanup-payments': {
             'task': 'football_talent.enrollment.tasks.cleanup_expired_waiting_payments',
             'schedule': crontab(minute=10, hour='*/2'),
-            'description': 'Cleanup expired football payments',
+            # 'description': 'Cleanup expired football payments',
         },
     }
 

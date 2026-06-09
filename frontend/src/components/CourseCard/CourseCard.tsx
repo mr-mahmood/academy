@@ -57,12 +57,12 @@ export default function CourseCard({
     const getStatusDisplay = (statusValue: string) => {
         const statusMap: Record<string, { label: string; className: string; icon: any }> = {
             'WAITING_FOR_PAYMENT': {
-                label: 'پیش ثبت نام',
-                className: 'statusWarning',
+                label: 'عدم پرداخت هزینه',
+                className: 'statusDanger',
                 icon: Icons.clock
             },
             'CONFIRMED': {
-                label: 'تایید شده',
+                label: 'ثبت نام موفق',
                 className: 'statusSuccess',
                 icon: Icons.check
             },

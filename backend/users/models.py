@@ -70,8 +70,6 @@ class User(AbstractUser):
         U15 = "U15", "U15"
         U17 = "U17", "U17"
         U18 = "U18", "U18"
-        YOUTH = "YOUTH", "جوانان"
-        U21 = "U21", "امید"
         OUT_OF_RANGE = "OOR", "خارج از محدوده" 
     
     # Core fields
@@ -199,12 +197,8 @@ class User(AbstractUser):
             return User.AgeCategory.U17  # 16-17 years old = U17
         elif age == 18 or age == 19:
             return User.AgeCategory.U18  # 18-19 years old = U18
-        elif age == 20:
-            return User.AgeCategory.YOUTH  # 20 years old = YOUTH
-        elif age == 21:
-            return User.AgeCategory.U21  # 21 years old = U21
         else:
-            return User.AgeCategory.OUT_OF_RANGE  # Above 21
+            return User.AgeCategory.OUT_OF_RANGE
             
     def save(self, *args, **kwargs):
         is_new = self.pk is None

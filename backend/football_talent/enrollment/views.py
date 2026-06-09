@@ -51,7 +51,9 @@ class FootballEnrollmentAPIView(APIView):
             
             enrollments = base_queryset.filter(
                 user=user,
+                enrollment_status=FootballEnrollment.EnrollmentStatus.CONFIRMED
             )
+            
             serializer = FootballEnrollmentSerializer(enrollments, many=True)
             return Response({
                 "message": "Your football enrollments retrieved successfully",

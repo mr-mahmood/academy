@@ -49,6 +49,11 @@ def generate_otp(phone_number: str):
     
     if request_count >= OTP_MAX_REQUESTS:
         _block_user(phone_number)
+        remaining_time = get_block_remaining_time(phone_number)
+        raise APIError(
+            AuthOTPError.OTP_ACCOUNT_BLOCKED,
+            {"remaining_seconds": remaining_time}
+        )
     
     # Increment request counter
     cache.set(request_key, request_count + 1, timeout=OTP_RATE_WINDOW)
@@ -196,13 +201,3 @@ def get_remaining_verification_attempts(phone_number: str) -> int:
     
     attempts = stored.get("verification_attempts", 0)
     return max(0, OTP_MAX_VERIFICATION_ATTEMPTS - attempts)
-
-
-def get_remaining_request_attempts(phone_number: str) -> int:
-    """Check how many OTP requests remain in current time window"""
-    if _is_user_blocked(phone_number):
-        return 0
-    
-    request_key = f"{OTP_REQUEST_LIMIT_PREFIX}_{phone_number}"
-    requests = cache.get(request_key, 0)
-    return max(0, OTP_MAX_REQUESTS - requests)

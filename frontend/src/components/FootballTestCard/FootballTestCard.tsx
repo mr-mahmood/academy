@@ -59,15 +59,15 @@ export default function FootballTestCard({
 
     const getStatusDisplay = (status: string) => {
         const statusMap: Record<string, { label: string; className: string; icon: any }> = {
-            'ACTIVE': {
-                label: 'فعال',
+            'WAITING_FOR_PAYMENT': {
+                label: 'عدم پرداخت هزینه',
+                className: 'statusDanger',
+                icon: Icons.clock
+            },
+            'CONFIRMED': {
+                label: 'ثبت نام موفق',
                 className: 'statusSuccess',
                 icon: Icons.check
-            },
-            'FULL': {
-                label: 'تکمیل ظرفیت',
-                className: 'statusWarning',
-                icon: Icons.users
             },
             'CANCELLED': {
                 label: 'لغو شده',
@@ -78,6 +78,16 @@ export default function FootballTestCard({
                 label: 'اتمام یافته',
                 className: 'statusInfo',
                 icon: Icons.verified
+            },
+            'ACTIVE': {
+                label: 'فعال',
+                className: 'statusSuccess',
+                icon: Icons.check
+            },
+            'FULL': {
+                label: 'تکمیل ظرفیت',
+                className: 'statusWarning',
+                icon: Icons.users
             },
         }
         return statusMap[status] || { label: status, className: 'statusDefault', icon: Icons.info }

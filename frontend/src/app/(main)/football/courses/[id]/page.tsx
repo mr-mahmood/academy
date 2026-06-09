@@ -321,12 +321,12 @@ export default function FootballTestDetailPage() {
                         <h3 className={styles.testName}>
                             {'پست '} {test.position_display} ({test.position})
                         </h3>
-                        {statusBadge && (
+                        {/* {statusBadge && (
                             <div className={`${styles.statusBadge} ${statusBadge.class}`}>
                                 <Icon icon={statusBadge.icon} />
                                 <span>{statusBadge.text}</span>
                             </div>
-                        )}
+                        )} */}
                     </div>
                     {test.academy && (
                         <>

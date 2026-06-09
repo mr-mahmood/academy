@@ -41,7 +41,7 @@ def check_waiting_payments_and_send_reminders():
                 time_since_last = timezone.now() - enrollment.updated_at
             
             # Only send reminder if interval has passed (24 hours)
-            if time_since_last >= timedelta(hours=24):
+            if time_since_last >= timedelta(hours=23): # for errro time and a gap we use 23 hours
                 
                 if enrollment.reminder_count < 3:
                     # Send reminder SMS

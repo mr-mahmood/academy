@@ -357,12 +357,12 @@ export default function ClassDetailPage() {
                 <div className={styles.headerInfo}>
                     <div className={styles.headerTopRow}>
                         <h1 className={styles.courseName}>{course.sport?.name || 'دوره ورزشی'}</h1>
-                        {statusBadge && (
+                        {/* {statusBadge && (
                             <div className={`${styles.statusBadge} ${statusBadge.class}`}>
                                 <Icon icon={statusBadge.icon} />
                                 <span>{statusBadge.text}</span>
                             </div>
-                        )}
+                        )} */}
                     </div>
                     {course.academy && (
                         <>

@@ -26,8 +26,6 @@ class FootballEnrollment(models.Model):
         U15 = "U15", "زیر ۱۵ سال"
         U17 = "U17", "زیر ۱۷ سال"
         U18 = "U18", "زیر ۱۸ سال"
-        YOUTH = "YOUTH", "جوانان"
-        U21 = "U21", "امید"
     
     user = models.ForeignKey(
         User, 
