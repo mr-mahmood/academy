@@ -1,8 +1,8 @@
-# football_talent/enrollments/admin.py
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 from .models import FootballEnrollment
+from .utils import export_football_enrollments_to_excel
 from config.admin import admin_site
 
 
@@ -25,7 +25,13 @@ class FootballEnrollmentAdmin(admin.ModelAdmin):
         }),
     )
     
-    actions = ['mark_confirmed', 'mark_cancelled']
+    actions = ['mark_confirmed', 'mark_cancelled', 'export_to_excel']
+    
+    def export_to_excel(self, request, queryset):
+        """Export selected football enrollments to Excel"""
+        return export_football_enrollments_to_excel(queryset)
+    
+    export_to_excel.short_description = "Excel Export"
     
     def user_link(self, obj):
         if obj.user:

@@ -152,7 +152,7 @@ class User(AbstractUser):
         ]
     
     def __str__(self):
-        return f"{self.phone_number}"
+        return f"{self.id}. {self.full_name} ({self.phone_number})"
     
     @classmethod
     def get_user_by_phone(cls, phone_number: str) -> 'User':

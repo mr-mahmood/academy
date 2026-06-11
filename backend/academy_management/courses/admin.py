@@ -1,14 +1,14 @@
-# apps/classes/admin.py
 from django.contrib import admin
 from .models import Course, CourseSchedule
+from .utils import export_courses_to_excel
 from config.admin import admin_site
+
 
 class CourseScheduleInline(admin.TabularInline):
     """Inline schedule entries"""
     model = CourseSchedule
     extra = 0
     fields = ['weekday', 'start_time', 'end_time']
-
 
 
 class CourseAdmin(admin.ModelAdmin):
@@ -35,8 +35,25 @@ class CourseAdmin(admin.ModelAdmin):
     
     inlines = [CourseScheduleInline]
     
-    actions = ['make_active', 'make_draft', 'make_full']
+    actions = ['make_active', 'make_draft', 'make_full', 'export_to_excel']
     
+    def export_to_excel(self, request, queryset):
+        """Export selected courses to Excel"""
+        return export_courses_to_excel(queryset)
+    
+    export_to_excel.short_description = "Excel Export"
+    
+    def make_active(self, request, queryset):
+        queryset.update(status=Course.Status.ACTIVE)
+    make_active.short_description = "Mark as Active"
+    
+    def make_draft(self, request, queryset):
+        queryset.update(status=Course.Status.CANCELLED)
+    make_draft.short_description = "Mark as Cancelled"
+    
+    def make_full(self, request, queryset):
+        queryset.update(status=Course.Status.FULL)
+    make_full.short_description = "Mark as Full"
 
 
 class CourseScheduleAdmin(admin.ModelAdmin):

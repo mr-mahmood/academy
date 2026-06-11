@@ -1,4 +1,3 @@
-// app/courses/[id]/page.tsx
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
@@ -64,7 +63,7 @@ export default function ClassDetailPage() {
 
     useEffect(() => {
         if (!activeUser || !isValidId) return
-        
+
         const fetchEnrollments = async () => {
             const result = await apiFetch({ url: 'api/academy/enrollment/', method: 'GET' })
             if (result.success) {
@@ -330,15 +329,6 @@ export default function ClassDetailPage() {
     const disableReason = getDisableReason()
     const supportContact = getSupportContact(course.sport?.name, course.gender_requirement)
 
-    let statusBadge = null
-    if (isEnrolled) {
-        statusBadge = { text: 'ثبت‌نام قطعی', class: styles.confirmedBadge, icon: Icons.check }
-    } else if (isPreRegistered) {
-        statusBadge = { text: 'در انتظار پرداخت', class: styles.pendingBadge, icon: Icons.clock }
-    } else {
-        statusBadge = { text: 'ثبت‌ نام نشده', class: styles.notRegisteredBadge, icon: Icons.infoCircle }
-    }
-
     function getDayName(weekday: number): string {
         const days: Record<number, string> = { 0: 'شنبه', 1: 'یکشنبه', 2: 'دوشنبه', 3: 'سه‌شنبه', 4: 'چهارشنبه', 5: 'پنجشنبه', 6: 'جمعه' }
         return days[weekday] || String(weekday)
@@ -350,243 +340,233 @@ export default function ClassDetailPage() {
 
     return (
         <div className={styles.container}>
-            <div className={styles.courseHeaderCard}>
-                <div className={styles.headerIcon}>
-                    <Icon icon={Icons.football} />
-                </div>
-                <div className={styles.headerInfo}>
-                    <div className={styles.headerTopRow}>
-                        <h1 className={styles.courseName}>{course.sport?.name || 'دوره ورزشی'}</h1>
-                        {/* {statusBadge && (
-                            <div className={`${styles.statusBadge} ${statusBadge.class}`}>
-                                <Icon icon={statusBadge.icon} />
-                                <span>{statusBadge.text}</span>
-                            </div>
-                        )} */}
+            {/* Single Compact Card - Like CourseCard */}
+            <div className={styles.detailCard}>
+                {/* Main Section - Sport Name & Sessions (Like CourseCard) */}
+                <div className={styles.mainSection}>
+                    <div className={styles.iconContainer}>
+                        <Icon icon={Icons.football} />
                     </div>
-                    {course.academy && (
-                        <>
-                            <p className={styles.academyName}>ورزشگاه {course.academy.name}</p>
-                            {course.academy.address_text && (
-                                <div className={styles.addressRow}>
-                                    <Icon icon={Icons.location} className={styles.addressIcon} />
-                                    <span>{course.academy.address_text}</span>
-                                </div>
-                            )}
-                        </>
-                    )}
+                    <div className={styles.mainInfo}>
+                        <h3 className={styles.title}>
+                            {course.sport?.name || 'دوره ورزشی'}
+                        </h3>
+                        <span className={styles.sessionsText}>
+                            {course.total_sessions || 0} جلسه
+                        </span>
+                    </div>
+                    <div className={`${styles.statusBadge} ${isEnrolled ? styles.statusSuccess : isPreRegistered ? styles.statusWarning : styles.statusDefault}`}>
+                        <Icon icon={isEnrolled ? Icons.check : isPreRegistered ? Icons.clock : Icons.infoCircle} />
+                        <span>{isEnrolled ? 'ثبت‌نام قطعی' : isPreRegistered ? 'در انتظار پرداخت' : 'ثبت‌نام نشده'}</span>
+                    </div>
                 </div>
-            </div>
 
-            {course.schedule && course.schedule.length > 0 && (
-                <div className={styles.scheduleCard}>
-                    <h3 className={styles.cardTitle}>زمان برگزاری</h3>
+                {/* Gender Section (Like CourseCard) */}
+                <div className={styles.genderSection}>
+                    <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
+                        <Icon icon={Icons.user} className={styles.genderIcon} />
+                        <span className={styles.genderLabel}>مناسب (ظرفیت)</span>
+                    </div>
+                    <span className={styles.genderValue}>
+                        {course.gender_requirement === 'MALE' ? 'آقایان' : course.gender_requirement === 'FEMALE' ? 'بانوان' : 'نامشخص'}{` (${course.max_students} نفر)`}
+                    </span>
+                </div>
+
+                {/* Schedule Section (Like CourseCard) */}
+                {course.schedule && course.schedule.length > 0 && (
                     <div className={styles.scheduleContainer}>
-                        {course.schedule.map((sched: Schedule, index: number) => (
+                        {course.schedule.map((sched, index) => (
                             <div key={sched.id || index} className={styles.scheduleRow}>
                                 <div className={styles.scheduleDay}>
                                     <Icon icon={Icons.calendar} className={styles.scheduleIcon} />
                                     <span>{getDayName(sched.weekday)}</span>
                                 </div>
                                 <div className={styles.scheduleTime}>
-                                    <Icon icon={Icons.clock} className={styles.scheduleIcon} />
-                                    <span>{sched.start_time?.slice(0, 5)} - {sched.end_time?.slice(0, 5)}</span>
+                                    <span>
+                                        {sched.end_time?.slice(0, 5)} - {sched.start_time?.slice(0, 5)}
+                                    </span>
                                 </div>
                             </div>
                         ))}
                     </div>
-                </div>
-            )}
+                )}
 
-            <div className={styles.infoGrid}>
-                <div className={styles.infoCard}>
-                    <Icon icon={Icons.users} />
-                    <div>
-                        <label>ظرفیت</label>
-                        <span className={styles.capacityValue}>
-                            {course.max_students} نفر
-                        </span>
+                {/* Address Row (Like CourseCard) */}
+                <div className={styles.addressRow}>
+                    <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center' }}>
+                        <Icon icon={Icons.building} className={styles.addressIcon} />
+                        <span className={styles.addressValue}>ورزشگاه {course.academy.name}</span>
+                        <span className={styles.addressSeparator} />
                     </div>
+                    {course.academy.address_text && (
+                        <span className={styles.addressDetail}>{course.academy.address_text}</span>
+                    )}
                 </div>
-                <div className={styles.infoCard}>
-                    <Icon icon={Icons.user} />
-                    <div>
-                        <label>جنسیت</label>
-                        <span>{course.gender_requirement === 'MALE' ? 'آقایان' : course.gender_requirement === 'FEMALE' ? 'بانوان' : 'نامشخص'}</span>
-                    </div>
-                </div>
-                <div className={styles.infoCard}>
-                    <Icon icon={Icons.info} />
-                    <div>
-                        <label>تعداد جلسات</label>
-                        <span>{course.total_sessions || 0} جلسه</span>
-                    </div>
-                </div>
-                <div className={styles.infoCard}>
-                    <Icon icon={Icons.verified} />
-                    <div>
-                        <label>وضعیت دوره</label>
-                        <span className={course.status === 'ACTIVE' ? styles.activeStatus : styles.inactiveStatus}>
-                            {course.status === 'ACTIVE' ? 'فعال' : course.status === 'FULL' ? 'تکمیل' : course.status === 'CANCELLED' ? 'لغو شده' : 'پایان یافته'}
-                        </span>
-                    </div>
-                </div>
-            </div>
 
-            {supportContact && (
-                <div className={styles.supportCard}>
-                    <div className={styles.supportHeader}>
-                        <Icon icon={Icons.phone} />
-                        <h3 className={styles.cardTitle2}>شماره پشتیبانی</h3>
-                    </div>
-                    <div className={styles.supportContent}>
-                        <div className={styles.supportInfo}>
-                            <span className={styles.supportLabel}>کارشناس:</span>
-                            <span className={styles.supportName}>{supportContact.name}</span>
-                        </div>
-                        <div className={styles.supportInfo}>
-                            <a href={`tel:${supportContact.phone}`} className={styles.supportPhone}>
-                                <Icon icon={Icons.phone} />
-                                {supportContact.phone}
+                {/* Support Section - Optional */}
+                {supportContact && (
+                    <div className={styles.supportSection}>
+                        <div className={styles.supportRow}>
+                            <div className={styles.supportInfoCompact}>
+                                <Icon icon={Icons.phone} className={styles.supportIconCompact} />
+                                <span className={styles.supportLabel}>پشتیبانی:</span>
+                            </div>
+                            <a href={`tel:${supportContact.phone}`} className={styles.supportPhoneCompact}>
+                                {supportContact.name} {supportContact.phone}
                             </a>
                         </div>
                     </div>
-                </div>
-            )}
-
-            <div className={styles.priceCard}>
-                <div className={styles.priceRow}>
-                    <span>شهریه دوره</span>
-                    <span>{formatPrice(course.price)} تومان</span>
-                </div>
-                <div className={styles.priceDivider}></div>
-                <div className={styles.totalRow}>
-                    <span>مبلغ قابل پرداخت</span>
-                    <span>{formatPrice(course.price)} تومان</span>
-                </div>
-            </div>
-
-            <div className={styles.actionsSection}>
-                {isEnrolled ? (
-                    <button onClick={() => setShowModal('cancel')} className={styles.cancelButton}>
-                        <Icon icon={Icons.timesCircle} /><span>لغو ثبت‌ نام</span>
-                    </button>
-                ) : isPreRegistered ? (
-                    <>
-                        <button onClick={() => setShowModal('pay')} disabled={paymentProcessing} className={styles.registerButton}>
-                            {paymentProcessing ? (
-                                <><span>پرداخت و تکمیل ثبت‌ نام</span> <div className={styles.smallSpinner}></div></>
-                            ) : (
-                                <><Icon icon={Icons.creditCard} /><span>پرداخت و تکمیل ثبت‌ نام</span></>
-                            )}
-                        </button>
-                        <button onClick={() => setShowModal('cancel')} disabled={cancelProcessing} className={styles.cancelButton}>
-                            {cancelProcessing ? (
-                                <><span>لغو ثبت‌ نام</span> <div className={styles.smallSpinner}></div></>
-                            ) : (
-                                <><Icon icon={Icons.timesCircle} /><span>لغو ثبت‌ نام</span></>
-                            )}
-                        </button>
-                    </>
-                ) : canPreRegister() ? (
-                    <button onClick={() => setShowModal('preRegister')} disabled={preRegistering} className={styles.registerButton}>
-                        {preRegistering ? (
-                            <><span>پیش‌ ثبت‌ نام</span> <div className={styles.smallSpinner}></div></>
-                        ) : (
-                            <><Icon icon={Icons.edit} /><span>پیش‌ ثبت‌ نام</span></>
-                        )}
-                    </button>
-                ) : (
-                    activeUser ? (
-                        disableReason && (
-                            <div className={styles.unavailableBox}>
-                                <Icon icon={Icons.infoCircle} /><p>{disableReason}</p>
-                            </div>
-                        )
-                    ) : (
-                        <button
-                            className={styles.registerButton}
-                            onClick={() => {
-                                sessionStorage.setItem('pendingRegistration', JSON.stringify({ courseId: course.id, parent: "academy" }))
-                                router.push('/login')
-                            }}
-                        >
-                            <Icon icon={Icons.edit} /><span>ورود و پیش‌ ثبت‌ نام</span>
-                        </button>
-                    )
                 )}
+
+                {/* Price Section - Bottom */}
+                <div className={styles.priceSectionCompact}>
+                    <div className={styles.priceRowCompact}>
+                        <span className={styles.priceLabelCompact}>هزینه دوره</span>
+                        <span className={styles.priceValueCompact}>{formatPrice(course.price)} تومان</span>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className={styles.actionsSectionCompact}>
+                    {isEnrolled ? (
+                        <button onClick={() => setShowModal('cancel')} className={styles.dangerButtonCompact}>
+                            <Icon icon={Icons.timesCircle} />
+                            <span>لغو ثبت‌ نام</span>
+                        </button>
+                    ) : isPreRegistered ? (
+                        <>
+                            <button onClick={() => setShowModal('pay')} disabled={paymentProcessing} className={styles.primaryButtonCompact}>
+                                {paymentProcessing ? (
+                                    <><span>پرداخت و تکمیل ثبت‌ نام</span> <div className={styles.smallSpinner}></div></>
+                                ) : (
+                                    <><Icon icon={Icons.creditCard} /><span>پرداخت و تکمیل ثبت‌ نام</span></>
+                                )}
+                            </button>
+                            <button onClick={() => setShowModal('cancel')} disabled={cancelProcessing} className={styles.dangerButtonCompact}>
+                                {cancelProcessing ? (
+                                    <><span>لغو ثبت‌ نام</span> <div className={styles.smallSpinner}></div></>
+                                ) : (
+                                    <><Icon icon={Icons.timesCircle} /><span>لغو ثبت‌ نام</span></>
+                                )}
+                            </button>
+                        </>
+                    ) : canPreRegister() ? (
+                        <button onClick={() => setShowModal('preRegister')} disabled={preRegistering} className={styles.primaryButtonCompact}>
+                            {preRegistering ? (
+                                <><span>پیش‌ ثبت‌ نام</span> <div className={styles.smallSpinner}></div></>
+                            ) : (
+                                <><Icon icon={Icons.edit} /><span>پیش‌ ثبت‌ نام</span></>
+                            )}
+                        </button>
+                    ) : (
+                        activeUser ? (
+                            disableReason && (
+                                <div className={styles.unavailableBoxCompact}>
+                                    <Icon icon={Icons.infoCircle} />
+                                    <p>{disableReason}</p>
+                                </div>
+                            )
+                        ) : (
+                            <button
+                                className={styles.primaryButtonCompact}
+                                onClick={() => {
+                                    sessionStorage.setItem('pendingRegistration', JSON.stringify({ courseId: course.id, parent: "academy" }))
+                                    showPopUp({
+                                        title: 'ادامه ثبت نام',
+                                        message: 'برای ادامه ثبت نام لازم است وارد حساب کاربری خود شوید',
+                                        type: 'warning',
+                                        onClose() {
+                                            router.push('/login');
+                                        },
+                                        onAutoClose() {
+                                            router.push('/login');
+                                        },
+                                        duration: 5000
+                                    })
+                                }}
+                            >
+                                <Icon icon={Icons.edit} /><span>ورود و پیش‌ ثبت‌ نام</span>
+                            </button>
+                        )
+                    )}
+                </div>
             </div>
 
-            {showModal === 'preRegister' && (
-                <div className={styles.modalOverlay} onClick={() => !preRegistering && setShowModal(null)}>
-                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        <div className={styles.modalIcon}><Icon icon={Icons.edit} /></div>
-                        <h3 className={styles.modalTitle}>تأیید پیش‌ ثبت‌ نام</h3>
-                        <p className={styles.modalText}>
-                            آیا مایل به پیش‌ ثبت‌ نام در دوره هستید؟
-                        </p>
-                        <div className={styles.modalWarning}>
-                            <Icon icon={Icons.infoCircle} />
-                            <span>پس از پیش‌ ثبت‌ نام، برای تکمیل باید پرداخت را انجام دهید</span>
-                        </div>
-                        <div className={styles.modalActions}>
-                            <button onClick={() => setShowModal(null)} disabled={preRegistering} className={styles.modalCancelBtn}>
-                                انصراف
-                            </button>
-                            <button onClick={handlePreRegister} disabled={preRegistering} className={styles.modalConfirmBtn}>
-                                {preRegistering ? <div className={styles.smallSpinner}></div> : 'تأیید'}
-                            </button>
+            {/* Modals - Styled consistently */}
+            {
+                showModal === 'preRegister' && (
+                    <div className={styles.modalOverlay} onClick={() => !preRegistering && setShowModal(null)}>
+                        <div className={styles.modalCompact} onClick={e => e.stopPropagation()}>
+                            <div className={styles.modalIconCompact}><Icon icon={Icons.edit} /></div>
+                            <h3 className={styles.modalTitleCompact}>تأیید پیش‌ ثبت‌ نام</h3>
+                            <p className={styles.modalTextCompact}>آیا مایل به پیش‌ ثبت‌ نام در دوره هستید؟</p>
+                            <div className={styles.modalWarningCompact}>
+                                <Icon icon={Icons.infoCircle} />
+                                <span>پس از پیش‌ ثبت‌ نام، برای تکمیل باید پرداخت را انجام دهید</span>
+                            </div>
+                            <div className={styles.modalActionsCompact}>
+                                <button onClick={() => setShowModal(null)} disabled={preRegistering} className={styles.modalCancelBtnCompact}>
+                                    انصراف
+                                </button>
+                                <button onClick={handlePreRegister} disabled={preRegistering} className={styles.modalConfirmBtnCompact}>
+                                    {preRegistering ? <div className={styles.smallSpinner}></div> : 'تأیید'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
-            {showModal === 'pay' && (
-                <div className={styles.modalOverlay} onClick={() => !paymentProcessing && setShowModal(null)}>
-                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        <div className={styles.modalIcon}><Icon icon={Icons.creditCard} /></div>
-                        <h3 className={styles.modalTitle}>تأیید پرداخت</h3>
-                        <p className={styles.modalText}>
-                            برای تکمیل ثبت‌ نام در دوره مبلغ <strong>{formatPrice(course.price)} تومان</strong> پرداخت می‌شود
-                        </p>
-                        <div className={styles.modalWarning}>
-                            <Icon icon={Icons.infoCircle} />
-                            <span>این عملیات غیرقابل بازگشت است</span>
-                        </div>
-                        <div className={styles.modalActions}>
-                            <button onClick={() => setShowModal(null)} disabled={paymentProcessing} className={styles.modalCancelBtn}>
-                                انصراف
-                            </button>
-                            <button onClick={handlePayment} disabled={paymentProcessing} className={styles.modalConfirmBtn}>
-                                {paymentProcessing ? <div className={styles.smallSpinner}></div> : 'پرداخت'}
-                            </button>
+            {
+                showModal === 'pay' && (
+                    <div className={styles.modalOverlay} onClick={() => !paymentProcessing && setShowModal(null)}>
+                        <div className={styles.modalCompact} onClick={e => e.stopPropagation()}>
+                            <div className={styles.modalIconCompact}><Icon icon={Icons.creditCard} /></div>
+                            <h3 className={styles.modalTitleCompact}>تأیید پرداخت</h3>
+                            <p className={styles.modalTextCompact}>
+                                برای تکمیل ثبت‌ نام در دوره مبلغ <strong>{formatPrice(course.price)} تومان</strong> پرداخت می‌شود
+                            </p>
+                            <div className={styles.modalWarningCompact}>
+                                <Icon icon={Icons.infoCircle} />
+                                <span>این عملیات غیرقابل بازگشت است</span>
+                            </div>
+                            <div className={styles.modalActionsCompact}>
+                                <button onClick={() => setShowModal(null)} disabled={paymentProcessing} className={styles.modalCancelBtnCompact}>
+                                    انصراف
+                                </button>
+                                <button onClick={handlePayment} disabled={paymentProcessing} className={styles.modalConfirmBtnCompact}>
+                                    {paymentProcessing ? <div className={styles.smallSpinner}></div> : 'پرداخت'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
-            {showModal === 'cancel' && (
-                <div className={styles.modalOverlay} onClick={() => !cancelProcessing && setShowModal(null)}>
-                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        <div className={styles.modalIcon}><Icon icon={Icons.timesCircle} /></div>
-                        <h3 className={styles.modalTitle}>لغو ثبت‌ نام</h3>
-                        <p className={styles.modalText}>آیا از لغو ثبت‌ نام در دوره اطمینان دارید؟</p>
-                        <div className={styles.modalWarning}>
-                            <Icon icon={Icons.infoCircle} />
-                            <span>در صورت لغو ثبت نام وجه پرداختی شما غیر قابل بازگشت است</span>
-                        </div>
-                        <div className={styles.modalActions}>
-                            <button onClick={() => setShowModal(null)} disabled={cancelProcessing} className={styles.modalCancelBtn}>
-                                انصراف
-                            </button>
-                            <button onClick={handleCancelEnrollment} disabled={cancelProcessing} className={styles.modalDangerBtn}>
-                                {cancelProcessing ? <div className={styles.smallSpinner}></div> : 'لغو ثبت‌نام'}
-                            </button>
+            {
+                showModal === 'cancel' && (
+                    <div className={styles.modalOverlay} onClick={() => !cancelProcessing && setShowModal(null)}>
+                        <div className={styles.modalCompact} onClick={e => e.stopPropagation()}>
+                            <div className={styles.modalIconCompact}><Icon icon={Icons.timesCircle} /></div>
+                            <h3 className={styles.modalTitleCompact}>لغو ثبت‌ نام</h3>
+                            <p className={styles.modalTextCompact}>آیا از لغو ثبت‌ نام در دوره اطمینان دارید؟</p>
+                            <div className={styles.modalWarningCompact}>
+                                <Icon icon={Icons.infoCircle} />
+                                <span>در صورت لغو ثبت نام وجه پرداختی شما غیر قابل بازگشت است</span>
+                            </div>
+                            <div className={styles.modalActionsCompact}>
+                                <button onClick={() => setShowModal(null)} disabled={cancelProcessing} className={styles.modalCancelBtnCompact}>
+                                    انصراف
+                                </button>
+                                <button onClick={handleCancelEnrollment} disabled={cancelProcessing} className={styles.modalDangerBtnCompact}>
+                                    {cancelProcessing ? <div className={styles.smallSpinner}></div> : 'لغو ثبت‌نام'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
             {PopupComponent}
-        </div>
+        </div >
     )
 }

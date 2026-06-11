@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import FootballCourse
+from .utils import export_football_courses_to_excel
 from config.admin import admin_site
 
 
@@ -13,7 +14,7 @@ class FootballCourseAdmin(admin.ModelAdmin):
     
     list_filter = ['status', 'position', 'academy']
     
-    search_fields = ['head_coach', 'academy__name']
+    search_fields = ['coache', 'academy__name']
     
     readonly_fields = ['created_at', 'updated_at']
     
@@ -26,7 +27,13 @@ class FootballCourseAdmin(admin.ModelAdmin):
         }),
     )
     
-    actions = ['activate_courses', 'cancel_courses', 'mark_completed']
+    actions = ['activate_courses', 'cancel_courses', 'mark_completed', 'export_to_excel']
+    
+    def export_to_excel(self, request, queryset):
+        """Export selected football courses to Excel"""
+        return export_football_courses_to_excel(queryset)
+    
+    export_to_excel.short_description = "Excel Export"
     
     def activate_courses(self, request, queryset):
         updated = queryset.update(status=FootballCourse.Status.ACTIVE)

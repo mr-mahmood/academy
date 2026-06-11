@@ -2,6 +2,7 @@ Django
 django-stubs
 djangorestframework
 djangorestframework-simplejwt
+django-import-export
 django-filter
 python-dateutil
 django_redis
@@ -24,3 +25,5 @@ django-environ
 requests
 Pillow
 gunicorn
+pandas
+openpyxl

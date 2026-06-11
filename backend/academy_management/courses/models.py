@@ -108,8 +108,44 @@ class Course(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.id}. {self.sport.name}-{self.academy.name}"
-    
+        schedules = list(self.schedule.all())  # type: ignore
+        
+        if not schedules:
+            return f"{self.sport.name} - {self.academy.name}"
+        
+        # Group by time
+        from collections import defaultdict
+        time_groups = defaultdict(list)
+        
+        for s in schedules:
+            # Format time in 24-hour format: "9:30-11:00" or "19:30-21:00"
+            start_24 = s.start_time.strftime("%H:%M").lstrip("0")
+            end_24 = s.end_time.strftime("%H:%M").lstrip("0")
+            
+            # Remove leading zero for hours (e.g., "09:30" -> "9:30")
+            if start_24.startswith("0"):
+                start_24 = start_24[1:]
+            if end_24.startswith("0"):
+                end_24 = end_24[1:]
+            
+            time_key = f"{start_24}-{end_24}"
+            day_short = s.weekday_name[:3]  # Sat, Sun, Mon, etc.
+            time_groups[time_key].append(day_short)
+        
+        # Format output
+        parts = []
+        for time_key, days in time_groups.items():
+            if len(days) == 3 and days == ['Sat', 'Mon', 'Wed']:
+                parts.append(f"Sat/Mon/Wed {time_key}")
+            elif len(days) == 2:
+                parts.append(f"{days[0]}/{days[1]} {time_key}")
+            elif len(days) > 2:
+                parts.append(f"{'/'.join(days)} {time_key}")
+            else:
+                parts.append(f"{days[0]} {time_key}")
+        
+        return f"{self.id}. {self.sport.name} {self.academy.name} ({', '.join(parts)})"
+        
     @property
     def available_seats(self) -> int:
         """Number of seats still available"""

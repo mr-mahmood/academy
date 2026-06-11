@@ -1,4 +1,3 @@
-// app/football-test/[id]/page.tsx
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
@@ -39,7 +38,7 @@ export default function FootballTestDetailPage() {
 
     useEffect(() => {
         if (!activeUser || !isValidId) return
-        
+
         const fetchEnrollments = async () => {
             const result = await apiFetch({ url: 'api/football/enrollment/', method: 'GET' })
             if (result.success) {
@@ -287,15 +286,6 @@ export default function FootballTestDetailPage() {
 
     const disableReason = getDisableReason()
 
-    let statusBadge = null
-    if (isEnrolled) {
-        statusBadge = { text: 'ثبت‌ نام قطعی', class: styles.confirmedBadge, icon: Icons.check }
-    } else if (isRegistered) {
-        statusBadge = { text: 'در انتظار پرداخت', class: styles.pendingBadge, icon: Icons.clock }
-    } else {
-        statusBadge = { text: 'ثبت‌ نام نشده', class: styles.notRegisteredBadge, icon: Icons.infoCircle }
-    }
-
     const getGenderDisplay = (gender: string) => {
         switch (gender) {
             case 'MALE': return 'آقایان'
@@ -312,116 +302,136 @@ export default function FootballTestDetailPage() {
         <div className={styles.container}>
             <AgeCategoryBadge ageCategory={activeUser?.age_category} />
 
-            <div className={styles.testHeaderCard}>
-                <div className={styles.headerIcon}>
-                    <Icon icon={Icons.football} />
-                </div>
-                <div className={styles.headerInfo}>
-                    <div className={styles.headerTopRow}>
-                        <h3 className={styles.testName}>
-                            {'پست '} {test.position_display} ({test.position})
-                        </h3>
-                        {/* {statusBadge && (
-                            <div className={`${styles.statusBadge} ${statusBadge.class}`}>
-                                <Icon icon={statusBadge.icon} />
-                                <span>{statusBadge.text}</span>
-                            </div>
-                        )} */}
+            {/* Single Compact Card - Same styling as course detail */}
+            <div className={styles.detailCard}>
+                {/* Main Section - Test Name & Position */}
+                <div className={styles.mainSection}>
+                    <div className={styles.iconContainer}>
+                        <Icon icon={Icons.football} />
                     </div>
-                    {test.academy && (
-                        <>
-                            <p className={styles.academyName}>ورزشگاه {test.academy.name}</p>
-                            {test.academy.address_text && (
-                                <div className={styles.addressRow}>
-                                    <Icon icon={Icons.location} className={styles.addressIcon} />
-                                    <span>{test.academy.address_text}</span>
-                                </div>
+                    <div className={styles.mainInfo}>
+                        <h3 className={styles.title}>
+                            تست فوتبال
+                        </h3>
+                        <span className={styles.positionText}>
+                            پست {test.position_display} ({test.position})
+                        </span>
+                    </div>
+                    <div className={`${styles.statusBadge} ${isEnrolled ? styles.statusSuccess : isRegistered ? styles.statusWarning : styles.statusDefault}`}>
+                        <Icon icon={isEnrolled ? Icons.check : isRegistered ? Icons.clock : Icons.infoCircle} />
+                        <span>{isEnrolled ? 'ثبت‌نام قطعی' : isRegistered ? 'در انتظار پرداخت' : 'ثبت‌نام نشده'}</span>
+                    </div>
+                </div>
+
+                {/* Academy Info Section */}
+                {test.academy && (
+                    <div className={styles.academySection}>
+                        <div className={styles.academyRow}>
+                            <Icon icon={Icons.building} className={styles.academyIcon} />
+                            <span className={styles.academyName}>ورزشگاه {test.academy.name}</span>
+                        </div>
+                        {test.academy.address_text && (
+                            <div className={styles.addressRowCompact}>
+                                <Icon icon={Icons.location} className={styles.addressIconCompact} />
+                                <span>{test.academy.address_text}</span>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Info Grid - Gender & Position (2 columns) */}
+                <div className={styles.infoGridCompact}>
+                    <div className={styles.infoItem}>
+                        <Icon icon={Icons.user} className={styles.infoIcon} />
+                        <div>
+                            <span className={styles.infoLabel}>جنسیت</span>
+                            <span className={styles.infoValue}>{getGenderDisplay(test.gender_requirement)}</span>
+                        </div>
+                    </div>
+                    <div className={styles.infoItem}>
+                        <Icon icon={Icons.user} className={styles.infoIcon} />
+                        <div>
+                            <span className={styles.infoLabel}>پست تخصصی</span>
+                            <span className={styles.infoValue}>{test.position_display} ({test.position})</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Price Section */}
+                <div className={styles.priceSectionCompact}>
+                    <div className={styles.priceRowCompact}>
+                        <span className={styles.priceLabelCompact}>هزینه تست</span>
+                        <span className={styles.priceValueCompact}>{formatPrice(test.price)} تومان</span>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className={styles.actionsSectionCompact}>
+                    {isEnrolled ? (
+                        <button onClick={() => setShowModal('cancel')} className={styles.dangerButtonCompact}>
+                            <Icon icon={Icons.timesCircle} />
+                            <span>لغو ثبت‌ نام</span>
+                        </button>
+                    ) : canRegister() ? (
+                        <button onClick={() => setShowModal('register')} disabled={registering} className={styles.primaryButtonCompact}>
+                            {registering ? (
+                                <><span>در حال ثبت‌ نام و پرداخت</span> <div className={styles.smallSpinner}></div></>
+                            ) : (
+                                <><Icon icon={Icons.creditCard} /><span>ثبت‌نام و پرداخت</span></>
                             )}
-                        </>
+                        </button>
+                    ) : (
+                        activeUser ? (
+                            disableReason && (
+                                <div className={styles.unavailableBoxCompact}>
+                                    <Icon icon={Icons.infoCircle} />
+                                    <p>{disableReason}</p>
+                                </div>
+                            )
+                        ) : (
+                            <button
+                                className={styles.primaryButtonCompact}
+                                onClick={() => {
+                                    sessionStorage.setItem('pendingRegistration', JSON.stringify({ courseId: test.id, parent: "football" }))
+                                    showPopUp({
+                                        title: 'ادامه ثبت نام',
+                                        message: 'برای ادامه ثبت نام لازم است وارد حساب کاربری خود شوید',
+                                        type: 'warning',
+                                        onClose() {
+                                            router.push('/login');
+                                        },
+                                        onAutoClose() {
+                                            router.push('/login');
+                                        },
+                                        duration: 5000
+                                    })
+                                }}
+                            >
+                                <Icon icon={Icons.edit} /><span>ورود و ثبت‌نام</span>
+                            </button>
+                        )
                     )}
                 </div>
             </div>
 
-            <div className={styles.infoGrid}>
-                <div className={styles.infoCard}>
-                    <Icon icon={Icons.user} />
-                    <div>
-                        <label>جنسیت</label>
-                        <span>{getGenderDisplay(test.gender_requirement)}</span>
-                    </div>
-                </div>
-                <div className={styles.infoCard}>
-                    <Icon icon={Icons.user} />
-                    <div>
-                        <label>پست تخصصی</label>
-                        <span>{test.position_display} ({test.position})</span>
-                    </div>
-                </div>
-            </div>
-
-            <div className={styles.priceCard}>
-                <div className={styles.priceRow}>
-                    <span>هزینه تست</span>
-                    <span>{formatPrice(test.price)} تومان</span>
-                </div>
-                <div className={styles.priceDivider}></div>
-                <div className={styles.totalRow}>
-                    <span>مبلغ قابل پرداخت</span>
-                    <span>{formatPrice(test.price)} تومان</span>
-                </div>
-            </div>
-
-            <div className={styles.actionsSection}>
-                {isEnrolled ? (
-                    <button onClick={() => setShowModal('cancel')} className={styles.cancelButton}>
-                        <Icon icon={Icons.timesCircle} /><span>لغو ثبت‌ نام</span>
-                    </button>
-                ) : canRegister() ? (
-                    <button onClick={() => setShowModal('register')} disabled={registering} className={styles.registerButton}>
-                        {registering ? (
-                            <><span>در حال ثبت‌ نام و پرداخت</span> <div className={styles.smallSpinner}></div></>
-                        ) : (
-                            <><Icon icon={Icons.creditCard} /><span>ثبت ‌نام و پرداخت</span></>
-                        )}
-                    </button>
-                ) : (
-                    activeUser ? (
-                        disableReason && (
-                            <div className={styles.unavailableBox}>
-                                <Icon icon={Icons.infoCircle} /><p>{disableReason}</p>
-                            </div>
-                        )
-                    ) : (
-                        <button
-                            className={styles.registerButton}
-                            onClick={() => {
-                                sessionStorage.setItem('pendingRegistration', JSON.stringify({ courseId: test.id, parent: "football" }))
-                                router.push('/login')
-                            }}
-                        >
-                            <Icon icon={Icons.edit} /><span>ورود و ثبت‌نام</span>
-                        </button>
-                    )
-                )}
-            </div>
-
+            {/* Modals - Styled consistently */}
             {showModal === 'register' && (
                 <div className={styles.modalOverlay} onClick={() => !registering && setShowModal(null)}>
-                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        <div className={styles.modalIcon}><Icon icon={Icons.creditCard} /></div>
-                        <h3 className={styles.modalTitle}>تأیید ثبت‌نام و پرداخت</h3>
-                        <p className={styles.modalText}>
+                    <div className={styles.modalCompact} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalIconCompact}><Icon icon={Icons.creditCard} /></div>
+                        <h3 className={styles.modalTitleCompact}>تأیید ثبت‌نام و پرداخت</h3>
+                        <p className={styles.modalTextCompact}>
                             آیا مایل به ثبت‌ نام در تست و پرداخت مبلغ <strong>{formatPrice(test.price)} تومان</strong> هستید؟
                         </p>
-                        <div className={styles.modalWarning}>
+                        <div className={styles.modalWarningCompact}>
                             <Icon icon={Icons.infoCircle} />
                             <span>پس از پرداخت، ثبت‌ نام شما نهایی خواهد شد</span>
                         </div>
-                        <div className={styles.modalActions}>
-                            <button onClick={() => setShowModal(null)} disabled={registering} className={styles.modalCancelBtn}>
+                        <div className={styles.modalActionsCompact}>
+                            <button onClick={() => setShowModal(null)} disabled={registering} className={styles.modalCancelBtnCompact}>
                                 انصراف
                             </button>
-                            <button onClick={handleRegisterAndPay} disabled={registering} className={styles.modalConfirmBtn}>
+                            <button onClick={handleRegisterAndPay} disabled={registering} className={styles.modalConfirmBtnCompact}>
                                 {registering ? <div className={styles.smallSpinner}></div> : 'تأیید و پرداخت'}
                             </button>
                         </div>
@@ -431,20 +441,20 @@ export default function FootballTestDetailPage() {
 
             {showModal === 'cancel' && (
                 <div className={styles.modalOverlay} onClick={() => !cancelProcessing && setShowModal(null)}>
-                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                        <div className={styles.modalIcon}><Icon icon={Icons.timesCircle} /></div>
-                        <h3 className={styles.modalTitle}>لغو ثبت‌نام</h3>
-                        <p className={styles.modalText}>آیا از لغو ثبت‌نام در تست اطمینان دارید؟</p>
-                        <div className={styles.modalWarning}>
+                    <div className={styles.modalCompact} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalIconCompact}><Icon icon={Icons.timesCircle} /></div>
+                        <h3 className={styles.modalTitleCompact}>لغو ثبت‌نام</h3>
+                        <p className={styles.modalTextCompact}>آیا از لغو ثبت‌نام در تست اطمینان دارید؟</p>
+                        <div className={styles.modalWarningCompact}>
                             <Icon icon={Icons.infoCircle} />
                             <span>در صورت لغو ثبت نام وجه پرداختی شما غیر قابل بازگشت است</span>
                         </div>
-                        <div className={styles.modalActions}>
-                            <button onClick={() => setShowModal(null)} disabled={cancelProcessing} className={styles.modalCancelBtn}>
+                        <div className={styles.modalActionsCompact}>
+                            <button onClick={() => setShowModal(null)} disabled={cancelProcessing} className={styles.modalCancelBtnCompact}>
                                 انصراف
                             </button>
-                            <button onClick={handleCancelEnrollment} disabled={cancelProcessing} className={styles.modalDangerBtn}>
-                                {cancelProcessing ? <div className={styles.smallSpinner}></div> : 'لغو ثبت‌ نام'}
+                            <button onClick={handleCancelEnrollment} disabled={cancelProcessing} className={styles.modalDangerBtnCompact}>
+                                {cancelProcessing ? <div className={styles.smallSpinner}></div> : 'لغو ثبت‌نام'}
                             </button>
                         </div>
                     </div>
