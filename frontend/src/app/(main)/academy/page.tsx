@@ -71,6 +71,20 @@ export default function AcademyPage() {
                     </div>
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>
+
+                <button
+                    className={styles.navCard}
+                    onClick={() => router.push('/academy/partners')}
+                >
+                    <div className={styles.cardIcon}>
+                        <Icon icon={Icons.building} />
+                    </div>
+                    <div className={styles.cardContent}>
+                        <h3>پایگاه ها</h3>
+                        <p>مشاهده لیست پایگاه های موجود</p>
+                    </div>
+                    <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
+                </button>
             </div>
         </div>
     )

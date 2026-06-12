@@ -54,7 +54,6 @@ class ExcelExportService:
                 'شناسه': course.id,
                 'ورزش': course.sport.name if course.sport else '-',
                 'آکادمی': course.academy.name if course.academy else '-',
-                'نام مربی': course.instructor_name or '-',
                 'تعداد جلسات': course.total_sessions,
                 'حداکثر دانشجو': course.max_students,
                 'تعداد ثبت‌نامی‌ها': course.enrolled_students,

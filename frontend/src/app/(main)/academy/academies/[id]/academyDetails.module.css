@@ -689,3 +689,17 @@
 .skeletonGenderBadge .skeletonPulse {
     border-radius: 2rem;
 }
+
+.supportPhoneCompact {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 2rem;
+    transition: all 200ms ease;
+    padding: 0.2rem 0.5rem 0.2rem 0.5rem;
+}

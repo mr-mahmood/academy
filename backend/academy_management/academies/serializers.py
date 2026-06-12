@@ -8,7 +8,8 @@ class AcademySerializer(serializers.ModelSerializer):
         model = Academy
         fields = [
             'id', 'name', 'address_text', 'latitude', 'longitude',
-            'phone', 'is_active', 'created_at', 'updated_at'
+            'instructor_name', 'instructor_phone', 'academy_type', 
+            'is_active', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
     
@@ -33,8 +34,11 @@ class AcademySerializer(serializers.ModelSerializer):
         
         return value.strip()
     
-    def validate_phone_number(self, value):
-        return validate_phone_number(value, instance=self.instance)
+    def validate_Instructor_phone(self, value):
+        """Validate phone number"""
+        if value:
+            return validate_phone_number(value, instance=self.instance)
+        return value
     
     def validate_latitude(self, value):
         if value is not None:

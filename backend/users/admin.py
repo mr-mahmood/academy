@@ -1,10 +1,9 @@
-# users/admin.py
-from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 from users.models import User
 from users.forms import UserCreationForm, UserChangeForm
 from config.admin import admin_site
+from .utils import export_users_to_excel  
 
 
 class UserAdmin(BaseUserAdmin):
@@ -31,6 +30,8 @@ class UserAdmin(BaseUserAdmin):
     list_filter = (
         "gender",
         "age_category",
+        "is_active",
+        "is_staff",
     )
     
     # Search fields
@@ -96,7 +97,15 @@ class UserAdmin(BaseUserAdmin):
         "last_login",
     )
     
+    # Add Excel export action
+    actions = ['export_to_excel']
     
+    def export_to_excel(self, request, queryset):
+        """Export selected users to Excel"""
+        return export_users_to_excel(queryset)
+    
+    export_to_excel.short_description = "Excel Export"
+
 
 # Register explicitly
 admin_site.register(User, UserAdmin)

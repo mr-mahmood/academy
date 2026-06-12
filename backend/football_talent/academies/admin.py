@@ -5,7 +5,7 @@ from config.admin import admin_site
 
 
 class FootballAcademyAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'city', 'phone', 'is_active']
+    list_display = ['id', 'name', 'city', 'is_active']
     list_display_links = ['name']
     readonly_fields = ['created_at', 'updated_at']
     

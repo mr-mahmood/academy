@@ -1,4 +1,3 @@
-// app/academies/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -14,7 +13,7 @@ export default function AcademiesListPage() {
     const [academies, setAcademies] = useState<Academy[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const { apiFetch } = useApi() 
+    const { apiFetch } = useApi()
 
     useEffect(() => {
         const fetchAcademies = async () => {
@@ -28,9 +27,17 @@ export default function AcademiesListPage() {
                 })
 
                 if (result.success && result.data?.academies) {
-                    setAcademies(result.data.academies)
+                    // Filter for INTERNAL academies only
+                    const internalAcademies = result.data.academies.filter(
+                        (academy: Academy) => academy.academy_type === 'INTERNAL'
+                    )
+                    setAcademies(internalAcademies)
                 } else if (result.success && Array.isArray(result.data)) {
-                    setAcademies(result.data)
+                    // Filter for INTERNAL academies only
+                    const internalAcademies = result.data.filter(
+                        (academy: Academy) => academy.academy_type === 'INTERNAL'
+                    )
+                    setAcademies(internalAcademies)
                 }
             } catch (error) {
                 console.error('Error fetching academies:', error)
@@ -44,7 +51,7 @@ export default function AcademiesListPage() {
     }, [router])
 
     if (loading) {
-        return <LoadingSpinner/>
+        return <LoadingSpinner />
     }
 
     if (error) {
@@ -61,11 +68,17 @@ export default function AcademiesListPage() {
 
     return (
         <div className={styles.container}>
-            <div className={styles.header}>
-                <h1 className={styles.pageTitle}>ورزشگاه‌ها</h1>
-                <p className={styles.pageSubtitle}>
-                    {academies.length} ورزشگاه فعال
-                </p>
+
+            {/* Explanation Box */}
+            <div className={styles.explanationBox}>
+                <Icon icon={Icons.handshake} className={styles.explanationIcon} />
+                <div className={styles.explanationContent}>
+                    <h4>ورزشگاه‌های داخلی چیست؟</h4>
+                    <p>
+                        ورزشگاه‌های داخلی، مجموعه‌های ورزشی هستند که به صورت مستقیم توسط مجموعه ما مدیریت می‌شوند.
+                        این ورزشگاه‌ها امکانات کامل و استانداردهای لازم برای برگزاری دوره‌های آموزشی را دارا می‌باشند.
+                    </p>
+                </div>
             </div>
 
             {academies.length === 0 ? (
@@ -73,8 +86,8 @@ export default function AcademiesListPage() {
                     <div className={styles.emptyIcon}>
                         <Icon icon={Icons.building} />
                     </div>
-                    <h3>ورزشگاه‌ای یافت نشد</h3>
-                    <p>در حال حاضر ورزشگاه فعالی وجود ندارد</p>
+                    <h3>ورزشگاه داخلی یافت نشد</h3>
+                    <p>در حال حاضر ورزشگاه داخلی فعالی وجود ندارد</p>
                 </div>
             ) : (
                 <div className={styles.list}>
@@ -92,18 +105,11 @@ export default function AcademiesListPage() {
                             {/* Info */}
                             <div className={styles.info}>
                                 <h3 className={styles.name}>{'ورزشگاه'} {academy.name}</h3>
-                                
+
                                 {academy.address_text && (
                                     <div className={styles.detailRow}>
                                         <Icon icon={Icons.location} className={styles.detailIcon} />
                                         <span>{academy.address_text}</span>
-                                    </div>
-                                )}
-                                
-                                {academy.phone && (
-                                    <div className={styles.detailRow}>
-                                        <Icon icon={Icons.phone} className={styles.detailIcon} />
-                                        <span dir="ltr">{academy.phone}</span>
                                     </div>
                                 )}
                             </div>

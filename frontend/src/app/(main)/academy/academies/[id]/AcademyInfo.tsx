@@ -34,25 +34,32 @@ export default function AcademyInfo({ academy, coursesCount, loading = false, er
     return (
         <div className={styles.infoTab}>
             <div className={styles.infoCard}>
-                <h3>اطلاعات ورزشگاه</h3>
+                <h3>
+                    {academy.academy_type === 'INTERNAL' ? 'اطلاعات ورزشگاه' : 'اطلاعات پایگاه'}
+                </h3>
                 <div className={styles.infoGrid}>
                     <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>نام ورزشگاه</span>
+                        <span className={styles.infoLabel}>نام</span>
                         <span className={styles.infoValue}>{academy.name}</span>
                     </div>
+                    {academy.instructor_name && (
+                        <div className={styles.infoItem}>
+                            <span className={styles.infoLabel}>مسئول</span>
+                            <span className={styles.infoValue} dir="ltr">{academy.instructor_name}</span>
+                        </div>
+                    )}
+                    {academy.instructor_phone && (
+                        <div className={styles.infoItem}>
+                            <span className={styles.infoLabel}>شماره تلفن مسئول</span>
+                            <a href={`tel:${academy.instructor_phone}`} className={styles.supportPhoneCompact}>
+                                {academy.instructor_phone}
+                            </a>
+                        </div>
+                    )}
+
                     <div className={styles.infoItem}>
                         <span className={styles.infoLabel}>آدرس</span>
                         <span className={styles.infoValue}>{academy.address_text || '---'}</span>
-                    </div>
-                    {academy.phone && (
-                        <div className={styles.infoItem}>
-                            <span className={styles.infoLabel}>تلفن</span>
-                            <span className={styles.infoValue} dir="ltr">{academy.phone}</span>
-                        </div>
-                    )}
-                    <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>تعداد دوره‌ها</span>
-                        <span className={styles.infoValue}>{coursesCount}</span>
                     </div>
                 </div>
             </div>

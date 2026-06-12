@@ -10,11 +10,12 @@ class ExcelExportService:
     @staticmethod
     def export_enrollments_to_excel(queryset, filename=None):
         """
-        Export enrollments to Excel with four sheets:
+        Export enrollments to Excel with five sheets:
         1. ثبت‌نام‌ها (Enrollments)
         2. کاربران (Users)
         3. دوره‌ها (Courses)
         4. پرداخت‌ها (Payments)
+        5. آکادمی‌ها (Academies)
         
         Args:
             queryset: Enrollment queryset to export
@@ -36,12 +37,14 @@ class ExcelExportService:
             users_df = ExcelExportService._create_users_dataframe(queryset)
             courses_df = ExcelExportService._create_courses_dataframe(queryset)
             payments_df = ExcelExportService._create_payments_dataframe(queryset)
+            academies_df = ExcelExportService._create_academies_dataframe(queryset)
             
             # Write to Excel with Persian sheet names
             enrollment_df.to_excel(writer, sheet_name='ثبت‌نام‌ها', index=False)
             users_df.to_excel(writer, sheet_name='کاربران', index=False)
             courses_df.to_excel(writer, sheet_name='دوره‌ها', index=False)
             payments_df.to_excel(writer, sheet_name='پرداخت‌ها', index=False)
+            academies_df.to_excel(writer, sheet_name='آکادمی‌ها', index=False)
             
             # Format the worksheets
             ExcelExportService._format_worksheets(writer)
@@ -124,7 +127,6 @@ class ExcelExportService:
                 'شناسه': course.id,
                 'ورزش': course.sport.name if course.sport else '-',
                 'آکادمی': course.academy.name if course.academy else '-',
-                'نام مربی': course.instructor_name or '-',
                 'تعداد جلسات': course.total_sessions,
                 'حداکثر دانشجو': course.max_students,
                 'تعداد ثبت‌نامی‌ها': course.enrolled_students,
@@ -200,6 +202,34 @@ class ExcelExportService:
         if 'کارمزد' in df.columns:
             df['کارمزد'] = df['کارمزد'].apply(lambda x: f"{x:,.0f}" if pd.notna(x) and x != '-' else x)
         
+        return df
+    
+    @staticmethod
+    def _create_academies_dataframe(queryset):
+        """Create DataFrame for unique academies with Persian headers"""
+        # Get unique academies from queryset
+        academies = {}
+        for enrollment in queryset:
+            if enrollment.course and enrollment.course.academy:
+                academy = enrollment.course.academy
+                if academy.id not in academies:
+                    academies[academy.id] = academy
+        
+        data = []
+        for academy in academies.values():
+            data.append({
+                'شناسه': academy.id,
+                'نام آکادمی': academy.name,
+                'مسئول آکادمی': academy.instructor_name or '',
+                'شماره تماس مسئول': academy.Instructor_phone or '',
+                'نوع آکادمی': 'داخلی' if academy.academy_type == 'INTERNAL' else 'پایگاه' if academy.academy_type == 'PARTNER_BASE' else '',
+                'آدرس': academy.address_text or '',
+                'وضعیت': 'فعال' if academy.is_active else 'غیرفعال',
+                'طول جغرافیایی': float(academy.longitude) if academy.longitude else '',
+                'عرض جغرافیایی': float(academy.latitude) if academy.latitude else '',
+            })
+        
+        df = pd.DataFrame(data)
         return df
     
     @staticmethod

@@ -34,9 +34,6 @@ class Course(models.Model):
         verbose_name="Academy"
     )
     
-    # Basic info
-    instructor_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Instructor")
-    
     # Capacity
     total_sessions = models.PositiveIntegerField(
         default=12,

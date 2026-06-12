@@ -8,7 +8,7 @@ from config.admin import admin_site
 
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ['id', 'user_link', 'course_link', 'res_num', 'amount', 'status', 'created_at']
-    list_filter = ['status', 'created_at']
+    list_filter = ['enrollment__course__academy__academy_type', 'status', 'created_at']
     search_fields = ['res_num', 'ref_num', 'enrollment__user__full_name', 'enrollment__course__sport__name']
     readonly_fields = ['created_at', 'updated_at', 'description']
     

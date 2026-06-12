@@ -12,7 +12,7 @@ import {
     faDumbbell, faMoon, faSun, faTag, faTicket, faTimesCircle,
     faUsers, faInfoCircle, faEdit, faCreditCard, faChevronRight, faChevronLeft,
     faChevronUp, faChevronDown, faBell, faUserCheck, faFilter, faWarning,
-    faRefresh
+    faRefresh, faHandshake
 
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -99,5 +99,7 @@ export const Icons = {
 
     filter: faFilter,
     refresh: faRefresh,
-    warning: faWarning
+    warning: faWarning,
+
+    handshake: faHandshake
 }

@@ -9,7 +9,8 @@ class FootballAcademySerializer(serializers.ModelSerializer):
         model = FootballAcademy
         fields = [
             'id', 'name', 'city', 'city_display', 'address_text', 'latitude', 'longitude',
-            'phone', 'is_active', 'created_at', 'updated_at'
+            'Instructor_phone', 'instructor_name',
+            'is_active', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
     
@@ -34,7 +35,7 @@ class FootballAcademySerializer(serializers.ModelSerializer):
         
         return value.strip()
     
-    def validate_phone(self, value):
+    def validate_Instructor_phone(self, value):
         """Validate phone number"""
         if value:
             return validate_phone_number(value, instance=self.instance)

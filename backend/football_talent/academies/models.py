@@ -28,9 +28,13 @@ class FootballAcademy(models.Model):
     )
     
     address_text = models.TextField(blank=True, null=True, verbose_name="Address")
+    
     latitude = models.DecimalField(max_digits=10, decimal_places=7, blank=True, null=True, verbose_name="Latitude")
     longitude = models.DecimalField(max_digits=10, decimal_places=7, blank=True, null=True, verbose_name="Longitude")
-    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Phone Number")
+    
+    instructor_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Instructor")
+    Instructor_phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Instructor Phone Number")
+    
     is_active = models.BooleanField(default=True, verbose_name="Is Active")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

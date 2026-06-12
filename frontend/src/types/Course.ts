@@ -7,7 +7,6 @@ export interface Course {
     id: number
     sport: Sport 
     academy: Academy
-    instructor_name: string | null
     total_sessions: number
     max_students: number
     enrolled_students: number

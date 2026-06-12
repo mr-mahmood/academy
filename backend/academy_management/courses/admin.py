@@ -14,20 +14,16 @@ class CourseScheduleInline(admin.TabularInline):
 class CourseAdmin(admin.ModelAdmin):
     """Simple Course admin"""
     
-    list_display = ['id', 'sport', 'academy', 'instructor_name', 
-                    'enrolled_students', 'max_students', 'price', 'gender_requirement', 'status']
-    
-    list_filter = ['status', 'gender_requirement', 'sport', 'academy']
-    
-    search_fields = ['instructor_name', 'sport__name', 'academy__name']
-    
+    list_display = ['id', 'sport', 'academy', 'enrolled_students', 'max_students', 'price', 'gender_requirement', 'status']
+    list_filter = ['academy__academy_type', 'status', 'gender_requirement', 'sport', 'academy']
+    search_fields = ['sport__name', 'academy__name']
     readonly_fields = ['created_at', 'updated_at']
     
     fieldsets = (
         ('Basic Information', {
             'fields': (
                 'sport', 'academy', 'gender_requirement',
-                'total_sessions', 'max_students', 'enrolled_students', 'price', 'instructor_name',
+                'total_sessions', 'max_students', 'enrolled_students', 'price',
                 'status'
             )
         }),

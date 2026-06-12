@@ -10,7 +10,7 @@ from config.admin import admin_site
 class EnrollmentAdmin(admin.ModelAdmin):
 
     list_display = ['id', 'user_link', 'get_phone_number', 'course_link', 'enrollment_status', 'get_reminder_count_display']
-    list_filter = ['course', 'enrollment_status']
+    list_filter = ['course__academy__academy_type', 'course', 'enrollment_status']
     search_fields = ['user__full_name', 'user__phone_number', 'course__sport__name']
     readonly_fields = ['enrolled_at', 'updated_at']
     

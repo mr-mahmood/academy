@@ -58,14 +58,13 @@ class ExcelExportService:
             data.append({
                 'شناسه': academy.id,
                 'نام آکادمی': academy.name,
+                'مسئول آکادمی': academy.instructor_name or '',
+                'شماره تماس مسئول': academy.Instructor_phone or '',
                 'شهر': city_display.get(academy.city, academy.city),
-                'شماره تماس': academy.phone or '',
                 'آدرس': academy.address_text or '',
                 'وضعیت': 'فعال' if academy.is_active else 'غیرفعال',
                 'طول جغرافیایی': float(academy.longitude) if academy.longitude else '',
                 'عرض جغرافیایی': float(academy.latitude) if academy.latitude else '',
-                'تاریخ ایجاد': academy.created_at.strftime("%Y-%m-%d %H:%M:%S") if academy.created_at else '',
-                'آخرین بروزرسانی': academy.updated_at.strftime("%Y-%m-%d %H:%M:%S") if academy.updated_at else '',
             })
         
         df = pd.DataFrame(data)

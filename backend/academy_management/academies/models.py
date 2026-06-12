@@ -7,11 +7,26 @@ from django.core.cache import cache
 class Academy(models.Model):
     id:int
     
+    class AcademyType(models.TextChoices):
+        INTERNAL = 'INTERNAL', 'آکادمی (داخلی)' 
+        PARTNER_BASE = 'PARTNER_BASE', 'پایگاه (همکار)'  
+       
     name = models.CharField(max_length=200, verbose_name="Name")
     address_text = models.TextField(blank=True, null=True, verbose_name="Address")
+    
     latitude = models.DecimalField(max_digits=10, decimal_places=7, blank=True, null=True, verbose_name="Latitude")
     longitude = models.DecimalField(max_digits=10, decimal_places=7, blank=True, null=True, verbose_name="Longitude")
-    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Phone Number")
+    
+    instructor_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Instructor")
+    instructor_phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Instructor Phone Number")
+    
+    academy_type = models.CharField(
+        max_length=20,
+        choices=AcademyType.choices,
+        default=AcademyType.INTERNAL,
+        verbose_name="Academy Type",
+    )
+    
     is_active = models.BooleanField(default=True, verbose_name="Is Active")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -24,14 +39,9 @@ class Academy(models.Model):
     
     
         indexes = [
-            # 🔥 ADD THESE INDEXES
-            # Active filtering (most common)
             models.Index(fields=['is_active']),
-            
-            # Name searches
+            models.Index(fields=['academy_type']),
             models.Index(fields=['name']),
-            
-            # Composite for active academies ordered by name
             models.Index(
                 fields=['is_active', 'name']
             ),
