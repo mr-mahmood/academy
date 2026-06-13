@@ -357,7 +357,7 @@ export default function ClassDetailPage() {
                     </div>
                     <div className={`${styles.statusBadge} ${isEnrolled ? styles.statusSuccess : isPreRegistered ? styles.statusWarning : styles.statusDefault}`}>
                         <Icon icon={isEnrolled ? Icons.check : isPreRegistered ? Icons.clock : Icons.infoCircle} />
-                        <span>{isEnrolled ? 'ثبت‌نام قطعی' : isPreRegistered ? 'در انتظار پرداخت' : 'ثبت‌نام نشده'}</span>
+                        <span>{isEnrolled ? 'ثبت‌ نام قطعی' : isPreRegistered ? 'در انتظار پرداخت' : 'ثبت‌ نام نشده'}</span>
                     </div>
                 </div>
 

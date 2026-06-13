@@ -1,11 +1,10 @@
-// app/my-courses/MyCoursesFilter.tsx
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
 import styles from './my-courses.module.css'
 import FilterModal from '@/components/FilterModal/FilterModal'
 import { Icon, Icons } from '@/components/icon'
-import { MyCoursesFilterSkeleton } from './MyCoursesSkeletons'
+import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
 import type { Enrollment } from '@/types/enrollment'
 import { useApi } from '@/hooks/useApi'
 
@@ -16,7 +15,12 @@ interface MyCoursesFilterProps {
     isLoading?: boolean
 }
 
-export default function MyCoursesFilter({ onEnrollmentsLoaded, onFilterChange, onFilterCountChange, isLoading = false }: MyCoursesFilterProps) {
+export default function MyCoursesFilter({ 
+    onEnrollmentsLoaded, 
+    onFilterChange, 
+    onFilterCountChange, 
+    isLoading = false 
+}: MyCoursesFilterProps) {
     const filterRef = useRef<HTMLDivElement>(null)
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
     const [activeFilterCount, setActiveFilterCount] = useState(0)
@@ -83,9 +87,9 @@ export default function MyCoursesFilter({ onEnrollmentsLoaded, onFilterChange, o
         return () => window.removeEventListener('filterCountChanged', handleFilterCount as EventListener)
     }, [onFilterCountChange])
 
-    // Show skeleton while loading
+    // Show loading spinner while loading
     if (isLoading) {
-        return <MyCoursesFilterSkeleton />
+        return <LoadingSpinner />
     }
 
     return (

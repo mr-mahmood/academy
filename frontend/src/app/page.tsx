@@ -24,14 +24,28 @@ export default function HomePage() {
 
                 <button
                     className={styles.navCard}
-                    onClick={() => router.push('/academy')}
+                    onClick={() => router.push('/academy?academy_type=INTERNAL')}
                 >
                     <div className={styles.cardIcon}>
                         <Icon icon={Icons.school} />
                     </div>
                     <div className={styles.cardContent}>
                         <h3>مدرسه تخصصی</h3>
-                        <p>مشاهده و ثبت نام در دوره‌های آموزشی</p>
+                        <p>مشاهده و ثبت نام در دوره‌های آموزشی مدرسه های تخصصی</p>
+                    </div>
+                    <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
+                </button>
+
+                <button
+                    className={styles.navCard}
+                    onClick={() => router.push('/academy?academy_type=PARTNER_BASE')}
+                >
+                    <div className={styles.cardIcon}>
+                        <Icon icon={Icons.handshake} />
+                    </div>
+                    <div className={styles.cardContent}>
+                        <h3>پایگاه ها</h3>
+                        <p>مشاهده و ثبت نام در دوره‌های آموزشی پایگاه های سراسر کشور</p>
                     </div>
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>

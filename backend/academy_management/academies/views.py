@@ -42,8 +42,17 @@ class AcademyAPIView(APIView):
                 "academy": serializer.data
             }, status=status.HTTP_200_OK)
         else:
-            # List all active academies
+            academy_type_param = request.GET.get('academy_type')
             academies = Academy.objects.all()
+            
+            if academy_type_param:
+                academy_type_upper = academy_type_param.upper()
+                
+                if academy_type_upper == 'INTERNAL':
+                    academies = academies.filter(academy_type=Academy.AcademyType.INTERNAL)
+                elif academy_type_upper == 'PARTNER_BASE':
+                    academies = academies.filter(academy_type=Academy.AcademyType.PARTNER_BASE)
+            
             serializer = AcademySerializer(academies, many=True)
             return Response({
                 "message": "Academies retrieved successfully",

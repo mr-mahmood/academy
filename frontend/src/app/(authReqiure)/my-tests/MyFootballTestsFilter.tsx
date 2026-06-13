@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from 'react'
 import styles from './my-tests.module.css'
 import FilterModal from '@/components/FilterModal/FilterModal'
 import { Icon, Icons } from '@/components/icon'
-import { MyFootballTestsFilterSkeleton } from './MyFootballTestsSkeletons'
+import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
 import type { FootballEnrollment } from '@/types/FootballEnrollment'
 import { useApi } from '@/hooks/useApi'
 
@@ -86,9 +86,9 @@ export default function MyFootballTestsFilter({
         return () => window.removeEventListener('filterCountChanged', handleFilterCount as EventListener)
     }, [onFilterCountChange])
 
-    // Show skeleton while loading
+    // Show loading spinner while loading
     if (isLoading) {
-        return <MyFootballTestsFilterSkeleton />
+        return <LoadingSpinner />
     }
 
     // Age category options

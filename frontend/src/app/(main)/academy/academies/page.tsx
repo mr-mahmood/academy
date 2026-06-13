@@ -1,19 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Icon, Icons } from '@/components/icon'
 import { useApi } from '@/hooks/useApi'
 import type { Academy } from '@/types/Academy'
 import styles from './academies.module.css'
 import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
 
-export default function AcademiesListPage() {
+function AcademiesContent() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const academyType = searchParams.get('academy_type') || 'INTERNAL'
     const [academies, setAcademies] = useState<Academy[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const { apiFetch } = useApi()
+
+    const isInternal = academyType === 'INTERNAL'
+    const typeLabel = isInternal ? 'ورزشگاه' : 'پایگاه'
+    const emptyMessage = isInternal ? 'ورزشگاه یافت نشد' : 'پایگاه همکار یافت نشد'
+    const emptyDescription = isInternal ? 'در حال حاضر ورزشگاه فعالی وجود ندارد' : 'در حال حاضر پایگاه همکار فعالی وجود ندارد'
 
     useEffect(() => {
         const fetchAcademies = async () => {
@@ -22,26 +29,20 @@ export default function AcademiesListPage() {
 
             try {
                 const result = await apiFetch({
-                    url: 'api/academy/academies/',
+                    url: `api/academy/academies?academy_type=${academyType}`,
                     method: 'GET'
                 })
 
                 if (result.success && result.data?.academies) {
-                    // Filter for INTERNAL academies only
-                    const internalAcademies = result.data.academies.filter(
-                        (academy: Academy) => academy.academy_type === 'INTERNAL'
-                    )
-                    setAcademies(internalAcademies)
+                    setAcademies(result.data?.academies)
                 } else if (result.success && Array.isArray(result.data)) {
-                    // Filter for INTERNAL academies only
-                    const internalAcademies = result.data.filter(
-                        (academy: Academy) => academy.academy_type === 'INTERNAL'
-                    )
-                    setAcademies(internalAcademies)
+                    setAcademies(result.data)
+                } else {
+                    setAcademies([])
                 }
             } catch (error) {
                 console.error('Error fetching academies:', error)
-                setError('خطا در دریافت اطلاعات ورزشگاه‌ها')
+                setError(`خطا در دریافت اطلاعات ${typeLabel}ها`)
             } finally {
                 setLoading(false)
             }
@@ -68,26 +69,13 @@ export default function AcademiesListPage() {
 
     return (
         <div className={styles.container}>
-
-            {/* Explanation Box */}
-            <div className={styles.explanationBox}>
-                <Icon icon={Icons.handshake} className={styles.explanationIcon} />
-                <div className={styles.explanationContent}>
-                    <h4>ورزشگاه‌های داخلی چیست؟</h4>
-                    <p>
-                        ورزشگاه‌های داخلی، مجموعه‌های ورزشی هستند که به صورت مستقیم توسط مجموعه ما مدیریت می‌شوند.
-                        این ورزشگاه‌ها امکانات کامل و استانداردهای لازم برای برگزاری دوره‌های آموزشی را دارا می‌باشند.
-                    </p>
-                </div>
-            </div>
-
             {academies.length === 0 ? (
                 <div className={styles.emptyState}>
                     <div className={styles.emptyIcon}>
                         <Icon icon={Icons.building} />
                     </div>
-                    <h3>ورزشگاه داخلی یافت نشد</h3>
-                    <p>در حال حاضر ورزشگاه داخلی فعالی وجود ندارد</p>
+                    <h3>{emptyMessage}</h3>
+                    <p>{emptyDescription}</p>
                 </div>
             ) : (
                 <div className={styles.list}>
@@ -95,16 +83,14 @@ export default function AcademiesListPage() {
                         <div
                             key={academy.id}
                             className={styles.card}
-                            onClick={() => router.push(`/academy/academies/${academy.id}`)}
+                            onClick={() => router.push(`/academy/academies/${academy.id}?academy_type=${academyType}`)}
                         >
-                            {/* Icon */}
                             <div className={styles.iconContainer}>
                                 <Icon icon={Icons.building} />
                             </div>
 
-                            {/* Info */}
                             <div className={styles.info}>
-                                <h3 className={styles.name}>{'ورزشگاه'} {academy.name}</h3>
+                                <h3 className={styles.name}>{typeLabel} {academy.name.replace('پایگاه ', '')}</h3>
 
                                 {academy.address_text && (
                                     <div className={styles.detailRow}>
@@ -114,12 +100,19 @@ export default function AcademiesListPage() {
                                 )}
                             </div>
 
-                            {/* Arrow */}
                             <Icon icon={Icons.arrowLeft} className={styles.arrow} />
                         </div>
                     ))}
                 </div>
             )}
         </div>
+    )
+}
+
+export default function AcademiesListPage() {
+    return (
+        <Suspense fallback={<LoadingSpinner />}>
+            <AcademiesContent />
+        </Suspense>
     )
 }

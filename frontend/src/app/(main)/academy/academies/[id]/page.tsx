@@ -1,8 +1,7 @@
-// app/academies/[id]/page.tsx
 'use client'
 
-import { useRef, useState, useEffect, useCallback } from 'react'
-import { useParams } from 'next/navigation'
+import { useRef, useState, useEffect, useCallback, Suspense } from 'react'
+import { useParams, useSearchParams } from 'next/navigation'
 import styles from './academyDetails.module.css'
 import AcademyInfo from './AcademyInfo'
 import AcademyCourseFilter from './AcademyCourseFilter'
@@ -11,10 +10,13 @@ import { Icon, Icons } from '@/components/icon'
 import { useApi } from '@/hooks/useApi'
 import type { Course } from '@/types/Course'
 import type { Academy } from '@/types/Academy'
+import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
 
-export default function AcademyDetailsPage() {
+function AcademyDetailsContent() {
     const params = useParams()
+    const searchParams = useSearchParams()
     const academyId = params.id as string
+    const academyType = searchParams.get('academy_type') || 'INTERNAL'
     const topRef = useRef<HTMLDivElement>(null)
     const { apiFetch } = useApi()
     const [activeTab, setActiveTab] = useState<'info' | 'map' | 'courses'>('info')
@@ -25,17 +27,22 @@ export default function AcademyDetailsPage() {
     const [filteredCourses, setFilteredCourses] = useState<any[]>([])
     const [activeFilterCount, setActiveFilterCount] = useState(0)
     const [error, setError] = useState<string | null>(null)
-    const [coursesFetched, setCoursesFetched] = useState(false)
-    const [academyFetched, setAcademyFetched] = useState(false)
 
-    // Fetch academy info only once
+    const isInternal = academyType === 'INTERNAL'
+    const typeLabel = isInternal ? 'ورزشگاه' : 'پایگاه'
+    const errorMessage = isInternal ? 'ورزشگاه مورد نظر یافت نشد' : 'پایگاه مورد نظر یافت نشد'
+
     useEffect(() => {
-        if (!academyId || academyFetched) return
+        if (!academyId) return
 
-        const fetchAcademy = async () => {
+        const fetchData = async () => {
+            setLoading(true)
+            setError(null)
+
             try {
+                // Fetch academy info
                 const academyResult = await apiFetch({
-                    url: `api/academy/academies/${academyId}/`,
+                    url: `api/academy/academies/${academyId}/?academy_type=${academyType}`,
                     method: 'GET',
                 })
                 
@@ -45,21 +52,13 @@ export default function AcademyDetailsPage() {
                 } else if (academyResult.success && academyResult.data) {
                     academyData = academyResult.data as Academy
                 } else {
-                    setError('ورزشگاه مورد نظر یافت نشد')
+                    setError(errorMessage)
                 }
                 setAcademy(academyData)
-                setAcademyFetched(true)
-            } catch (error) {
-                console.error('Error fetching academy:', error)
-                setError('خطا در دریافت اطلاعات')
-            }
-        }
 
-        const fetchCourses = async () => {
-            setLoading(true)
-            try {
+                // Fetch courses
                 const coursesResult = await apiFetch({
-                    url: `api/academy/courses/academies/${academyId}/`,
+                    url: `api/academy/courses/academies/${academyId}/?academy_type=${academyType}`,
                     method: 'GET'
                 })
 
@@ -69,18 +68,17 @@ export default function AcademyDetailsPage() {
                     setOriginalCourses(coursesArray)
                     setFilteredCourses(coursesArray)
                     setCoursesCount(coursesArray.length)
-                    setCoursesFetched(true)
                 }
             } catch (error) {
-                console.error('Error fetching courses:', error)
+                console.error('Error fetching data:', error)
+                setError('خطا در دریافت اطلاعات')
             } finally {
                 setLoading(false)
             }
         }
 
-        fetchCourses()
-        fetchAcademy()
-    }, [academyId, apiFetch, academyFetched])
+        fetchData()
+    }, [academyId])
 
     const handleFilterChange = useCallback((newFilteredData: any[]) => {
         setFilteredCourses(newFilteredData)
@@ -89,18 +87,34 @@ export default function AcademyDetailsPage() {
     const handleTabChange = (tab: 'info' | 'map' | 'courses') => {
         setActiveTab(tab)
         if (tab === 'courses') {
-            // Reset filters when switching to courses tab
             window.dispatchEvent(new CustomEvent('resetFilters'))
         }
     }
 
-    // Don't show loading for info tab when only academy is loading
-    const showLoading = activeTab === 'courses' ? loading : (activeTab === 'info' && !academyFetched)
+    if (loading) {
+        return <LoadingSpinner />
+    }
+
+    if (error || !academy) {
+        return (
+            <div className={styles.errorContainer}>
+                <div className={styles.errorBox}>
+                    <Icon icon={Icons.timesCircle} />
+                    <div>
+                        <h3>خطا</h3>
+                        <p>{error || errorMessage}</p>
+                    </div>
+                    <button onClick={() => window.history.back()}>بازگشت</button>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <>
             <div ref={topRef} />
             <div className={styles.container}>
+
                 {/* Tabs */}
                 <div className={styles.tabs}>
                     <button
@@ -132,8 +146,9 @@ export default function AcademyDetailsPage() {
                         <AcademyInfo
                             academy={academy}
                             coursesCount={coursesCount}
-                            loading={!academyFetched}
-                            error={error}
+                            academyType={academyType}
+                            loading={false}
+                            error={null}
                         />
                     )}
 
@@ -164,5 +179,13 @@ export default function AcademyDetailsPage() {
                 </div>
             </div>
         </>
+    )
+}
+
+export default function AcademyDetailsPage() {
+    return (
+        <Suspense fallback={<LoadingSpinner />}>
+            <AcademyDetailsContent />
+        </Suspense>
     )
 }

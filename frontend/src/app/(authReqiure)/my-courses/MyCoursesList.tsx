@@ -1,12 +1,11 @@
-// app/my-courses/MyCoursesList.tsx
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { Icon, Icons } from '@/components/icon'
 import ClassCard from '@/components/CourseCard/CourseCard'
+import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
 import type { Enrollment } from '@/types/enrollment'
 import styles from './my-courses.module.css'
-import { MyCoursesCardSkeleton } from './MyCoursesSkeletons'
 
 interface MyCoursesListProps {
     enrollments?: Enrollment[]
@@ -46,15 +45,9 @@ export default function MyCoursesList({ enrollments = [], isLoading = false }: M
         window.dispatchEvent(new CustomEvent('resetMyCoursesFilters'))
     }, [])
 
-    // Show skeletons while loading - THIS PREVENTS THE FLASH
+    // Show loading spinner while loading
     if (isLoading) {
-        return (
-            <div className={styles.enrollmentsList}>
-                {[1, 2, 3].map((i) => (
-                    <MyCoursesCardSkeleton key={i} />
-                ))}
-            </div>
-        )
+        return <LoadingSpinner />
     }
 
     // No courses at all (user has no enrollments)

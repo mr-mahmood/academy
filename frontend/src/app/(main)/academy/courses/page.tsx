@@ -1,14 +1,17 @@
 'use client'
 
-import { Suspense, useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import styles from './courses.module.css'
 import CoursesList from './CoursesList'
-import { CoursesGridSkeleton } from './Skeletons'
 import Filter from './CourseFilter'
 import { useApi } from '@/hooks/useApi'
+import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
 
-export default function CoursesStreamingPage() {
+function CoursesContent() {
     const topRef = useRef<HTMLDivElement>(null)
+    const searchParams = useSearchParams()
+    const academyType = searchParams.get('academy_type') || 'INTERNAL'
     const { apiFetch } = useApi()
     const [loading, setLoading] = useState(true)
     const [originalCourses, setOriginalCourses] = useState<any[]>([])
@@ -21,7 +24,7 @@ export default function CoursesStreamingPage() {
             setLoading(true)
             try {
                 const result = await apiFetch({
-                    url: 'api/academy/courses/',
+                    url: `api/academy/courses/?academy_type=${academyType}`,
                     method: 'GET'
                 })
 
@@ -38,7 +41,7 @@ export default function CoursesStreamingPage() {
         }
 
         fetchCourses()
-    }, [])
+    }, [academyType])
 
     useEffect(() => {
         const handleFilterCount = (e: CustomEvent) => {
@@ -50,13 +53,6 @@ export default function CoursesStreamingPage() {
 
     const handleFilterChange = (newFilteredData: any[]) => {
         setFilteredCourses(newFilteredData)
-    }
-
-    const scrollToTop = () => {
-        topRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        })
     }
 
     return (
@@ -76,5 +72,13 @@ export default function CoursesStreamingPage() {
                 />
             </div>
         </>
+    )
+}
+
+export default function CoursesStreamingPage() {
+    return (
+        <Suspense fallback={<LoadingSpinner />}>
+            <CoursesContent />
+        </Suspense>
     )
 }

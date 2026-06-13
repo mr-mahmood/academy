@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Icon, Icons } from '@/components/icon'
 import { useApi } from '@/hooks/useApi'
 import CourseCard from '@/components/CourseCard/CourseCard'
@@ -15,8 +15,10 @@ interface Sport {
     name: string
 }
 
-export default function RegisterPage() {
+function RegisterContent() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const academyType = searchParams.get('academy_type') || 'INTERNAL'
     const { activeUser } = useActiveUser()
     const { apiFetch } = useApi()
 
@@ -42,13 +44,10 @@ export default function RegisterPage() {
 
     // Handle browser back button
     useEffect(() => {
-        // Add popstate listener for browser back button
         const handlePopState = () => {
             if (step === 1) {
-                // Allow normal browser back
                 router.back()
             } else {
-                // Prevent default and handle manually
                 if (step === 2) {
                     setSelectedGender('')
                     setStep(1)
@@ -60,8 +59,7 @@ export default function RegisterPage() {
         }
 
         window.addEventListener('popstate', handlePopState)
-        
-        // Push initial state only once
+
         if (window.history.state === null) {
             window.history.pushState({ step: 1 }, '')
         }
@@ -78,7 +76,7 @@ export default function RegisterPage() {
             setShowEmptyState(false)
             const timer = setTimeout(() => {
                 setInitialStep3Load(false)
-            }, 200)
+            }, 500)
             return () => clearTimeout(timer)
         }
     }, [step, selectedSport, selectedGender])
@@ -88,7 +86,7 @@ export default function RegisterPage() {
         if (!initialStep3Load && !filtering && availableCourses.length === 0 && step === 3) {
             const timer = setTimeout(() => {
                 setShowEmptyState(true)
-            }, 200)
+            }, 500)
             return () => clearTimeout(timer)
         } else {
             setShowEmptyState(false)
@@ -103,7 +101,7 @@ export default function RegisterPage() {
 
             try {
                 const coursesResult = await apiFetch({
-                    url: 'api/academy/courses/',
+                    url: `api/academy/courses?academy_type=${academyType}`,
                     method: 'GET'
                 })
 
@@ -112,11 +110,11 @@ export default function RegisterPage() {
                     setAllCourses(Array.isArray(coursesData) ? coursesData : [])
 
                     const uniqueSports = new Map<number, Sport>()
-                    ;(Array.isArray(coursesData) ? coursesData : []).forEach((course: Course) => {
-                        if (course.sport && !uniqueSports.has(course.sport.id)) {
-                            uniqueSports.set(course.sport.id, course.sport)
-                        }
-                    })
+                        ; (Array.isArray(coursesData) ? coursesData : []).forEach((course: Course) => {
+                            if (course.sport && !uniqueSports.has(course.sport.id)) {
+                                uniqueSports.set(course.sport.id, course.sport)
+                            }
+                        })
                     setSports(Array.from(uniqueSports.values()))
                 } else {
                     setError('خطا در دریافت اطلاعات دوره‌ها')
@@ -167,27 +165,6 @@ export default function RegisterPage() {
         window.history.pushState({ step: 3 }, '')
     }
 
-    const handleBack = () => {
-        if (step === 2) {
-            setSelectedGender('')
-            setStep(1)
-            setError('')
-        } else if (step === 3) {
-            setSelectedSport(null)
-            setStep(2)
-            setError('')
-        }
-    }
-
-    const handleReset = () => {
-        setSelectedSport(null)
-        setSelectedGender('')
-        setStep(1)
-        setError('')
-        // Replace history to prevent multiple back presses
-        window.history.replaceState({ step: 1 }, '')
-    }
-
     // Step 1: Gender Selection
     if (step === 1) {
         return (
@@ -211,8 +188,7 @@ export default function RegisterPage() {
                     </div>
                 </div>
 
-                {/* Selected Options Banner - Step 1 */}
-                <div className={styles.selectedBanner}>
+                {/* <div className={styles.selectedBanner}>
                     <div style={{ textAlign: 'center' }}>
                         <span className={styles.bannerTitle}>انتخاب‌های شما</span>
                     </div>
@@ -233,7 +209,7 @@ export default function RegisterPage() {
                             <span className={styles.bannerValue}>{selectedSport?.name || 'انتخاب نشده'}</span>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 <div className={styles.stepContainer}>
                     <h2 className={styles.stepTitle}>جنسیت خود را انتخاب کنید</h2>
@@ -259,7 +235,6 @@ export default function RegisterPage() {
 
     return (
         <div className={styles.container}>
-            {/* Progress Steps */}
             <div className={styles.progressContainer}>
                 <div className={styles.progressSteps}>
                     <div className={`${styles.step} ${step >= 1 ? styles.active : ''}`}>
@@ -279,8 +254,7 @@ export default function RegisterPage() {
                 </div>
             </div>
 
-            {/* Selected Options Banner - Step 2 & 3 */}
-            <div className={styles.selectedBanner}>
+            {/* <div className={styles.selectedBanner}>
                 <div style={{ textAlign: 'center' }}>
                     <span className={styles.bannerTitle}>انتخاب‌های شما</span>
                 </div>
@@ -314,9 +288,8 @@ export default function RegisterPage() {
                         </button>
                     )}
                 </div>
-            </div>
+            </div> */}
 
-            {/* Step 2: Select Sport */}
             {step === 2 && (
                 <div className={styles.stepContainer}>
                     <h2 className={styles.stepTitle}>ورزش مورد نظر خود را انتخاب کنید</h2>
@@ -334,7 +307,6 @@ export default function RegisterPage() {
                 </div>
             )}
 
-            {/* Step 3: Show Courses */}
             {step === 3 && selectedSport && selectedGender && (
                 <div className={styles.stepContainer}>
                     <div className={styles.resultsHeader}>
@@ -342,10 +314,7 @@ export default function RegisterPage() {
                     </div>
 
                     {(initialStep3Load || filtering) ? (
-                        <div className={styles.loadingState}>
-                            <div className={styles.spinner}></div>
-                            <p>در حال بارگذاری</p>
-                        </div>
+                        <LoadingSpinner />
                     ) : showEmptyState && availableCourses.length === 0 ? (
                         <div className={styles.emptyState}>
                             <Icon icon={Icons.school} />
@@ -353,10 +322,7 @@ export default function RegisterPage() {
                             <p>متاسفانه هیچ دوره‌ای با شرایط انتخاب شده وجود ندارد</p>
                         </div>
                     ) : !showEmptyState && availableCourses.length === 0 ? (
-                        <div className={styles.loadingState}>
-                            <div className={styles.spinner}></div>
-                            <p>در حال بارگذاری</p>
-                        </div>
+                        <LoadingSpinner />
                     ) : (
                         <div className={styles.coursesList}>
                             {availableCourses.map((course) => (
@@ -381,5 +347,13 @@ export default function RegisterPage() {
                 </div>
             )}
         </div>
+    )
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={<LoadingSpinner />}>
+            <RegisterContent />
+        </Suspense>
     )
 }

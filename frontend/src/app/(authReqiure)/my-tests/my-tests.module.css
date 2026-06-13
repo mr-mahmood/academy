@@ -48,6 +48,11 @@
     color: var(--accent-color, #e6b800);
 }
 
+.filterButtonActive {
+    border-color: var(--accent-color);
+    background: rgba(var(--accent-color-rgb), 0.05);
+}
+
 .chevron {
     transition: transform 0.2s ease;
     margin-right: auto;
@@ -67,144 +72,6 @@
     border-radius: 9999px;
     margin-left: 0.25rem;
     color: white;
-}
-
-/* Filter Button Skeleton */
-.filterButtonSkeleton {
-    width: 100%;
-    height: 50px;
-    background: var(--bg-primary, #FFFFFF);
-    border: 1px solid var(--border-color, #E2E8F0);
-    border-radius: 2rem;
-    overflow: hidden;
-    position: relative;
-}
-
-.filterButtonSkeleton::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        90deg,
-        var(--skeleton-start, #e2e8f0) 0%,
-        var(--skeleton-mid, #f1f5f9) 50%,
-        var(--skeleton-start, #e2e8f0) 100%
-    );
-    background-size: 200% 100%;
-    animation: skeletonPulse 1.5s ease-in-out infinite;
-    border-radius: 2rem;
-}
-
-/* Skeleton Pulse Animation */
-.skeletonPulse {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg,
-            var(--skeleton-start, #F1F5F9) 0%,
-            var(--skeleton-mid, #E2E8F0) 50%,
-            var(--skeleton-start, #F1F5F9) 100%);
-    background-size: 200% 100%;
-    border-radius: 2rem;
-    animation: skeletonPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes skeletonPulse {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
-}
-
-/* Skeleton Card */
-.skeletonCard {
-    background: var(--bg-card, #FFFFFF);
-    border-radius: 2rem;
-    padding: 1.25rem;
-    border: 1px solid var(--border-color, #E2E8F0);
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-}
-
-.skeletonHeader {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.skeletonPositionIcon {
-    width: 52px;
-    height: 52px;
-    border-radius: 1.2rem;
-    background: var(--bg-secondary, #F8FAFC);
-    overflow: hidden;
-}
-
-.skeletonPositionInfo {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.skeletonPositionTitle {
-    width: 60%;
-    height: 20px;
-    border-radius: 2rem;
-    overflow: hidden;
-    background: var(--bg-secondary, #F8FAFC);
-}
-
-.skeletonAgeCategory {
-    width: 40%;
-    height: 14px;
-    border-radius: 2rem;
-    overflow: hidden;
-    background: var(--bg-secondary, #F8FAFC);
-}
-
-.skeletonStatusBadge {
-    width: 80px;
-    height: 28px;
-    border-radius: 2rem;
-    overflow: hidden;
-    background: var(--bg-secondary, #F8FAFC);
-}
-
-.skeletonGenderSection,
-.skeletonDateSection,
-.skeletonAcademySection {
-    background: var(--bg-secondary, #F8FAFC);
-    border-radius: 1.3rem;
-    padding: 0.65rem 0.875rem;
-    overflow: hidden;
-}
-
-.skeletonGenderSection .skeletonPulse,
-.skeletonDateSection .skeletonPulse,
-.skeletonAcademySection .skeletonPulse {
-    height: 20px;
-}
-
-.skeletonBottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border-color, #E2E8F0);
-}
-
-.skeletonPrice {
-    width: 120px;
-    height: 24px;
-    border-radius: 2rem;
-    overflow: hidden;
-    background: var(--bg-secondary, #F8FAFC);
 }
 
 /* Empty State */
@@ -244,8 +111,10 @@
     background: #FECACA;
     cursor: pointer;
     transition: all 200ms ease;
+    margin-top: 0.5rem;
 }
 
 .resetFiltersButton:hover {
     transform: translateY(-2px);
+    background: #ffb3b3;
 }

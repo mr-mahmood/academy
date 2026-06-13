@@ -394,12 +394,12 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.4rem 0.8rem;
-    border: 1px solid #ff6b6b;
+    border: 1px solid #c90606;
     border-radius: 2rem;
     font-size: 0.75rem;
     font-weight: 600;
     color: #c90606;
-    background: #FECACA;
+    background: var(--bg-card);
     cursor: pointer;
     transition: all 200ms ease;
 }

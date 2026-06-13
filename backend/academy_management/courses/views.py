@@ -4,6 +4,8 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from django.db.models import QuerySet
 from typing import Optional, cast
+
+from academy_management.academies.models import Academy
 from .models import Course, CourseSchedule
 from .serializers import CourseSerializer, CourseScheduleSerializer
 from authentication.permissions import IsAdmin
@@ -25,16 +27,13 @@ class CourseAPIView(APIView):
             return [AllowAny()]
         return [IsAdmin()]
     
-    def get_queryset(self, academy_id: Optional[int] = None) -> QuerySet:
+    def get_queryset(self) -> QuerySet:
         """Optimized queryset to avoid N+1 queries"""
         queryset = Course.objects.select_related(
             'sport',
             'academy'
         ).prefetch_related('schedule')
-        
-        if academy_id is not None:
-            queryset = queryset.filter(academy_id=academy_id)
-        
+
         return queryset
     
     def get(self, request, pk: Optional[int] = None, academy_id: Optional[int] = None):
@@ -51,7 +50,7 @@ class CourseAPIView(APIView):
             }, status=status.HTTP_200_OK)
         
         elif academy_id is not None:
-            courses = self.get_queryset(academy_id=academy_id)
+            courses = self.get_queryset().filter(academy_id=academy_id)
             serializer = CourseSerializer(courses, many=True)
             return Response({
                 "message": f"Courses for academy {academy_id} retrieved successfully",
@@ -59,10 +58,20 @@ class CourseAPIView(APIView):
             }, status=status.HTTP_200_OK)
         
         else:
+            academy_type_param = request.GET.get('academy_type')
             courses = self.get_queryset()
+            
+            if academy_type_param:
+                academy_type_upper = academy_type_param.upper()
+                
+                if academy_type_upper == 'INTERNAL':
+                    courses = courses.filter(academy__academy_type=Academy.AcademyType.INTERNAL)
+                elif academy_type_upper == 'PARTNER_BASE':
+                    courses = courses.filter(academy__academy_type=Academy.AcademyType.PARTNER_BASE)
+            
             serializer = CourseSerializer(courses, many=True)
             return Response({
-                "message": "All courses retrieved successfully",
+                "message": "All courses retrieved successfully" if not academy_type_param else f"{academy_type_param} courses retrieved successfully",
                 "courses": serializer.data
             }, status=status.HTTP_200_OK)
     

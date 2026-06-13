@@ -319,7 +319,7 @@ export default function FootballTestDetailPage() {
                     </div>
                     <div className={`${styles.statusBadge} ${isEnrolled ? styles.statusSuccess : isRegistered ? styles.statusWarning : styles.statusDefault}`}>
                         <Icon icon={isEnrolled ? Icons.check : isRegistered ? Icons.clock : Icons.infoCircle} />
-                        <span>{isEnrolled ? 'ثبت‌نام قطعی' : isRegistered ? 'در انتظار پرداخت' : 'ثبت‌نام نشده'}</span>
+                        <span>{isEnrolled ? 'ثبت‌ نام قطعی' : isRegistered ? 'در انتظار پرداخت' : 'ثبت‌ نام نشده'}</span>
                     </div>
                 </div>
 

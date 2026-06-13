@@ -3,9 +3,9 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Icon, Icons } from '@/components/icon'
 import FootballTestCard from '@/components/FootballTestCard/FootballTestCard'
+import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
 import type { FootballEnrollment } from '@/types/FootballEnrollment'
 import styles from './my-tests.module.css'
-import { MyFootballTestsCardSkeleton } from './MyFootballTestsSkeletons'
 
 interface MyFootballTestsListProps {
     enrollments?: FootballEnrollment[]
@@ -45,15 +45,9 @@ export default function MyFootballTestsList({ enrollments = [], isLoading = fals
         window.dispatchEvent(new CustomEvent('resetMyFootballTestsFilters'))
     }, [])
 
-    // Show skeletons while loading
+    // Show loading spinner while loading
     if (isLoading) {
-        return (
-            <div className={styles.enrollmentsList}>
-                {[1, 2, 3].map((i) => (
-                    <MyFootballTestsCardSkeleton key={i} />
-                ))}
-            </div>
-        )
+        return <LoadingSpinner />
     }
 
     // No tests at all (user has no enrollments)
