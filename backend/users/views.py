@@ -59,7 +59,6 @@ class UserSignupAPIView(APIView):
         make_cookie(response, {
             "access_token": access_token,
             "refresh_token": refresh_token,
-            "token_version": user.token_version,
         })
         
         return response

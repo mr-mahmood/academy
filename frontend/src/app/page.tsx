@@ -2,19 +2,12 @@
 
 import { useRouter } from 'next/navigation'
 import { Icon, Icons } from '@/components/icon'
-import { useActiveUser } from '@/contexts/active_user_context'
 import styles from '@/styles/home.module.css'
 import Footer from '@/components/Footer/Footer'
-import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
 
 
 export default function HomePage() {
     const router = useRouter()
-    const { activeUser, isLoadingActiveUser } = useActiveUser()
-
-    if (isLoadingActiveUser) {
-        return <LoadingSpinner />
-    }
 
     return (
         <div className={styles.container}>
@@ -38,7 +31,7 @@ export default function HomePage() {
 
                 <button
                     className={styles.navCard}
-                    onClick={() => router.push('/academy?academy_type=PARTNER_BASE')}
+                    onClick={() => router.push('/academy/academies?academy_type=PARTNER_BASE')}
                 >
                     <div className={styles.cardIcon}>
                         <Icon icon={Icons.handshake} />
@@ -64,24 +57,20 @@ export default function HomePage() {
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
                 </button>
 
-                <button
-                    className={`${styles.navCard} ${styles.memberCard}`}
-                    onClick={() => router.push(activeUser ? '/dashboard' : '/login')}
-                >
-                    <div className={styles.cardIcon}>
-                        <Icon icon={Icons.user} />
-                    </div>
-                    <div className={styles.cardContent}>
-                        <h3>{activeUser ? 'پنل کاربری' : 'ورود'}</h3>
-                        <p>
-                            {activeUser
-                                ? 'مشاهده پنل کاربری'
-                                : 'ورود به حساب شخصی در سامانه'
-                            }
-                        </p>
-                    </div>
-                    <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
-                </button>
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
             </div>
 
             {/* About Section */}

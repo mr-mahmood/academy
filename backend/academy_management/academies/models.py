@@ -35,7 +35,6 @@ class Academy(models.Model):
         db_table = "academies"
         verbose_name = "Academy"
         verbose_name_plural = "Academies"
-        ordering = ['name']
     
     
         indexes = [

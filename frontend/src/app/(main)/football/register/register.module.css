@@ -404,9 +404,9 @@
 
 /* Options Grid */
 .optionsGrid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
     margin-top: 0.5rem;
 }
 
@@ -453,8 +453,8 @@
 }
 
 .optionTitle {
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 0.8rem;
+    font-weight: 900;
     color: var(--text-primary, #102A43);
     margin-bottom: 0.2rem;
 }

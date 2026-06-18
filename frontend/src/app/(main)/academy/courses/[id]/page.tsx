@@ -21,17 +21,9 @@ interface SupportContact {
 
 const getSupportContact = (sportName?: string, genderRequirement?: string): SupportContact | null => {
     const sport = sportName?.toLowerCase() || ''
-
-    if (sport.includes('فوتبال') || sport.includes('فوتسال')) {
-        return { name: 'سعید طاهری', phone: '09131860199', gender: 'MALE' }
-    }
-
+    
     if (sport.includes('والیبال') && genderRequirement === 'MALE') {
         return { name: 'آقای شفیعی', phone: '09133687181', gender: 'MALE' }
-    }
-
-    if (sport.includes('والیبال') && genderRequirement === 'FEMALE') {
-        return { name: 'خانم عالم پیکر', phone: '09131292268', gender: 'FEMALE' }
     }
 
     return null

@@ -11,10 +11,12 @@ from users.models import User
 from users.serializers import UserProfileSerializer
 from core.exceptions import APIError, AuthOTPError, AuthSessionError
 from authentication.cookies import make_cookie
-from authentication.tokens import VersionedRefreshToken, rotate_refresh_token
+from authentication.tokens import VersionedRefreshToken
 from authentication.auth import RefreshJWTAuthentication
 from authentication.otp_service import generate_otp, verify_otp
 
+import logging
+logger = logging.getLogger(__name__)
 
 PHONE_VERIFIED_PREFIX = settings.PHONE_VERIFIED_PREFIX
 PHONE_VERIFIED_EXPIRY = settings.PHONE_VERIFIED_EXPIRY
@@ -82,10 +84,6 @@ class VerifyOTPApiView(APIView):
         """Login existing user and set authentication cookies"""
         user = User.get_user_by_phone(phone_number)
         
-        # Only increment token version if we're not already saving
-        user.token_version += 1  # invalidate old JWTs
-        user.save(update_fields=["token_version"])
-        
         # Generate tokens
         refresh = VersionedRefreshToken.for_user(user)
         access_token = str(refresh.access_token)
@@ -99,7 +97,6 @@ class VerifyOTPApiView(APIView):
         make_cookie(response, {
             "access_token": access_token,
             "refresh_token": refresh_token,
-            "token_version": user.token_version,
         })
         
         return response
@@ -113,13 +110,13 @@ class VerifyOTPApiView(APIView):
             timeout=PHONE_VERIFIED_EXPIRY
         )
         
-        responce = Response({
+        response = Response({
             "message": "Phone verified successfully. Please complete your registration.",
             "phone_verified": True,
             "phone_number": phone_number
         }, status=status.HTTP_200_OK)
         
-        return responce
+        return response
 
 
 class LogoutAPIView(APIView):
@@ -141,31 +138,50 @@ class LogoutAPIView(APIView):
         response = Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
         response.delete_cookie("access_token")
         response.delete_cookie("refresh_token")
-        response.delete_cookie("token_version")
         
         return response
 
 
 class RefreshAPIView(APIView):
-    """Refresh access token using refresh token from cookie"""
+    """
+    Refresh access token using refresh token from cookie
+    Uses RefreshJWTAuthentication to validate the refresh token
+    """
     authentication_classes = [RefreshJWTAuthentication]
-    permission_classes = []
+    permission_classes = [AllowAny]
 
     def post(self, request):
+        user: User = request.user
+        logger.info(f'Refresh token request initiated for user: {user.phone_number}')
+
         refresh_token = request.COOKIES.get("refresh_token")
         
         if not refresh_token:
+            logger.error(f'Refresh token request failed: No refresh token found in cookies for user: {user.phone_number}')
             raise APIError(AuthSessionError.NO_REFRESH_TOKEN)
         
         try:
-            new_access, new_refresh = rotate_refresh_token(refresh_token, request)
-        except ValueError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            old_refresh = RefreshToken(refresh_token)
+            old_refresh.blacklist()
+            
+            # Create new tokens
+            new_refresh = VersionedRefreshToken.for_user(user)
+            new_access = str(new_refresh.access_token)
+            new_refresh_token = str(new_refresh)
+            
+        except Exception as e:
+            logger.error(f'Refresh token request failed for user {user.phone_number}: {str(e)}')
+            raise APIError(AuthSessionError.INVALID_REFRESH_TOKEN)
         
-        response = Response({"message": "Token refreshed successfully"}, status=status.HTTP_200_OK)
+        response = Response({
+            "message": "Token refreshed successfully"
+        }, status=status.HTTP_200_OK)
+        
         make_cookie(response, {
             "access_token": new_access,
-            "refresh_token": new_refresh,
+            "refresh_token": new_refresh_token,
         })
+        
+        logger.info(f'Refresh token request completed successfully for user: {user.phone_number}')
         
         return response

@@ -72,7 +72,7 @@ export default function MyCoursesFilter({
         }
 
         fetchEnrollments()
-    }, [apiFetch, onEnrollmentsLoaded, fetched])
+    }, [onEnrollmentsLoaded, fetched])
 
     // Listen for filter count changes
     useEffect(() => {
@@ -86,11 +86,6 @@ export default function MyCoursesFilter({
         window.addEventListener('filterCountChanged', handleFilterCount as EventListener)
         return () => window.removeEventListener('filterCountChanged', handleFilterCount as EventListener)
     }, [onFilterCountChange])
-
-    // Show loading spinner while loading
-    if (isLoading) {
-        return <LoadingSpinner />
-    }
 
     return (
         <>

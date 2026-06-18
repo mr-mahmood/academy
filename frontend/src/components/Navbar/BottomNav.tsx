@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Icon, Icons } from '@/components/icon'
 import styles from './BottomNav.module.css'
+import { useActiveUser } from '@/contexts/active_user_context'
 
 interface BottomNavProps {
     onLogout?: () => void
@@ -12,6 +13,8 @@ export default function BottomNav({ onLogout }: BottomNavProps) {
     const router = useRouter()
     const pathname = usePathname()
     const [isDark, setIsDark] = useState(false)
+
+    const { activeUser } = useActiveUser()
 
     // Initialize theme from localStorage on mount
     useEffect(() => {
@@ -66,13 +69,23 @@ export default function BottomNav({ onLogout }: BottomNavProps) {
                 <span className={styles.navLabel}>صفحه اصلی</span>
             </button>
 
-            <button
-                onClick={() => router.push('/dashboard')}
-                className={`${styles.navItem} ${pathname === '/dashboard' ? styles.navItemActive : ''}`}
-            >
-                <Icon icon={Icons.dashboard} className={styles.navIcon} />
-                <span className={styles.navLabel}>داشبورد</span>
-            </button>
+            {activeUser ? (
+                <button
+                    onClick={() => router.push('/dashboard')}
+                    className={`${styles.navItem} ${pathname === '/dashboard' ? styles.navItemActive : ''}`}
+                >
+                    <Icon icon={Icons.dashboard} className={styles.navIcon} />
+                    <span className={styles.navLabel}>داشبورد</span>
+                </button>
+            ) : (
+                <button
+                    onClick={() => router.push('/login')}
+                    className={`${styles.navItem} ${pathname === '/login' ? styles.navItemActive : ''}`}
+                >
+                    <Icon icon={Icons.user} className={styles.navIcon} />
+                    <span className={styles.navLabel}>ورود</span>
+                </button>
+            )}
 
             {/* Theme Toggle Button */}
             <button

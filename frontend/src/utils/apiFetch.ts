@@ -27,8 +27,7 @@ const refreshToken = async (): Promise<boolean> => {
 };
 
 // --- Logout Function ---
-const handleLogout = async (router: any, setActiveUser?: (user: null) => void) => {
-    router.prefetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`);
+const handleLogout = async (setActiveUser?: (user: null) => void) => {
     console.log("Logging out and redirecting...");
     try {
         await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/logout/`, {
@@ -39,12 +38,12 @@ const handleLogout = async (router: any, setActiveUser?: (user: null) => void) =
     } catch (error) {
         console.error("Error during logout fetch:", error instanceof Error ? error.message : String(error));
     }
-    
+
     // Clear user from context if setActiveUser is provided
     if (setActiveUser) {
         setActiveUser(null);
     }
-    
+
     // Clear any stored user data
     if (typeof window !== 'undefined') {
         sessionStorage.removeItem('user');
@@ -99,7 +98,7 @@ export async function robustFetch({
             }
 
             // --- AUTHENTICATION ERROR HANDLING ---
-            if (data.success === false) {
+            if (isAuthApiError) {
                 const currentCode = data?.code;
 
                 if (currentCode === 4) {
@@ -125,11 +124,15 @@ export async function robustFetch({
         }
 
         // --- DECIDE NEXT STEP ---
-
         if (shouldLogout) {
-            await handleLogout(router, setActiveUser);
-            // Throw error to stop execution
-            throw new Error("Authentication session expired. Please log in again.");
+            const refreshSuccess = await refreshToken();
+            if (refreshSuccess) {
+                shouldRetryOriginalRequest = true;
+            } else {
+                await handleLogout(setActiveUser);
+                // Throw error to stop execution
+                throw new Error("Authentication session expired. Please log in again.");
+            }
         }
 
         if (shouldRetryOriginalRequest && attempt < maxRetries) {
@@ -140,7 +143,7 @@ export async function robustFetch({
         } else if (shouldRetryOriginalRequest && attempt >= maxRetries) {
             console.error(`Max retries reached for ${url}. Request failed.`);
             if (isAuthError && !await refreshToken()) {
-                await handleLogout(router, setActiveUser);
+                await handleLogout(setActiveUser);
                 throw new Error("Authentication session expired after multiple retries. Please log in again.");
             }
             throw new Error(`Request to ${url} failed after ${maxRetries + 1} attempts.`);
@@ -170,11 +173,11 @@ export async function publicFetch({
         });
 
         const data: ApiResponse = await response.json();
-        
+
         if (!response.ok) {
             throw new Error(data.message || `HTTP error! status: ${response.status}`);
         }
-        
+
         return data;
     } catch (error) {
         console.error('Public API Error:', error);

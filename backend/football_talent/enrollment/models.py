@@ -155,6 +155,7 @@ class FootballEnrollment(models.Model):
     @transaction.atomic
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+        user : User = self.user
         
         # Track status changes
         was_cancelled = False
@@ -183,20 +184,20 @@ class FootballEnrollment(models.Model):
                     raise APIError(RegistrationError.FOOTBALL_COURSE_NOT_ACTIVE)
                 
                 # Check if user has already enrolled in this course
-                if FootballEnrollment.objects.filter(user=self.user, course=self.course).exists():
+                if FootballEnrollment.objects.filter(user=user, course=self.course, enrollment_status=self.EnrollmentStatus.CONFIRMED).exists():
                     raise APIError(RegistrationError.FOOTBALL_COURSE_ALREADY_ENROLLED)
                 
                 # Check gender requirement
-                if self.course.gender_requirement == FootballCourse.GenderRequirement.MALE and self.user.gender != 'MALE':
+                if self.course.gender_requirement == FootballCourse.GenderRequirement.MALE and user.gender != 'MALE':
                     raise APIError(RegistrationError.FOOTBALL_GENDER_MISMATCH)
-                if self.course.gender_requirement == FootballCourse.GenderRequirement.FEMALE and self.user.gender != 'FEMALE':
+                if self.course.gender_requirement == FootballCourse.GenderRequirement.FEMALE and user.gender != 'FEMALE':
                     raise APIError(RegistrationError.FOOTBALL_GENDER_MISMATCH)
                 
                 # Set age category from user's current age category
-                if not self.user.age_category or self.user.age_category == User.AgeCategory.OUT_OF_RANGE:
+                if not user.age_category or user.age_category == User.AgeCategory.OUT_OF_RANGE:
                     raise APIError(RegistrationError.FOOTBALL_AGE_CATEGORY_NOT_FOUND)
                 
-                self.age_category = self.user.age_category
+                self.age_category = user.age_category
                 
                 self.course.save(update_fields=['status'])
             
@@ -216,8 +217,8 @@ class FootballEnrollment(models.Model):
         
         # Clear cache
         CacheService.invalidate_model(self.__class__, self.pk)
-        cache.delete(f"football_user:{self.user.id}:enrollments")
-        cache.delete(f"football_user:{self.user.id}:active_enrollments")
+        cache.delete(f"football_user:{user.id}:enrollments")
+        cache.delete(f"football_user:{user.id}:active_enrollments")
         cache.delete(f"football_course:{self.course.id}:enrollments")
         cache.delete("football_enrollments:all_list")
         cache.delete("football_enrollments:active_list")

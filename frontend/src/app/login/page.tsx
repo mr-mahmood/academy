@@ -253,7 +253,7 @@ function AuthPageContent() {
                     } else {
                         setRedirecting(true)
                         setTimeout(() => {
-                            router.push('/dashboard')
+                            router.push('/')
                         }, 1000)
                     }
                     return true

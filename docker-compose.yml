@@ -107,6 +107,8 @@ services:
     #   - frontend
     networks:
       - academy_network
+    environment:
+      - TZ=Asia/Tehran
 
 networks:
   academy_network:

@@ -59,7 +59,7 @@ class ExcelExportService:
                 'شناسه': academy.id,
                 'نام آکادمی': academy.name,
                 'مسئول آکادمی': academy.instructor_name or '',
-                'شماره تماس مسئول': academy.Instructor_phone or '',
+                'شماره تماس مسئول': academy.instructor_phone or '',
                 'شهر': city_display.get(academy.city, academy.city),
                 'آدرس': academy.address_text or '',
                 'وضعیت': 'فعال' if academy.is_active else 'غیرفعال',

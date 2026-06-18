@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import styles from '@/app/login/login.module.css'
 import UserForm from '@/components/UserForm'
 import { usePopup } from '@/hooks/Popup'
+import LoadingSpinner from '@/components/LoadingSpinner/LoadingSpinner'
 
 function SignupContent() {
     const router = useRouter()
@@ -77,7 +78,7 @@ function SignupContent() {
 
 export default function SignupPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LoadingSpinner />}>
             <SignupContent />
         </Suspense>
     )

@@ -22,6 +22,14 @@ function AcademiesContent() {
     const emptyMessage = isInternal ? 'ورزشگاه یافت نشد' : 'پایگاه همکار یافت نشد'
     const emptyDescription = isInternal ? 'در حال حاضر ورزشگاه فعالی وجود ندارد' : 'در حال حاضر پایگاه همکار فعالی وجود ندارد'
 
+    const pageConfig = {
+        title: isInternal ? 'مدرسه تخصصی' : 'پایگاه‌های همکار',
+        description: isInternal
+            ? 'مدرسه تخصصی، مجموعه‌های ورزشی هستند که به صورت مستقیم توسط مجموعه ما مدیریت می‌شوند. این مجموعه ها امکانات کامل و استانداردهای لازم برای برگزاری دوره‌های آموزشی را دارا می‌باشند.'
+            : 'پایگاه‌های همکار، مجموعه‌های ورزشی هستند که با ما در همکاری هستند. این پایگاه‌ها با رعایت استانداردهای تعیین شده، میزبان دوره‌های آموزشی ما می‌باشند.',
+        icon: isInternal ? Icons.school : Icons.handshake
+    }
+
     useEffect(() => {
         const fetchAcademies = async () => {
             setLoading(true)
@@ -69,6 +77,14 @@ function AcademiesContent() {
 
     return (
         <div className={styles.container}>
+            {/* Dynamic Explanation Box based on academy_type */}
+            <div className={styles.explanationBox}>
+                <Icon icon={pageConfig.icon} className={styles.explanationIcon} />
+                <div className={styles.explanationContent}>
+                    <h4>{pageConfig.title}</h4>
+                    <p>{pageConfig.description}</p>
+                </div>
+            </div>
             {academies.length === 0 ? (
                 <div className={styles.emptyState}>
                     <div className={styles.emptyIcon}>

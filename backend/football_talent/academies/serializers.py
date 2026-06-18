@@ -9,7 +9,7 @@ class FootballAcademySerializer(serializers.ModelSerializer):
         model = FootballAcademy
         fields = [
             'id', 'name', 'city', 'city_display', 'address_text', 'latitude', 'longitude',
-            'Instructor_phone', 'instructor_name',
+            'instructor_phone', 'instructor_name',
             'is_active', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']

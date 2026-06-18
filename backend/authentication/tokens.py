@@ -1,5 +1,5 @@
+# authentication/tokens.py
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.exceptions import TokenError
 from core.exceptions import APIError, AuthSessionError
 from users.models import User
@@ -9,7 +9,6 @@ class VersionedRefreshToken(RefreshToken):
     @classmethod
     def for_user(cls, user):
         token = super().for_user(user)
-        token["token_version"] = user.token_version
         return token
 
 

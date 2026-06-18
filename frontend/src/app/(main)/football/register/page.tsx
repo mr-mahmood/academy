@@ -251,45 +251,6 @@ export default function FootballRegisterPage() {
         window.history.replaceState({ step: 1 }, '')
     }
 
-    // Selection banner component to avoid duplication
-    const SelectionBanner = ({ showBackButton = true, showResetButton = true }: { showBackButton?: boolean; showResetButton?: boolean }) => (
-        <div className={styles.selectedBanner}>
-            <div style={{ textAlign: 'center' }}>
-                <span className={styles.bannerTitle}>انتخاب‌های شما</span>
-            </div>
-            <div className={styles.bannerTable}>
-                <div className={styles.bannerRow}>
-                    <span className={styles.bannerLabel}>جنسیت:</span>
-                    <span className={styles.bannerValue}>
-                        {selectedGender === 'MALE' ? 'آقایان' : selectedGender === 'FEMALE' ? 'بانوان' : 'انتخاب نشده'}
-                    </span>
-                </div>
-                <div className={styles.bannerRow}>
-                    <span className={styles.bannerLabel}>شهر:</span>
-                    <span className={styles.bannerValue}>{selectedCity?.name || 'انتخاب نشده'}</span>
-                </div>
-                <div className={styles.bannerRow}>
-                    <span className={styles.bannerLabel}>پست:</span>
-                    <span className={styles.bannerValue}>{selectedPosition?.display_name || 'انتخاب نشده'}</span>
-                </div>
-            </div>
-            <div className={styles.bannerActionsLine}>
-                {showBackButton && (
-                    <button onClick={handleBack} className={styles.bannerBackButton}>
-                        <Icon icon={Icons.chevronRight} />
-                        <span>بازگشت</span>
-                    </button>
-                )}
-                {showResetButton && (
-                    <button onClick={handleReset} className={styles.bannerResetButton}>
-                        <Icon icon={Icons.times} />
-                        <span>شروع مجدد</span>
-                    </button>
-                )}
-            </div>
-        </div>
-    )
-
     const ProgressSteps = () => (
         <div className={styles.progressContainer}>
             <div className={styles.progressSteps}>
@@ -325,7 +286,6 @@ export default function FootballRegisterPage() {
         return (
             <div className={styles.container}>
                 <ProgressSteps />
-                <SelectionBanner showBackButton={false} showResetButton={false} />
                 <div className={styles.stepContainer}>
                     <h2 className={styles.stepTitle}>جنسیت خود را انتخاب کنید</h2>
                     <div className={styles.genderOptions}>
@@ -352,7 +312,6 @@ export default function FootballRegisterPage() {
         return (
             <div className={styles.container}>
                 <ProgressSteps />
-                <SelectionBanner showBackButton={true} showResetButton={false} />
                 <div className={styles.stepContainer}>
                     <h2 className={styles.stepTitle}>شهر مورد نظر خود را انتخاب کنید</h2>
                     <div className={styles.optionsGrid}>
@@ -376,7 +335,6 @@ export default function FootballRegisterPage() {
         return (
             <div className={styles.container}>
                 <ProgressSteps />
-                <SelectionBanner showBackButton={true} showResetButton={false} />
                 <div className={styles.stepContainer}>
                     <h2 className={styles.stepTitle}>پست تخصصی خود را انتخاب کنید</h2>
                     <div className={styles.optionsGrid}>
@@ -399,7 +357,6 @@ export default function FootballRegisterPage() {
     return (
         <div className={styles.container}>
             <ProgressSteps />
-            <SelectionBanner showBackButton={true} showResetButton={true} />
 
             <div className={styles.stepContainer}>
                 <div className={styles.resultsHeader}>

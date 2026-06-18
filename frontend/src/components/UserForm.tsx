@@ -8,7 +8,7 @@ import styles from '../styles/userForm.module.css'
 import { useActiveUser } from '@/contexts/active_user_context'
 import moment from 'moment-jalaali'
 import { useApi } from '@/hooks/useApi'
-
+import { usePopup } from '@/hooks/Popup'
 
 // Iranian cities by province
 const IRANIAN_CITIES: Record<string, string[]> = {
@@ -149,37 +149,14 @@ interface UserFormProps {
     onSuccess?: (user?: any) => void
 }
 
-// Toast notification component
-function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            onClose()
-        }, 3000)
-        return () => clearTimeout(timer)
-    }, [onClose])
-
-    return (
-        <div className={`${styles.toast} ${styles[type]}`}>
-            <div className={styles.toastIcon}>
-                {type === 'success' ? <Icon icon={Icons.check} /> : <Icon icon={Icons.timesCircle} />}
-            </div>
-            <div className={styles.toastContent}>
-                <p>{message}</p>
-            </div>
-            <button onClick={onClose} className={styles.toastClose}>
-                <Icon icon={Icons.times} size="sm" />
-            </button>
-        </div>
-    )
-}
-
 export default function UserForm({ mode, initialPhoneNumber, onSuccess }: UserFormProps) {
     const router = useRouter()
+    const { showPopUp, PopupComponent } = usePopup()
+
     const { activeUser, setActiveUser } = useActiveUser()
     const { apiFetch } = useApi()
 
     const [loading, setLoading] = useState(false)
-    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
@@ -287,24 +264,6 @@ export default function UserForm({ mode, initialPhoneNumber, onSuccess }: UserFo
             if (persianError) newErrors.last_name = persianError
         }
 
-        // Parent fields (required for signup, optional for profile)
-        // if (mode === 'signup') {
-        //     if (!formData.parent_full_name.trim()) {
-        //         newErrors.parent_full_name = 'نام والد الزامی است'
-        //     } else if (formData.parent_full_name.trim().length < 2) {
-        //         newErrors.parent_full_name = 'نام والد حداقل 2 کاراکتر باشد'
-        //     } else {
-        //         const persianError = validatePersianText(formData.parent_full_name, 'نام والد')
-        //         if (persianError) newErrors.parent_full_name = persianError
-        //     }
-
-        //     if (!formData.parent_national_id) {
-        //         newErrors.parent_national_id = 'کد ملی والد الزامی است'
-        //     } else if (!/^\d{10}$/.test(formData.parent_national_id)) {
-        //         newErrors.parent_national_id = 'کد ملی والد باید 10 رقم باشد'
-        //     }
-        // }
-
         // National ID validation
         if (!formData.national_id) {
             newErrors.national_id = 'کد ملی الزامی است'
@@ -352,7 +311,14 @@ export default function UserForm({ mode, initialPhoneNumber, onSuccess }: UserFo
         e.preventDefault()
 
         if (!validateForm()) {
-            setToast({ message: 'لطفاً اطلاعات را به درستی وارد کنید', type: 'error' })
+            showPopUp({
+                title: 'اطلاعات نادرست است',
+                message: 'لطفا اطلاعات را به درستی وارد کنید',
+                type: 'error',
+                duration: 5000,
+                onClose: () => { },
+                onAutoClose: () => { }
+            })
             return
         }
 
@@ -372,13 +338,6 @@ export default function UserForm({ mode, initialPhoneNumber, onSuccess }: UserFo
 
         if (mode === 'signup') {
             apiPayload.phone_number = formData.phone_number
-            // apiPayload.parent_full_name = formData.parent_full_name
-            // apiPayload.parent_national_id = formData.parent_national_id
-            // apiPayload.parent_relationship = formData.parent_relationship
-        } else {
-            // apiPayload.parent_full_name = formData.parent_full_name
-            // apiPayload.parent_national_id = formData.parent_national_id
-            // apiPayload.parent_relationship = formData.parent_relationship
         }
 
         try {
@@ -390,7 +349,14 @@ export default function UserForm({ mode, initialPhoneNumber, onSuccess }: UserFo
                 })
 
                 if (result.success) {
-                    setToast({ message: 'پروفایل با موفقیت بروزرسانی شد', type: 'success' })
+                    showPopUp({
+                        title: 'آپدیت موفقیت آمیز',
+                        message: 'پروفایل شما با موفقیت آپدیت شد',
+                        type: 'success',
+                        duration: 5000,
+                        onClose: () => { },
+                        onAutoClose: () => { }
+                    })
 
                     if (result.data?.user) {
                         setActiveUser(result.data.user)
@@ -404,7 +370,14 @@ export default function UserForm({ mode, initialPhoneNumber, onSuccess }: UserFo
                         }
                     }, 2000)
                 } else {
-                    setToast({ message: result.message || 'خطا در بروزرسانی پروفایل', type: 'error' })
+                    showPopUp({
+                        title: 'خطا در بروزرسانی',
+                        message: 'خطایی در بروزرسانی پروفایل رخ داد',
+                        type: 'error',
+                        duration: 5000,
+                        onClose: () => { },
+                        onAutoClose: () => { }
+                    })
                 }
             } else {
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/signup/`, {
@@ -419,7 +392,14 @@ export default function UserForm({ mode, initialPhoneNumber, onSuccess }: UserFo
                 const result = await response.json()
 
                 if (response.ok) {
-                    setToast({ message: 'ثبت نام با موفقیت انجام شد', type: 'success' })
+                    showPopUp({
+                        title: 'ثبت نام موفق',
+                        message: 'حساب کاربری شما با موفقیت ساخته شد',
+                        type: 'success',
+                        duration: 5000,
+                        onClose: () => { },
+                        onAutoClose: () => { }
+                    })
 
                     if (result.data?.user) {
                         setActiveUser(result.data.user)
@@ -432,25 +412,53 @@ export default function UserForm({ mode, initialPhoneNumber, onSuccess }: UserFo
                         const userData = result.data?.user
                         setTimeout(() => {
                             onSuccess(userData)
-                        }, 2000)
+                        }, 1000)
                     } else {
                         setTimeout(() => {
-                            router.push('/dashboard')
-                        }, 2000)
+                            router.push('/')
+                        }, 1000)
                     }
                 } else {
                     if (result.code === 103) {
-                        setToast({ message: 'شماره موبایل تایید نشده است. لطفاً دوباره وارد شوید', type: 'error' })
+                        showPopUp({
+                            title: 'خطا در ثبت نام',
+                            message: 'شماره موبایل تایید نشده است. لطفاً دوباره وارد سایت شوید',
+                            type: 'error',
+                            duration: 5000,
+                            onClose: () => { },
+                            onAutoClose: () => { }
+                        })
                     } else if (result.code === 121 || result.code === 161) {
-                        setToast({ message: 'کد ملی خودتان را وارد کنید', type: 'error' })
+                        showPopUp({
+                            title: 'خطا در ثبت نام',
+                            message: 'لطفا کد ملی خودتان را وارد کنید',
+                            type: 'error',
+                            duration: 5000,
+                            onClose: () => { },
+                            onAutoClose: () => { }
+                        })
                     } else {
-                        setToast({ message: result.message || 'خطا در ثبت نام. لطفاً دوباره تلاش کنید', type: 'error' })
+                        showPopUp({
+                            title: 'خطا در ثبت نام',
+                            message: 'خطا در ثبت نام. لطفاً دوباره تلاش کنید',
+                            type: 'error',
+                            duration: 5000,
+                            onClose: () => { },
+                            onAutoClose: () => { }
+                        })
                     }
                 }
             }
         } catch (error) {
             console.error('Error submitting form:', error)
-            setToast({ message: 'خطا در ارتباط با سرور. لطفا دوباره تلاش کنید.', type: 'error' })
+            showPopUp({
+                title: 'مشکل ارتباط با سرور',
+                message: 'خطا در ارتباط با سرور. لطفا دوباره تلاش کنید.',
+                type: 'error',
+                duration: 5000,
+                onClose: () => { },
+                onAutoClose: () => { }
+            })
         } finally {
             setLoading(false)
         }
@@ -458,80 +466,12 @@ export default function UserForm({ mode, initialPhoneNumber, onSuccess }: UserFo
 
     return (
         <div className={styles.formWrapper}>
-            {/* Toast Notification */}
-            {toast && (
-                <Toast
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => setToast(null)}
-                />
-            )}
-
             <form onSubmit={handleSubmit} className={styles.profileForm}>
                 <div className={styles.headerSection}>
                     <h2 className={styles.pageTitle} style={{ textAlign: 'center', color: 'var(--text-primary)' }}>
-                        {mode === 'signup' ? 'ثبت اطلاعات فردی' : 'ویرایش پروفایل'}
+                        {mode === 'signup' ? 'ساخت حساب کاربری' : 'ویرایش پروفایل'}
                     </h2>
                 </div>
-
-                {/* Parent Fields Section */}
-                {/* <div className={styles.sectionDivider}>
-                    <span>اطلاعات والد</span>
-                </div>
-
-                <div className={styles.twoColumnGrid}>
-                    <div className={styles.fieldGroup}>
-                        <label className={styles.fieldLabel}>
-                            کد ملی والد
-                            <span className={styles.requiredStar}>*</span>
-                        </label>
-                        <input
-                            type="text"
-                            inputMode="numeric"
-                            value={formData.parent_national_id}
-                            onChange={(e) => handleChange('parent_national_id', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                            placeholder="۱۲۳۴۵۶۷۸۹۰"
-                            disabled={loading}
-                            maxLength={10}
-                            className={`${styles.fieldInput} ${errors.parent_national_id ? styles.fieldError : ''}`}
-                            dir="ltr"
-                        />
-                        {errors.parent_national_id && <p className={styles.errorText}>{errors.parent_national_id}</p>}
-                    </div>
-
-                    <div className={styles.fieldGroup}>
-                        <label className={styles.fieldLabel}>
-                            نام کامل والد
-                            <span className={styles.requiredStar}>*</span>
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.parent_full_name}
-                            onChange={(e) => handleChange('parent_full_name', e.target.value)}
-                            placeholder={formData.parent_relationship === 'FATHER' ? 'رضا احمدی' : 'فاطمه اکبری'}
-                            disabled={loading}
-                            className={`${styles.fieldInput} ${errors.parent_full_name ? styles.fieldError : ''}`}
-                            dir="rtl"
-                        />
-                        {errors.parent_full_name && <p className={styles.errorText}>{errors.parent_full_name}</p>}
-                    </div>
-                </div>
-
-                <div className={styles.fieldGroup}>
-                    <label className={styles.fieldLabel}>
-                        رابطه با والد
-                        <span className={styles.requiredStar}>*</span>
-                    </label>
-                    <select
-                        value={formData.parent_relationship}
-                        onChange={(e) => handleChange('parent_relationship', e.target.value)}
-                        disabled={loading}
-                        className={`${styles.fieldInput} ${styles.selectInput}`}
-                    >
-                        <option value="FATHER">پدر</option>
-                        <option value="MOTHER">مادر</option>
-                    </select>
-                </div> */}
 
                 {/* Personal Information Section */}
                 <div className={styles.sectionDivider}>
@@ -754,6 +694,8 @@ export default function UserForm({ mode, initialPhoneNumber, onSuccess }: UserFo
                     )}
                 </button>
             </form>
+
+            {PopupComponent}
         </div>
     )
 }

@@ -77,11 +77,6 @@ class FootballEnrollmentAPIView(APIView):
             academy_id=academy_id,
             position=position,
             gender_requirement=gender_requirement,
-            defaults={
-                'coache': "Coach",
-                'price': 4500000,
-                'status': FootballCourse.Status.ACTIVE
-            }
         )
         
         # Check for existing enrollment
@@ -92,7 +87,7 @@ class FootballEnrollmentAPIView(APIView):
         
         # If enrollment exists and is in WAITING_FOR_PAYMENT state, return it
         if existing_enrollment:
-            if existing_enrollment.enrollment_status == FootballEnrollment.EnrollmentStatus.WAITING_FOR_PAYMENT:
+            if existing_enrollment.enrollment_status in [FootballEnrollment.EnrollmentStatus.WAITING_FOR_PAYMENT, FootballEnrollment.EnrollmentStatus.CANCELLED]:
                 serializer = FootballEnrollmentSerializer(existing_enrollment)
                 return Response({
                     "message": "You already have a pending enrollment for this test. Please complete payment.",

@@ -491,3 +491,5 @@ backend/logs/
 *.index
 
 backup_postgres.sh
+
+test2.py

@@ -33,7 +33,6 @@ services:
 
   backend:
     image: mrmahmood/academy-backend:latest
-    container_name: academy_backend
     restart: unless-stopped
     volumes:
       - backend_static:/app/static
@@ -54,7 +53,6 @@ services:
 
   celery:
     image: mrmahmood/academy-backend:latest
-    container_name: academy_celery
     restart: unless-stopped
     user: "1000:1000"
     env_file:
@@ -74,7 +72,6 @@ services:
 
   celery-beat:
     image: mrmahmood/academy-backend:latest
-    container_name: academy_celery_beat
     restart: unless-stopped
     env_file:
       - ./.env
@@ -88,7 +85,6 @@ services:
 
   frontend:
     image: mrmahmood/academy-frontend:latest
-    container_name: academy_frontend
     restart: unless-stopped
     depends_on:
       - backend
@@ -114,6 +110,8 @@ services:
       - frontend
     networks:
       - academy_network
+    environment:
+      - TZ=Asia/Tehran
 
 
 networks:
