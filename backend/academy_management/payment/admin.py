@@ -12,6 +12,11 @@ class PaymentAdmin(admin.ModelAdmin):
     search_fields = ['res_num', 'ref_num', 'enrollment__user__full_name', 'enrollment__course__sport__name']
     readonly_fields = ['created_at', 'updated_at', 'description']
     
+    # Performance optimizations
+    list_select_related = ['enrollment', 'enrollment__user', 'enrollment__course', 'enrollment__course__academy', 'enrollment__course__sport']
+    raw_id_fields = ['enrollment']
+    autocomplete_fields = ['enrollment']
+    
     # Add Excel export action
     actions = ['export_to_excel']
     

@@ -7,16 +7,15 @@ from config.admin import admin_site
 class FootballCourseAdmin(admin.ModelAdmin):
     """Simple Football Course admin"""
     
-    list_display = [
-        'id', 'academy', 'position', 'gender_requirement',
-        'price', 'status'
-    ]
-    
+    list_display = ['id', 'academy', 'position', 'gender_requirement', 'price', 'status']
     list_filter = ['status', 'position', 'academy']
-    
     search_fields = ['coache', 'academy__name']
-    
     readonly_fields = ['created_at', 'updated_at']
+
+    # Performance optimizations
+    list_select_related = ['academy']
+    raw_id_fields = ['academy']
+    autocomplete_fields = ['academy']
     
     fieldsets = (
         ('Basic Information', {

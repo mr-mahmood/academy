@@ -9,6 +9,7 @@ class AcademyAdmin(admin.ModelAdmin):
     list_filter = ['academy_type']
     list_display_links = ['name']
     readonly_fields = ['created_at', 'updated_at']
+    search_fields = ['name']
     
     # Add Excel export action
     actions = ['export_to_excel']

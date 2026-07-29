@@ -193,7 +193,7 @@ export default function FootballRegisterPage() {
         }
 
         window.addEventListener('popstate', handlePopState)
-        
+
         // Push initial state only once
         if (window.history.state === null) {
             window.history.pushState({ step: 1 }, '')
@@ -279,6 +279,20 @@ export default function FootballRegisterPage() {
 
     if (loading) {
         return <LoadingSpinner />
+    }
+
+    if (allTests.length === 0) {
+        return (
+            <div className={styles.container}>
+                <div className={styles.emptyTests}>
+                    <Icon icon={Icons.football} />
+                    <p>
+                        در حال حاضر امکان ثبت نام در تست‌های فوتبال وجود ندارد.
+                        لطفاً برای اطلاعات بیشتر با پشتیبانی تماس بگیرید.
+                    </p>
+                </div>
+            </div>
+        )
     }
 
     // Step 1: Gender Selection

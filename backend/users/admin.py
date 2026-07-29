@@ -24,6 +24,7 @@ class UserAdmin(BaseUserAdmin):
         "is_active",
         "is_staff",
         "is_superuser",
+        "created_at"
     )
     
     # Filters in sidebar
@@ -62,6 +63,8 @@ class UserAdmin(BaseUserAdmin):
                 "is_active",
                 "is_staff",
                 "is_superuser",
+                "created_at",
+                "updated_at"
             ),
         }),
     )

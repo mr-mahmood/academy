@@ -19,6 +19,11 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ['sport__name', 'academy__name']
     readonly_fields = ['created_at', 'updated_at']
     
+    # Performance optimizations
+    list_select_related = ['sport', 'academy']
+    raw_id_fields = ['sport', 'academy']
+    autocomplete_fields = ['sport', 'academy']
+    
     fieldsets = (
         ('Basic Information', {
             'fields': (

@@ -27,13 +27,19 @@ class CourseAPIView(APIView):
             return [AllowAny()]
         return [IsAdmin()]
     
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self, academy_id=None):
         """Optimized queryset to avoid N+1 queries"""
         queryset = Course.objects.select_related(
             'sport',
             'academy'
         ).prefetch_related('schedule')
-
+        
+        if academy_id is not None:
+            queryset = queryset.filter(academy_id=academy_id)
+        else:
+            # only run when the user dont want to see a specific course
+            queryset = queryset.filter(status=Course.Status.ACTIVE)
+        
         return queryset
     
     def get(self, request, pk: Optional[int] = None, academy_id: Optional[int] = None):
@@ -50,7 +56,7 @@ class CourseAPIView(APIView):
             }, status=status.HTTP_200_OK)
         
         elif academy_id is not None:
-            courses = self.get_queryset().filter(academy_id=academy_id)
+            courses = self.get_queryset(academy_id=academy_id)
             serializer = CourseSerializer(courses, many=True)
             return Response({
                 "message": f"Courses for academy {academy_id} retrieved successfully",
@@ -135,12 +141,15 @@ class CourseScheduleAPIView(APIView):
             return [AllowAny()]
         return [IsAdmin()]
     
-    def get_queryset(self, course_id: Optional[int] = None) -> QuerySet:
+    def get_queryset(self, course_id: Optional[int] = None):
         """Optimized queryset for CourseSchedule"""
         queryset = CourseSchedule.objects.select_related('course')
         
         if course_id is not None:
             queryset = queryset.filter(course_id=course_id)
+        else:
+            # only run when the user dont want to see a specific course schedule
+            queryset = queryset.filter(course__status=Course.Status.ACTIVE)
         
         return queryset
     

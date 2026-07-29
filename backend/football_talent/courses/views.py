@@ -31,6 +31,9 @@ class FootballCourseAPIView(APIView):
         
         if academy_id is not None:
             queryset = queryset.filter(academy_id=academy_id)
+        else:
+            # only run when the user dont want to see a specific course
+            queryset = queryset.filter(status=FootballCourse.Status.ACTIVE)
         
         return queryset
     

@@ -12,6 +12,11 @@ class FootballEnrollmentAdmin(admin.ModelAdmin):
     search_fields = ['user__full_name', 'user__phone_number', 'course__academy__name']
     readonly_fields = ['enrolled_at', 'updated_at', 'age_category']
     
+    # Performance optimizations
+    list_select_related = ['user', 'course', 'course__academy']
+    raw_id_fields = ['user', 'course']
+    autocomplete_fields = ['user', 'course']
+    
     fieldsets = (
         ('Enrollment Info', {
             'fields': ('user', 'course', 'age_category')

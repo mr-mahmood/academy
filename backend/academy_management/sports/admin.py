@@ -7,6 +7,7 @@ from config.admin import admin_site
 class SportAdmin(admin.ModelAdmin):
     list_display = ['id', 'name']
     list_display_links = ['name']
+    search_fields = ['name']
     
 
 # Register explicitly

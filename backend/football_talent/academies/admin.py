@@ -8,6 +8,7 @@ class FootballAcademyAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'city', 'is_active']
     list_display_links = ['name']
     readonly_fields = ['created_at', 'updated_at']
+    search_fields = ['name']
     
     # Add Excel export action
     actions = ['export_to_excel']

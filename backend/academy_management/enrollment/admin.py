@@ -8,11 +8,15 @@ from config.admin import admin_site
 
 
 class EnrollmentAdmin(admin.ModelAdmin):
-
-    list_display = ['id', 'user_link', 'get_phone_number', 'course_link', 'enrollment_status', 'get_reminder_count_display']
+    list_display = ['id', 'user_link', 'get_phone_number', 'course_link', 'enrollment_status', 'get_reminder_count_display', 'enrolled_at']
     list_filter = ['course__academy__academy_type', 'course', 'enrollment_status']
     search_fields = ['user__full_name', 'user__phone_number', 'course__sport__name']
     readonly_fields = ['enrolled_at', 'updated_at']
+    
+    # Performance optimizations
+    list_select_related = ['user', 'course', 'course__academy', 'course__sport']
+    raw_id_fields = ['user', 'course']
+    autocomplete_fields = ['user', 'course']
     
     fieldsets = (
         ('Enrollment Info', {
@@ -27,9 +31,8 @@ class EnrollmentAdmin(admin.ModelAdmin):
         }),
     )
     
-    actions = ['mark_confirmed', 'mark_cancelled']
+    actions = ['mark_confirmed', 'mark_cancelled', 'export_to_excel']
     
-    # Fixed: Access the phone number through the user object
     @admin.display(description="Phone Number", ordering="user__phone_number")
     def get_phone_number(self, obj):
         return obj.user.phone_number if obj.user else "-"
@@ -58,17 +61,11 @@ class EnrollmentAdmin(admin.ModelAdmin):
         return "-"
     course_link.short_description = "Course name and schedule"
     
-    
-    # Add Excel export action
-    actions = ['export_to_excel']
-    
     def export_to_excel(self, request, queryset):
         """Export selected enrollments to Excel with multiple sheets"""
         return export_enrollments_to_excel(queryset)
     
     export_to_excel.short_description = "Excel Export"
-    
-
 
 
 admin_site.register(Enrollment, EnrollmentAdmin)
