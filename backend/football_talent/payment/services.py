@@ -39,14 +39,14 @@ class ZibalFootballPaymentService:
                 self.REQUEST_URL,
                 json=payload,
                 headers={'Content-Type': 'application/json'},
-                timeout=30
+                timeout=300
             )
             result = response.json()
 
             if result.get('result') == 100:
                 track_id = result.get('trackId')
                 payment.track_id = track_id
-                payment.save(update_fields=['track_id'])
+                payment.save(update_fields=['updated_at', 'track_id'])
                 return {'success': True, 'track_id': track_id, 'error': None}
             else:
                 error_msg = result.get('message', 'Unknown error')
@@ -85,7 +85,7 @@ class ZibalFootballPaymentService:
                 self.VERIFY_URL,
                 json=payload,
                 headers={'Content-Type': 'application/json'},
-                timeout=30
+                timeout=300
             )
             result = response.json()
 

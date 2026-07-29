@@ -196,12 +196,12 @@ class Enrollment(models.Model):
                 
                 # Increment enrolled students for new enrollment
                 self.course.enrolled_students += 1
-                self.course.save(update_fields=['enrolled_students', 'status'])
+                self.course.save(update_fields=['updated_at', 'enrolled_students', 'status'])
             
             elif was_reactivated:
                 # Reactivating a cancelled enrollment - increment count again
                 self.course.enrolled_students += 1
-                self.course.save(update_fields=['enrolled_students', 'status'])
+                self.course.save(update_fields=['updated_at', 'enrolled_students', 'status'])
                 # Clear cancelled_at timestamp
                 self.cancelled_at = None
         
@@ -214,7 +214,7 @@ class Enrollment(models.Model):
             # Lock and decrement course count
             course = Course.objects.select_for_update().get(id=self.course.id)
             course.enrolled_students = max(0, course.enrolled_students - 1)
-            course.save(update_fields=['enrolled_students', 'status'])
+            course.save(update_fields=['updated_at', 'enrolled_students', 'status'])
         
         super().save(*args, **kwargs)
         
@@ -245,7 +245,7 @@ class Enrollment(models.Model):
         
         if was_counted:
             course.enrolled_students = max(0, course.enrolled_students - 1)
-            course.save(update_fields=['enrolled_students', 'status'])
+            course.save(update_fields=['updated_at', 'enrolled_students', 'status'])
         
         # Clear cache
         CacheService.invalidate_model(self.__class__, enrollment_id)

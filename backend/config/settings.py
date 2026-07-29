@@ -184,17 +184,30 @@ SIMPLE_JWT = {
 # -----------------------------
 # Cookies & CORS
 # -----------------------------
-SESSION_COOKIE_SAMESITE = "Lax"  # 'Lax' works with HTTP, 'None' requires HTTPS
+# Trust the X-Forwarded-Proto header from nginx
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+
+# Cookie settings
+# "Lax" if frontend and backend are on same domain (they are)
+# "None" only if they're on different domains
+SESSION_COOKIE_SAMESITE = "Lax"  # Lax since same domain
 CSRF_COOKIE_SAMESITE = "Lax"
-SESSION_COOKIE_SECURE = True  # False for HTTP, True for HTTPS
-CSRF_COOKIE_SECURE = True     # False for HTTP, True for HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
+# This allows cookies to work across all subdomains
+SESSION_COOKIE_DOMAIN = ".sepahansc.com"
+CSRF_COOKIE_DOMAIN = ".sepahansc.com"
+
+# Load from environment
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
-
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # This is the most important for development
-CORS_ALLOW_CREDENTIALS = True
-
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+
+# Cookie ages
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 1 week
+CSRF_COOKIE_AGE = 60 * 60 * 24 * 7     # 1 week
 
 # -----------------------------
 # Channels & Redis

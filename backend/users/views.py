@@ -6,10 +6,10 @@ from django.core.cache import cache
 from users.serializers import UserProfileSerializer
 from users.models import User
 from typing import cast
-from authentication.tokens import VersionedRefreshToken
 from authentication.cookies import make_cookie
 from core.exceptions import APIError, UserAccountError
 from authentication.permissions import IsAdmin
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.settings import api_settings
 
 PHONE_VERIFIED_PREFIX = "phone_verified"
@@ -46,7 +46,7 @@ class UserSignupAPIView(APIView):
         cache.delete(verified_key)
         
         # Generate tokens for auto-login
-        refresh = VersionedRefreshToken.for_user(user)
+        refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
         

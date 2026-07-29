@@ -11,7 +11,7 @@ from users.models import User
 from users.serializers import UserProfileSerializer
 from core.exceptions import APIError, AuthOTPError, AuthSessionError
 from authentication.cookies import make_cookie
-from authentication.tokens import VersionedRefreshToken
+from authentication.tokens import rotate_refresh_token
 from authentication.auth import RefreshJWTAuthentication
 from authentication.otp_service import generate_otp, verify_otp
 
@@ -85,7 +85,7 @@ class VerifyOTPApiView(APIView):
         user = User.get_user_by_phone(phone_number)
         
         # Generate tokens
-        refresh = VersionedRefreshToken.for_user(user)
+        refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
         
@@ -136,52 +136,42 @@ class LogoutAPIView(APIView):
         
         # Clear cookies
         response = Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        response.delete_cookie("access_token")
-        response.delete_cookie("refresh_token")
+        response.delete_cookie("access_token", path='/', domain=settings.SESSION_COOKIE_DOMAIN)
+        response.delete_cookie("refresh_token", path='/', domain=settings.SESSION_COOKIE_DOMAIN)
         
         return response
 
-
+    
 class RefreshAPIView(APIView):
-    """
-    Refresh access token using refresh token from cookie
-    Uses RefreshJWTAuthentication to validate the refresh token
-    """
     authentication_classes = [RefreshJWTAuthentication]
     permission_classes = [AllowAny]
 
     def post(self, request):
         user: User = request.user
-        logger.info(f'Refresh token request initiated for user: {user.phone_number}')
+        logger.info(f'Refresh token request initiated')
 
         refresh_token = request.COOKIES.get("refresh_token")
         
         if not refresh_token:
-            logger.error(f'Refresh token request failed: No refresh token found in cookies for user: {user.phone_number}')
+            logger.error(f'Refresh token request failed: No refresh token found in cookies')
             raise APIError(AuthSessionError.NO_REFRESH_TOKEN)
-        
+
         try:
-            old_refresh = RefreshToken(refresh_token)
-            old_refresh.blacklist()
             
-            # Create new tokens
-            new_refresh = VersionedRefreshToken.for_user(user)
-            new_access = str(new_refresh.access_token)
-            new_refresh_token = str(new_refresh)
+            new_access, new_refresh = rotate_refresh_token(refresh_token, request)
             
-        except Exception as e:
-            logger.error(f'Refresh token request failed for user {user.phone_number}: {str(e)}')
-            raise APIError(AuthSessionError.INVALID_REFRESH_TOKEN)
-        
-        response = Response({
-            "message": "Token refreshed successfully"
-        }, status=status.HTTP_200_OK)
+        except ValueError as e:
+            
+            logger.error(f'Refresh token request failed: {str(e)}')
+            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+
+        response = Response({"message": "Token refresh successful"}, status=status.HTTP_200_OK)
         
         make_cookie(response, {
             "access_token": new_access,
-            "refresh_token": new_refresh_token,
+            "refresh_token": str(new_refresh),
         })
         
-        logger.info(f'Refresh token request completed successfully for user: {user.phone_number}')
+        logger.info(f'Refresh token request completed successfully')
         
         return response

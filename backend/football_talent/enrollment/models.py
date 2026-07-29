@@ -89,7 +89,7 @@ class FootballEnrollment(models.Model):
             if self.age_category != user_age_category:
                 self.age_category = user_age_category
                 if save:
-                    self.save(update_fields=['age_category', 'updated_at'])
+                    self.save(update_fields=['updated_at', 'age_category'])
                 return True
         return False
     
@@ -130,7 +130,7 @@ class FootballEnrollment(models.Model):
             
             if old_category != new_category:
                 enrollment.age_category = new_category
-                enrollment.save(update_fields=['age_category', 'updated_at'])
+                enrollment.save(update_fields=['updated_at', 'age_category'])
                 updated += 1
         
         # Clear cache
@@ -199,10 +199,10 @@ class FootballEnrollment(models.Model):
                 
                 self.age_category = user.age_category
                 
-                self.course.save(update_fields=['status'])
+                self.course.save(update_fields=['updated_at', 'status'])
             
             elif was_reactivated:
-                self.course.save(update_fields=['status'])
+                self.course.save(update_fields=['updated_at', 'status'])
                 self.cancelled_at = None
         
         # Handle cancellation
@@ -211,7 +211,7 @@ class FootballEnrollment(models.Model):
                 self.cancelled_at = timezone.now()
             
             course = FootballCourse.objects.select_for_update().get(id=self.course.id)
-            course.save(update_fields=['status'])
+            course.save(update_fields=['updated_at', 'status'])
         
         super().save(*args, **kwargs)
         
@@ -239,7 +239,7 @@ class FootballEnrollment(models.Model):
         result = super().delete(*args, **kwargs)
         
         if was_counted:
-            course.save(update_fields=['status'])
+            course.save(update_fields=['updated_at', 'status'])
         
         CacheService.invalidate_model(self.__class__, enrollment_id)
         cache.delete(f"football_user:{user_id}:enrollments")

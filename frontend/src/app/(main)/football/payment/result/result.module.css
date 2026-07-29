@@ -1,12 +1,9 @@
-/* Main container - full viewport height with flex column */
 .pageContainer {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     background: var(--bg-secondary, #F5F7FA);
 }
 
-/* Content wrapper - takes remaining space to push BottomNav down */
 .contentWrapper {
     flex: 1;
     display: flex;
@@ -37,6 +34,7 @@
     }
 }
 
+/* Status-specific box styles */
 .successBox {
     border-top: 4px solid #10B981;
 }
@@ -45,6 +43,19 @@
     border-top: 4px solid #EF4444;
 }
 
+.pendingBox {
+    border-top: 4px solid #F59E0B;
+}
+
+.cancelledBox {
+    border-top: 4px solid #8B5CF6;
+}
+
+.reversedBox {
+    border-top: 4px solid #EF4444;
+}
+
+/* Icon styles */
 .icon {
     width: 80px;
     height: 80px;
@@ -55,13 +66,28 @@
     border-radius: 50%;
 }
 
-.successBox .icon {
-    background: #D1FAE5;
+.successIcon {
+    background: var(--bg-secondary);
     color: #059669;
 }
 
-.failedBox .icon {
-    background: #FEE2E2;
+.failedIcon {
+    background: var(--bg-secondary);
+    color: #DC2626;
+}
+
+.pendingIcon {
+    background: var(--bg-secondary);
+    color: #D97706;
+}
+
+.cancelledIcon {
+    background: var(--bg-secondary);
+    color: #7C3AED;
+}
+
+.reversedIcon {
+    background: var(--bg-secondary);
     color: #DC2626;
 }
 
@@ -70,17 +96,30 @@
     height: 40px !important;
 }
 
+/* Title styles */
 .title {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.75rem;
 }
 
-.successBox .title {
+.successTitle {
     color: #065F46;
 }
 
-.failedBox .title {
+.failedTitle {
+    color: #991B1B;
+}
+
+.pendingTitle {
+    color: #92400E;
+}
+
+.cancelledTitle {
+    color: #5B21B6;
+}
+
+.reversedTitle {
     color: #991B1B;
 }
 
@@ -115,10 +154,32 @@
     color: var(--text-primary, #111827);
 }
 
-.countdown {
+.pendingInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.pendingInfo .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color, #E5E7EB);
+    border-top-color: #F59E0B;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.pendingInfo p {
     font-size: 0.875rem;
     color: var(--text-secondary, #6B7280);
-    margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .buttons {
@@ -133,7 +194,7 @@
     background: var(--accent-color, #D4A017);
     color: white;
     border: none;
-    border-radius: 0.75rem;
+    border-radius: 2rem;
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
@@ -143,6 +204,14 @@
 .primaryButton:hover {
     background: var(--accent-hover, #B8860B);
     transform: translateY(-1px);
+}
+
+.pendingButton {
+    background: #F59E0B;
+}
+
+.pendingButton:hover {
+    background: #D97706;
 }
 
 .secondaryButton {
@@ -155,37 +224,9 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 180ms ease;
+    border: 1px solid var(--border-color, #E5E7EB);
 }
 
-/* Loading state - same layout structure */
-.loadingBox {
-    width: 100%;
-    max-width: 450px;
-    text-align: center;
-}
-
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid var(--border-color, #E5E7EB);
-    border-top-color: var(--accent-color, #D4A017);
-    border-radius: 50%;
-    margin: 0 auto 1.5rem auto;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.loadingBox h2 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-primary, #111827);
-}
-
-.loadingBox p {
-    color: var(--text-secondary, #6B7280);
+.secondaryButton:hover {
+    background: var(--bg-hover, #F3F4F6);
 }

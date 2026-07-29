@@ -80,7 +80,7 @@ class CourseAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         course = cast(Course, serializer.save())
         
-        # 🔥 FIX: Store the ID first, then use it
+        # Store the ID first, then use it
         course_id = course.pk
         course = self.get_queryset().get(pk=course_id)
         
@@ -99,7 +99,7 @@ class CourseAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         updated_course = cast(Course, serializer.save())
         
-        # 🔥 FIX: Store the ID first, then use it
+        # Store the ID first, then use it
         course_id = updated_course.pk
         updated_course = self.get_queryset().get(pk=course_id)
         
@@ -187,7 +187,7 @@ class CourseScheduleAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         schedule = cast(CourseSchedule, serializer.save(course=course))
         
-        # 🔥 FIX: Store the ID first, then use it
+        # Store the ID first, then use it
         schedule_id = schedule.pk
         schedule = self.get_queryset().get(pk=schedule_id)
         
@@ -207,7 +207,7 @@ class CourseScheduleAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         updated_schedule = cast(CourseSchedule, serializer.save())
         
-        # 🔥 FIX: Store the ID first, then use it
+        # Store the ID first, then use it
         schedule_id = updated_schedule.pk
         updated_schedule = self.get_queryset().get(pk=schedule_id)
         

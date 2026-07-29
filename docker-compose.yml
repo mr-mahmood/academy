@@ -17,11 +17,11 @@ services:
       timeout: 10s
       retries: 5
 
-  # Redis (for caching and sessions)
+
   redis:
     image: redis:latest
     container_name: academy_redis
-    restart: always
+    restart: unless-stopped
     networks:
       - academy_network
     healthcheck:
@@ -30,16 +30,14 @@ services:
       timeout: 5s
       retries: 3
 
-  # Backend (Django)
+
   backend:
+    image: mrmahmood/academy-backend:latest
     build: ./backend
-    image: mrmahmood/academy-backend:latest 
-    container_name: academy_backend
     restart: unless-stopped
     volumes:
-      - ./backend:/app
-      - ./backend/static:/app/static
-      - ./backend/media:/app/media 
+      - backend_static:/app/static
+      - backend_media:/app/media
     env_file:
       - ./.env
     depends_on:
@@ -49,15 +47,15 @@ services:
       - academy_network
     command: >
       sh -c "
-        python manage.py collectstatic --noinput
+        python manage.py collectstatic --noinput &&
         python manage.py migrate --noinput &&
-        python manage.py runserver 0.0.0.0:8000
+        gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 2
       "
 
   celery:
     image: mrmahmood/academy-backend:latest
-    container_name: academy_celery
     restart: unless-stopped
+    user: "1000:1000"
     env_file:
       - ./.env
     depends_on:
@@ -73,42 +71,50 @@ services:
       timeout: 10s
       retries: 3
 
-  # Frontend (Next.js)
-  frontend:
-    build: ./frontend
-    image: mrmahmood/academy-frontend:latest
-    container_name: academy_frontend
+  celery-beat:
+    image: mrmahmood/academy-backend:latest
     restart: unless-stopped
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next 
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres
+      - redis
+      - backend
+    networks:
+      - academy_network
+    command: celery -A config beat --loglevel=info
+
+  frontend:
+    image: mrmahmood/academy-frontend:latest
+    build: ./frontend
+    restart: unless-stopped
     depends_on:
       - backend
     networks:
       - academy_network
-    command: sh -c "pnpm dev"
-      
+    command: sh -c "pnpm start"
 
-  # Nginx (Reverse Proxy)
   nginx:
     image: nginx:latest
     container_name: academy_nginx
     restart: unless-stopped
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./backend/static:/static:ro  # Mount static files for nginx
-      - ./backend/media:/media:ro    # Mount media files for nginx
+      - backend_static:/static:ro
+      - backend_media:/media:ro
+      - ./certs/server.crt:/etc/nginx/server.crt:ro
+      - ./certs/server.key:/etc/nginx/server.key:ro
     ports:
       - "80:80"
       - "443:443"
     depends_on:
       - backend
-    #   - frontend
+      - frontend
     networks:
       - academy_network
     environment:
       - TZ=Asia/Tehran
+
 
 networks:
   academy_network:
@@ -116,3 +122,5 @@ networks:
 
 volumes:
   postgres_data:
+  backend_static:
+  backend_media:

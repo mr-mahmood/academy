@@ -12,7 +12,7 @@ import {
     faDumbbell, faMoon, faSun, faTag, faTicket, faTimesCircle,
     faUsers, faInfoCircle, faEdit, faCreditCard, faChevronRight, faChevronLeft,
     faChevronUp, faChevronDown, faBell, faUserCheck, faFilter, faWarning,
-    faRefresh, faHandshake
+    faRefresh, faHandshake, faExclamationTriangle, 
 
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -101,5 +101,6 @@ export const Icons = {
     refresh: faRefresh,
     warning: faWarning,
 
-    handshake: faHandshake
+    handshake: faHandshake,
+    exclamationTriangle: faExclamationTriangle
 }

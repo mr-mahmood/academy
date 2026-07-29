@@ -49,12 +49,20 @@ class BeatSchedule:
         },
     }
 
+    SMS = {
+        'check_sms_token_every_12_hours': {
+            'task': 'core.sms_task.check_sms_token_remain',
+            'schedule': crontab(minute=15, hour='12,23'),  # Runs at 12:15, 23:15
+        },
+    }
+
 
 # Apply all schedules
 app.conf.beat_schedule = {}
 app.conf.beat_schedule.update(BeatSchedule.USER)
 app.conf.beat_schedule.update(BeatSchedule.ACADEMY)
 app.conf.beat_schedule.update(BeatSchedule.FOOTBALL)
+app.conf.beat_schedule.update(BeatSchedule.SMS)
 
 
 # ============================================

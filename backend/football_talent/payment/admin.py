@@ -10,6 +10,10 @@ class FootballPaymentAdmin(admin.ModelAdmin):
     search_fields = ['res_num', 'ref_num']
     readonly_fields = ['created_at', 'updated_at', 'description']
     
+    list_select_related = ['enrollment', 'enrollment__user', 'enrollment__course', 'enrollment__course__academy']
+    raw_id_fields = ['enrollment']
+    autocomplete_fields = ['enrollment']
+
     # Add Excel export action
     actions = ['export_to_excel']
     

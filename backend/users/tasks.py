@@ -18,7 +18,7 @@ def update_all_users_age_categories():
         
         if old_category != new_category:
             user.age_category = new_category
-            user.save(update_fields=['age_category', 'updated_at'])
+            user.save(update_fields=['updated_at', 'age_category'])
             FootballEnrollment.update_all_enrollments_for_user(user)
             updated_count += 1
     

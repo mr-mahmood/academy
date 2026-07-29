@@ -150,7 +150,6 @@ class FootballPayment(models.Model):
             f"Price: {self.amount:,} Rials ({self.amount_in_toman:,} Tomans)\n"
             f"Enrollment Date: {self.enrollment.enrolled_at.strftime('%Y-%m-%d %H:%M:%S') if self.enrollment.enrolled_at else 'N/A'}\n"
             f"Paid at: {paid_message}\n"
-            f"Status: {self.enrollment.get_enrollment_status_display() if hasattr(self.enrollment, 'get_enrollment_status_display') else self.enrollment.enrollment_status}\n"
         )
         return description
     
@@ -186,7 +185,7 @@ class FootballPayment(models.Model):
         self.masked_pan = masked_pan
         self.paid_at = timezone.now()
         self.description = self._generate_description()
-        self.save(update_fields=['amount', 'status', 'ref_num', 'masked_pan', 'paid_at', 'description', 'updated_at'])
+        self.save(update_fields=['updated_at', 'amount', 'status', 'ref_num', 'masked_pan', 'paid_at', 'description'])
     
     def mark_as_failed(self):
         """Mark as failed - amount can still be updated later if needed"""
@@ -195,7 +194,7 @@ class FootballPayment(models.Model):
         
         self.status = FootballPaymentStatus.FAILED
         self.description = self._generate_description()
-        self.save(update_fields=['status', 'description', 'updated_at'])
+        self.save(update_fields=['updated_at', 'status', 'description'])
     
     def mark_as_cancelled(self):
         """Mark as cancelled - amount can still be updated later if needed"""
@@ -204,4 +203,4 @@ class FootballPayment(models.Model):
         
         self.status = FootballPaymentStatus.CANCELLED
         self.description = self._generate_description()
-        self.save(update_fields=['status', 'description', 'updated_at'])
+        self.save(update_fields=['updated_at', 'status', 'description'])

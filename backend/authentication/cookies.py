@@ -9,5 +9,8 @@ def make_cookie(response: Response, cookies: dict) -> Response:
             httponly=True,
             secure=settings.SESSION_COOKIE_SECURE,
             samesite=settings.SESSION_COOKIE_SAMESITE,
+            path='/',
+            domain=settings.SESSION_COOKIE_DOMAIN,  # Add domain
+            max_age=settings.SESSION_COOKIE_AGE,    # Set expiration
         )
     return response

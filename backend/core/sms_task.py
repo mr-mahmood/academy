@@ -34,7 +34,7 @@ def send_sms_verification_task(phone_number: str, otp_code: str):
         res = conn.getresponse()
         
         if res.status == 200:
-            logger.info(f"SMS sent to {phone_number}")
+            logger.info(f"SMS sent")
             return True
         
         logger.error(f"SMS failed: {res.status}")
@@ -70,7 +70,7 @@ def send_pre_registration_sms_task(phone_number: str, full_name: str, sport_name
         res = conn.getresponse()
         
         if res.status == 200:
-            logger.info(f"Pre-registration SMS sent to {phone_number}")
+            logger.info(f"Pre-registration SMS sent")
             return True
         
         logger.error(f"Pre-registration SMS failed: {res.status}")
@@ -106,7 +106,7 @@ def send_payment_reminder_sms_task(phone_number: str, full_name: str, sport_name
         res = conn.getresponse()
         
         if res.status == 200:
-            logger.info(f"Payment reminder SMS sent to {phone_number}")
+            logger.info(f"Payment reminder SMS sent")
             return True
         
         logger.error(f"Payment reminder SMS failed: {res.status}")
@@ -143,7 +143,7 @@ def send_payment_success_sms_task(phone_number: str, full_name: str, sport_name:
         res = conn.getresponse()
         
         if res.status == 200:
-            logger.info(f"Payment success SMS sent to {phone_number}")
+            logger.info(f"Payment success SMS sent")
             return True
         
         logger.error(f"Payment success SMS failed: {res.status}")
@@ -180,7 +180,7 @@ def send_football_registration_sms_task(phone_number: str, full_name: str, posit
         res = conn.getresponse()
         
         if res.status == 200:
-            logger.info(f"Football registration SMS sent to {phone_number}")
+            logger.info(f"Football registration SMS sent")
             return True
         
         logger.error(f"Football registration SMS failed: {res.status}")
@@ -191,34 +191,51 @@ def send_football_registration_sms_task(phone_number: str, full_name: str, posit
         conn.close()
 
 
-# @shared_task
-# def send_birthday_wishes_sms_task(phone_number: str, full_name: str) -> bool:
-#     try:
-#         conn = http.client.HTTPSConnection("api.sms.ir")
+@shared_task
+def check_sms_token_remain():
+    """Check SMS token balance and notify admins if below threshold"""
+    conn = None
+    try:
+        # Get current credit balance
+        conn = http.client.HTTPSConnection("api.sms.ir")
+        headers = {'Content-Type': 'application/json', 'x-api-key': settings.SMSIR_API_KEY}
+        conn.request("GET", "/v1/credit/", headers=headers)
+        res = conn.getresponse()
         
-#         payload = json.dumps({
-#             "mobile": phone_number,
-#             "templateId": 851973,
-#             "parameters": [
-#                 {"name": "FULLNAME", "value": full_name[:40]},
-#             ]
-#         })
+        if res.status != 200:
+            return False
         
-#         headers = {
-#             'Content-Type': 'application/json',
-#             'x-api-key': settings.SMSIR_API_KEY
-#         }
+        token_balance = int(json.loads(res.read().decode('utf-8')).get('data', 0))
         
-#         conn.request("POST", "/v1/send/verify", payload, headers)
-#         res = conn.getresponse()
+        # Check if below threshold (500 tokens)
+        if token_balance > 500:
+            return True
         
-#         if res.status == 200:
-#             logger.info(f"Birthday wishes SMS sent to {phone_number}")
-#             return True
+        # Send notification to admins
+        admins = ["09133820398", "09024629079"]
+        notification_conn = http.client.HTTPSConnection("api.sms.ir")
+        headers['x-api-key'] = settings.SMSIR_API_KEY
         
-#         logger.error(f"Birthday wishes SMS failed: {res.status}")
+        for mobile in admins:
+            payload = json.dumps({
+                "mobile": mobile,
+                "templateId": 793982,
+                "parameters": [{"name": "TOKEN", "value": token_balance}]
+            })
+            notification_conn.request("POST", "/v1/send/verify", payload, headers)
+            res = notification_conn.getresponse()
+            
+            if res.status == 200:
+                logger.info(f"Notification sent for SMS.ir Recharge")
+            else:
+                logger.error(f"Failed to send Notification sent for SMS.ir Recharge")
         
-#     except Exception as e:
-#         logger.error(f"Error sending birthday SMS: {e}")
-#     finally:
-#         conn.close()
+        notification_conn.close()
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error while checking SMS token: {e}")
+        return False
+    finally:
+        if conn:
+            conn.close()

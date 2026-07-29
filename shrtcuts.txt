@@ -11,7 +11,4 @@ sudo docker-compose up
 docker load -i academy-backend.tar
 docker load -i academy-frontend.tar
 
-docker rollout backend
-docker rollout frontend
-
 scp academy-backend.tar reisi@194.150.71.210:~/Academy/ 

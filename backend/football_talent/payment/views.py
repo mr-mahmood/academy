@@ -65,7 +65,7 @@ class InitiateFootballPaymentAPIView(APIView):
         # Reactivate cancelled enrollments
         if enrollment.enrollment_status == FootballEnrollment.EnrollmentStatus.CANCELLED:
             enrollment.enrollment_status = FootballEnrollment.EnrollmentStatus.WAITING_FOR_PAYMENT
-            enrollment.save(update_fields=['enrollment_status'])
+            enrollment.save(update_fields=['updated_at', 'enrollment_status'])
         
         # 3. Get or create payment (but always reset it for new attempt)
         payment, created = FootballPayment.objects.get_or_create(
@@ -89,7 +89,7 @@ class InitiateFootballPaymentAPIView(APIView):
             timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
             random_digits = ''.join(random.choices(string.digits, k=6))
             payment.res_num = f"F{timestamp}{random_digits}"
-            payment.save(update_fields=['res_num'])
+            payment.save(update_fields=['updated_at', 'res_num'])
         
         # Build dynamic callback URL
         callback_url = request.build_absolute_uri('/api/football/payment/callback/')
@@ -142,17 +142,19 @@ class FootballPaymentCallbackAPIView(APIView):
         except FootballPayment.DoesNotExist:
             return redirect(f"/football/payment/result?status=failed&error=order_not_found")
         
+        # ===== Handle duplicate callbacks =====
+        if payment.status == FootballPaymentStatus.PAID:
+            logger.info(f"Duplicate callback - payment {payment.id} already verified")
+            return redirect(f"/football/payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")
+        
+        if payment.status in [FootballPaymentStatus.FAILED, FootballPaymentStatus.CANCELLED, FootballPaymentStatus.REVERSED]:
+            logger.info(f"Duplicate callback - payment {payment.id} already {payment.status}")
+            return redirect(f"/football/payment/result?status=failed&res_num={order_id}&error=already_processed")
+        
         # Update track_id if needed
         if not payment.track_id:
             payment.track_id = track_id
-            payment.save(update_fields=['track_id'])
-        
-        # Prevent double processing
-        if payment.status == FootballPaymentStatus.PAID:
-            return redirect(f"/football/payment/result?status=success&ref_num={payment.ref_num}&res_num={order_id}")
-        
-        if payment.status == FootballPaymentStatus.REVERSED:
-            return redirect(f"/football/payment/result?status=failed&res_num={order_id}&error=already_reversed")
+            payment.save(update_fields=['updated_at', 'track_id'])
         
         # Check success flag
         if success_flag != '1':
@@ -162,18 +164,12 @@ class FootballPaymentCallbackAPIView(APIView):
                 payment.mark_as_failed()
             return redirect(f"/football/payment/result?status=failed&res_num={order_id}&error=payment_unsuccessful")
         
-        # IMPORTANT: Update amount one more time before verification
-        # This ensures the user pays the absolute latest price
-        if payment.status == FootballPaymentStatus.PENDING:
-            payment._update_pending_amount_from_course()
-            payment.save(update_fields=['amount', 'description', 'updated_at'])
-        
-        # Verify payment
+        # ===== Do the verification via API call =====
         service = ZibalFootballPaymentService()
         verify_result = service.verify_payment(payment)
         
         if verify_result.get('verified'):
-            # Amount validation - payment.amount is the current course price
+            # Amount validation against the LOCKED price from initiation
             if verify_result.get('amount') != payment.amount:
                 payment.mark_as_failed()
                 logger.error(f"Amount mismatch: expected {payment.amount}, got {verify_result.get('amount')}")
@@ -189,9 +185,9 @@ class FootballPaymentCallbackAPIView(APIView):
             enrollment = payment.enrollment
             if enrollment:
                 enrollment.enrollment_status = FootballEnrollment.EnrollmentStatus.CONFIRMED
-                enrollment.save(update_fields=['enrollment_status'])
+                enrollment.save(update_fields=['updated_at', 'enrollment_status'])
                 
-                # === ADD THIS: Send football registration SMS asynchronously ===
+                # Send SMS asynchronously
                 try:
                     # Get user and course details for SMS
                     user: User = enrollment.user
@@ -210,10 +206,10 @@ class FootballPaymentCallbackAPIView(APIView):
                         academy_name=academy_name,
                         tracking_code=tracking_code
                     )
-                    logger.info(f"Football registration SMS queued for user {user.phone_number}")
+                    logger.info(f"Football registration SMS queued")
                     
                 except Exception as e:
-                    pass
+                    logger.error(f"Failed to queue SMS: {str(e)}")
                 # === END OF SMS TASK ===
             
             logger.info(f"Football payment {payment.id} verified successfully. Amount frozen at {payment.amount}")

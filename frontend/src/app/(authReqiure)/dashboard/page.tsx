@@ -101,7 +101,7 @@ export default function DashboardPage() {
                 </button>
 
                 {/* Payments/Financial */}
-                <button
+                {/* <button
                     className={styles.selectionCard}
                     onClick={() => router.push('/payments')}
                 >
@@ -113,7 +113,7 @@ export default function DashboardPage() {
                         <p>مشاهده تاریخچه پرداخت‌ها و صورتحساب</p>
                     </div>
                     <Icon icon={Icons.arrowLeft} className={styles.cardArrow} />
-                </button>
+                </button> */}
 
                 {/* Logout */}
                 <button

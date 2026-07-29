@@ -161,7 +161,6 @@ class Payment(models.Model):
             f"Price: {self.amount:,} Rials ({self.amount_in_toman:,} Tomans)\n"
             f"Enrollment Date: {self.enrollment.enrolled_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
             f"Paid at: {paid_message}\n"
-            f"Status: {self.enrollment.get_enrollment_status_display() if hasattr(self.enrollment, 'get_enrollment_status_display') else self.enrollment.enrollment_status}\n"
         )
         return description
     
